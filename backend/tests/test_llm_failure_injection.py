@@ -1,5 +1,6 @@
 """LLM failure injection tests — provider fallback, retryable vs non-retryable errors."""
 import json
+import re
 
 import httpx
 import pytest
@@ -15,7 +16,7 @@ S = lambda: Settings(
     supabase_url="u", supabase_service_key="s")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent"
+GEMINI_URL = re.compile(r"https://generativelanguage\.googleapis\.com/v1beta/models/gemini-[\d\.]+-flash:generateContent\?key=.*")
 
 
 def _groq_response(code, body=None):
