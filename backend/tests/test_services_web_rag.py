@@ -17,13 +17,11 @@ Covers:
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from app.contracts import (
     AbstentionReason,
-    ConfidenceBand,
     EvidenceChunk,
     RAGResult,
 )
@@ -451,7 +449,7 @@ class TestFullPipeline:
 
 class TestEdgeCases:
     def test_default_min_relevance_score(self):
-        assert DEFAULT_MIN_RELEVANCE_SCORE == 60.0
+        assert DEFAULT_MIN_RELEVANCE_SCORE == 40.0
 
     def test_top_k_parameter(self):
         service = WebRAGService()

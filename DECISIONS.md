@@ -110,3 +110,17 @@ Each entry: what changed, why, what it replaced, when.
 **Date:** 2026-09-04  
 **What:** Voice route passes `rag_result.get("speech_text")` to TTS, never the raw `answer`.  
 **Why:** The raw answer contains `[chunk:id]` citation markers. `speech_text` is the citation-stripped version produced post-verification. TTS of citation markers is nonsense audio.
+
+---
+
+### Bounded evidence/context layers
+**Date:** 2026-09-05
+**What:** EvidenceController caps the generation prompt to top 3 static + top 3 dynamic chunks (3000 chars each). ContextBuilder defaults to max 8 chunks total. Web RAG caps at 12 chunks per source. These are independent layers — retrieval returns more, but each downstream stage further bounds what it processes.
+**Why:** Intentional engineering control to bound context size and generation latency/cost while retaining sufficient evidence for grounded answers. Transplanted from eGovAssistant proven defaults.
+
+---
+
+### Bounded generation output
+**Date:** 2026-09-05
+**What:** `GENERATION_MAX_TOKENS = 1800` for normal generation, `REPAIR_MAX_TOKENS = 2200` for citation repair. These values are sent to Groq as `max_tokens` in the API request.
+**Why:** Intentional engineering control to bound generation output size and latency/cost. Value transplanted from eGovAssistant proven defaults.

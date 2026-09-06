@@ -283,7 +283,32 @@ Translation: Sarvam → Azure → return original
 
 ---
 
-## 12. Grievance workflow stages
+## 12. Evidence/context and generation controls
+
+Multiple independent layers bound the amount of evidence and tokens processed:
+
+**Evidence controller** (`evidence_controller.py`) — caps what enters the generation prompt:
+- Static evidence: top 3 highest-quality chunks only
+- Dynamic (web) evidence: top 3 highest-quality chunks only
+- Per-chunk text: truncated at `MAX_CHARS_PER_CHUNK = 3000`
+
+**Context builder** (`rag/context_builder.py`) — caps the overall context window:
+- Default `max_chunks = 8` (total across all sources)
+
+**Web RAG** (`web_rag/service.py`) — caps chunks per web source:
+- `WEB_MAX_CHUNKS_PER_SOURCE = 12`
+
+**Generation token limits** (`config.py`, `groq_llm.py`, `rag/answer_generator.py`):
+- Normal generation: `GENERATION_MAX_TOKENS = 1800`
+- Repair generation (citation repair): `REPAIR_MAX_TOKENS = 2200`
+
+These are separate layers (retrieval → evidence selection → prompt assembly → generation) and are not contradictory. Each bounds a different stage of the pipeline.
+
+The limits are intentional engineering controls to bound context size and generation latency/cost while retaining sufficient evidence for grounded answers.
+
+---
+
+## 13. Grievance workflow stages
 
 | Stage | What happens |
 |---|---|
@@ -301,7 +326,7 @@ State persisted to Supabase `grievance_states` (upsert on `conversation_id`).
 
 ---
 
-## 13. Non-functional constraints
+## 14. Non-functional constraints
 
 - No personal GPU; free-tier / cloud-only
 - Every external provider call has a strict timeout

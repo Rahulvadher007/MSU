@@ -1,5 +1,4 @@
 """LLM failure injection tests — provider fallback, retryable vs non-retryable errors."""
-import json
 import re
 
 import httpx
@@ -13,7 +12,8 @@ from app.providers.groq_llm import GroqLLMProvider
 
 S = lambda: Settings(
     gemini_api_key="k", groq_api_key="g",
-    supabase_url="u", supabase_service_key="s")
+    supabase_url="u", supabase_service_key="s",
+    gemini_model="gemini-2.5-flash")
 
 GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 GEMINI_URL = re.compile(r"https://generativelanguage\.googleapis\.com/v1beta/models/gemini-[\d\.]+-flash:generateContent\?key=.*")
