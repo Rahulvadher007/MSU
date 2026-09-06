@@ -8,7 +8,7 @@ from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 
-S = lambda: Settings(gemini_api_key="k", groq_api_key="g", supabase_url="u", supabase_service_key="s")
+S = lambda: Settings(gemini_api_key="k", groq_api_key="g", supabase_url="u", supabase_service_key="s", gemini_model="gemini-2.5-flash")
 
 @respx.mock
 def test_falls_back_to_gemini_on_429():
