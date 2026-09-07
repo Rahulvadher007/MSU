@@ -4,9 +4,9 @@ import { IconInfo, IconAlertTriangle, IconXCircle, IconX } from "./Icons";
 type Tone = "info" | "warn" | "error";
 
 const TONES: Record<Tone, string> = {
-  info: "bg-[var(--cream)] text-[var(--text-body)] border-[var(--border-soft)]",
-  warn: "bg-[var(--state-warning)]/12 text-[var(--state-warning)] border-[var(--state-warning)]/30",
-  error: "bg-[var(--state-error)]/12 text-[var(--state-error)] border-[var(--state-error)]/30",
+  info: "bg-[var(--cream)] text-[var(--text-body)] border-[var(--accent-legal)]/20",
+  warn: "bg-[var(--state-warning)]/10 text-[var(--state-warning)] border-[var(--state-warning)]/25",
+  error: "bg-[var(--state-error)]/10 text-[var(--state-error)] border-[var(--state-error)]/25",
 };
 
 const ICONS: Record<Tone, ReactNode> = {

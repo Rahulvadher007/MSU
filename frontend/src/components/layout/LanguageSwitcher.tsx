@@ -40,14 +40,13 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
 
   return (
     <div ref={containerRef} className={`relative inline-block ${className}`}>
-      {/* shadcn UI Dropdown Trigger Button */}
       <button
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={t("common.globe")}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-9 items-center justify-between gap-2 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--canvas)] px-3 text-sm font-medium text-[var(--ink)] shadow-2xs transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--cream)] focus:border-[var(--accent-primary)] focus:outline-none"
+        className="inline-flex h-9 items-center justify-between gap-2 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--surface-elevated)] px-3 text-sm font-medium text-[var(--ink)] shadow-[var(--shadow-sm)] transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--cream)] focus:border-[var(--accent-primary)] focus:outline-none"
       >
         <span className="flex items-center gap-1.5">
           <IconGlobe className="h-4 w-4 text-[var(--text-tertiary)]" />
@@ -58,12 +57,11 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
         </span>
       </button>
 
-      {/* shadcn UI Dropdown Menu Content Panel */}
       {open && (
         <div
           role="listbox"
           aria-label="Language selection"
-          className="absolute right-0 top-full z-50 mt-1.5 max-h-72 w-44 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-1.5 shadow-lg shadow-[rgba(0,0,0,0.08)] backdrop-blur-sm transition-all"
+          className="absolute right-0 top-full z-50 mt-1.5 max-h-72 w-44 overflow-y-auto rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-1.5 shadow-[var(--shadow-lg)] backdrop-blur-sm transition-all"
         >
           <div className="mb-1 border-b border-[var(--border-soft)] px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--text-faint)]">
             Select Language
@@ -83,7 +81,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
                   }}
                   className={`flex w-full items-center justify-between rounded-[var(--radius-sm)] px-2.5 py-1.5 text-left text-xs font-medium transition-colors ${
                     isSelected
-                      ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)]"
+                      ? "bg-[var(--accent-primary)]/10 font-semibold text-[var(--accent-primary)]"
                       : "text-[var(--text-body)] hover:bg-[var(--cream)] hover:text-[var(--ink)]"
                   }`}
                 >

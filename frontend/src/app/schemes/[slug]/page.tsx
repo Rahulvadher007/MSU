@@ -45,7 +45,7 @@ export default function SchemeDetailPage() {
   return (
     <div className="rail-frame page-container">
       <Reveal trigger="load">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 shadow-[var(--shadow-sm)] md:p-8">
           <Badge deco={deco(sc.category)}>{t(`category.${sc.category}`)}</Badge>
           <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.name}</h1>
           <p className="mt-1 text-[var(--text-body)]">{sc.benefit}</p>
@@ -57,18 +57,18 @@ export default function SchemeDetailPage() {
           </Link>
         </div>
       </Reveal>
-      <Stagger className="mt-6 space-y-6">
+      <Stagger className="mt-6 space-y-4">
         {SECTIONS.map((s) => (
-          <section key={s} className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-            <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t(`detail.${s}`)}</h2>
+          <section key={s} className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
+            <h2 className="font-semibold text-[var(--text-primary)]">{t(`detail.${s}`)}</h2>
             {Array.isArray(body[s]) ? (
-              <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">
+              <ul className="mt-2 font-answer list-disc space-y-1 pl-5 text-base leading-relaxed text-[var(--text-secondary)]">
                 {(body[s] as string[]).map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}
               </ul>
             ) : (
-              <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">{body[s] as string}</p>
+              <p className="mt-2 font-answer text-base leading-relaxed text-[var(--text-secondary)]">{body[s] as string}</p>
             )}
           </section>
         ))}
