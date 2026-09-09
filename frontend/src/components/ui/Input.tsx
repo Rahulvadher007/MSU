@@ -21,6 +21,7 @@ export function Input({
         placeholder=" "
         aria-invalid={invalid || undefined}
         className="input-field"
+        style={{ fontSize: "16px" }}
       />
       <label htmlFor={inputId} className="input-label">
         {labelText}

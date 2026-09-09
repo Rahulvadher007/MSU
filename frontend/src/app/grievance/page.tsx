@@ -54,8 +54,8 @@ export default function GrievancePage() {
           <p className="mt-1 text-[var(--text-body)]">{t("grievance.subtitle")}</p>
         </Reveal>
         <div className="mx-auto mt-8 max-w-xl">
-          <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--cream)] text-[var(--state-success)]">
+          <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-8 text-center shadow-[var(--shadow-md)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent-tint-soft)] text-[var(--state-success)]">
               <IconShield className="h-8 w-8" />
             </div>
             <h2 className="display mt-4 text-2xl tracking-tight text-[var(--ink)] md:text-3xl">{t("grievance.successTitle")}</h2>
@@ -81,12 +81,13 @@ export default function GrievancePage() {
   return (
     <div className="rail-frame page-container">
       <Reveal trigger="load">
-        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("grievance.title")}</h1>
-        <p className="mt-1 text-[var(--text-body)]">{t("grievance.subtitle")}</p>
+        <p className="eyebrow">{t("nav.grievance")}</p>
+        <h1 className="display mt-3 text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("grievance.title")}</h1>
+        <p className="mt-2 text-[var(--text-body)]">{t("grievance.subtitle")}</p>
       </Reveal>
 
       <div className="mx-auto mt-8 max-w-2xl">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-6 shadow-[var(--shadow-md)] md:p-8">
           <Stepper steps={steps} current={step} />
 
           <div className="mt-8">

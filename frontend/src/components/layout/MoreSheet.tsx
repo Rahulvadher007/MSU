@@ -24,7 +24,7 @@ export function MoreSheet({ open, onClose }: { open: boolean; onClose: () => voi
   if (!open) return null;
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-[#201515]/45" aria-hidden="true" onClick={onClose} />
+      <div className="fixed inset-0 z-30 bg-[var(--ink)]/45 backdrop-blur-sm" aria-hidden="true" onClick={onClose} />
       <div
         role="dialog"
         aria-modal="true"
