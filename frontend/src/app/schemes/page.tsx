@@ -41,13 +41,14 @@ export default function SchemesPage() {
   });
 
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("schemes.title")}</h1>
-        <p className="mt-1 text-[var(--text-body)]">{t("schemes.subtitle")}</p>
+        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}>{t("schemes.title")}</h1>
+        <p className="mt-1 text-[var(--body)]">{t("schemes.subtitle")}</p>
         <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("schemes.searchPlaceholder")} className="max-w-sm" />
-          <p className="text-sm text-[var(--text-body)]">{t("schemes.count", { n: filtered.length })}</p>
+          <p className="text-sm text-[var(--body)]">{t("schemes.count", { n: filtered.length })}</p>
         </div>
         <div className="mt-4">
           <Chips<Filter>
@@ -68,8 +69,8 @@ export default function SchemesPage() {
             <Link key={s.slug} href={`/schemes/${s.slug}`} className="block">
               <Card interactive>
                 <Badge deco={deco(s.category)}>{t(`category.${s.category}`)}</Badge>
-                <h2 className="mt-[var(--space-2)] font-[var(--font-semibold)] text-[var(--text-primary)]">{s.name}</h2>
-                <p className="mt-[var(--space-1)] text-[var(--text-sm)] text-[var(--text-secondary)]">{s.benefit}</p>
+                <h2 className="mt-[var(--space-2)] font-semibold text-[var(--ink)]">{s.name}</h2>
+                <p className="mt-[var(--space-1)] text-[var(--text-sm)] text-[var(--body)]">{s.benefit}</p>
               </Card>
             </Link>
           ))}

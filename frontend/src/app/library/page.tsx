@@ -34,10 +34,11 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("library.title")}</h1>
-        <p className="mt-1 text-[var(--text-body)]">{t("library.subtitle")}</p>
+        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}>{t("library.title")}</h1>
+        <p className="mt-1 text-[var(--body)]">{t("library.subtitle")}</p>
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("library.searchPlaceholder")} className="mt-4 max-w-sm" />
         <div className="mt-5 flex flex-wrap gap-2">
         {domains.map((d) => (
@@ -48,8 +49,8 @@ export default function LibraryPage() {
             onClick={() => setDomain(d)}
             className={`inline-flex h-10 items-center rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
               d === domain
-                ? "border-[var(--dark)] bg-[var(--dark)] text-[var(--on-dark-strong)]"
-                : "border-[var(--border-default)] bg-[var(--cream-2)] text-[var(--text-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                ? "border-[var(--surface-dark)] bg-[var(--surface-dark)] text-[var(--on-primary)]"
+                : "border-[var(--hairline)] bg-[var(--cream-2)] text-[var(--body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
             }`}
           >
             {d === "all" ? t("common.all") : d}
@@ -65,14 +66,14 @@ export default function LibraryPage() {
             <li key={d.id}>
               <a href={d.url} target="_blank" rel="noopener noreferrer" className="block">
                 <Card interactive className="flex items-center gap-3">
-                  <IconDoc className="w-5 h-5 shrink-0 text-[var(--text-tertiary)]" />
+                  <IconDoc className="w-5 h-5 shrink-0 text-[var(--muted)]" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-[var(--font-semibold)] text-[var(--text-primary)]">{d.title}</p>
-                    <p className="text-[var(--text-sm)] text-[var(--text-secondary)]">
+                    <p className="truncate font-semibold text-[var(--ink)]">{d.title}</p>
+                    <p className="text-[var(--text-sm)] text-[var(--body)]">
                       {d.source} · {t("library.page", { p: d.page })} · {d.publishedAt}
                     </p>
                   </div>
-                  <IconChevronRight className="w-5 h-5 shrink-0 text-[var(--text-tertiary)]" />
+                  <IconChevronRight className="w-5 h-5 shrink-0 text-[var(--muted)]" />
                 </Card>
               </a>
             </li>

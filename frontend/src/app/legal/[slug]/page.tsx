@@ -31,18 +31,19 @@ export default function LegalDetailPage() {
   const sc = translated[0] ?? doc;
   if (!sc) {
     return (
-      <div className="rail-frame page-container">
-        <EmptyState title={t("legal.notFound")} action={<Link href="/legal" className="text-sm text-[var(--accent-primary)] underline">{t("nav.legal")}</Link>} />
+      <div className="page-container">
+        <EmptyState title={t("legal.notFound")} action={<Link href="/legal" className="text-sm text-[var(--ink)] underline">{t("nav.legal")}</Link>} />
       </div>
     );
   }
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] border-l-[3px] border-l-[var(--ink)] bg-[var(--cream)] p-6 md:p-8">
           <Badge deco={deco(sc.category)}>{t(`legalCategory.${sc.category}`)}</Badge>
-          <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.title}</h1>
-          <p className="mt-1 text-[var(--text-body)]">{sc.overview}</p>
+          <h1 className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+              style={{ fontFamily: "var(--font-display)" }}>{sc.title}</h1>
+          <p className="mt-1 text-[var(--body)]">{sc.overview}</p>
           <Link href={`/chat?q=${encodeURIComponent(formatLegalQuestion(sc.title, locale))}`}>
             <Button className="mt-4">
               {t("legal.askThisLaw")}
@@ -52,23 +53,23 @@ export default function LegalDetailPage() {
         </div>
       </Reveal>
       <Stagger className="mt-6 space-y-6">
-        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.overview")}</h2>
-          <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">{sc.overview}</p>
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("legal.overview")}</h2>
+          <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--body)]">{sc.overview}</p>
         </section>
         {SECTIONS.map((s) => (
-          <section key={s} className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-            <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t(`legal.${s}`)}</h2>
-            <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">
+          <section key={s} className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+            <h2 className="font-semibold text-[var(--ink)]">{t(`legal.${s}`)}</h2>
+            <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--body)]">
               {sc[s].map((item, i) => (
                 <li key={i}>{item}</li>
               ))}
             </ul>
           </section>
         ))}
-        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.source")}</h2>
-          <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--accent-primary)] underline">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("legal.source")}</h2>
+          <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--ink)] underline">
             {sc.source.label}
           </a>
         </section>
