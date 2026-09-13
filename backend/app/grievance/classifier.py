@@ -46,7 +46,7 @@ CATEGORY_KEYWORDS = {
     ],
     GrievanceCategory.MUNICIPAL: [
         "municipal", "municipality", "corporation", "nagar nigam",
-        "garbage", "waste", "trash", "rubbish",
+        "garbage", "waste", "trash", "rubbish", "sanitation",
         "drainage", "sewage", "drain", "blocked drain", "clogged drain",
         "street light", "streetlight", "lamp post",
         "building permit", "property tax", "house tax",

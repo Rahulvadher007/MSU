@@ -613,7 +613,11 @@ class GrievanceSubmissionGuide:
                 ) if language != "en" else "Municipal Corporation / Urban Local Body",
             ) if language != "en" else "Municipal Corporation / Urban Local Body Citizen Portal"
             department = route.department  # "Urban Local Body / Municipal Corporation"
-            portal_url = None
+            portal_url = (
+                "The official portal URL could not be automatically "
+                "verified. Please visit the Municipal Corporation / "
+                "Urban Local Body website directly."
+            )
             first_step = translate_template(
                 "step_identify_municipal_authority", language,
             )
@@ -641,7 +645,14 @@ class GrievanceSubmissionGuide:
                 first_step = f"Visit the official {authority} website for {location_label}"
 
             verified_url = self._try_verify_official_portal(city, state)
-            portal_url = verified_url  # None if not found
+            if verified_url:
+                portal_url = verified_url
+            else:
+                portal_url = (
+                    f"The official portal URL for {location_label} "
+                    "could not be automatically verified. "
+                    f"Please visit the {authority} website directly."
+                )
 
         # must never replace the resolved local authority just because
         escalation_step = translate_template(

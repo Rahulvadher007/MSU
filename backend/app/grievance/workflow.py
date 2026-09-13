@@ -765,17 +765,29 @@ class GrievanceWorkflow:
         "dispute", "issue with", "problem with", "not processed",
         "still waiting", "no action", "inaction", "not resolved",
         "escalate", "escalation", "status of my", "check my status",
+        "sanitation", "dirty", "filth", "unclean", "litter",
+        "report a", "reporting a", "report the", "report this",
     )
 
     _INFORMATIONAL_RE = re.compile(
-        r"^(?:what|who|where|when|why|how|which|whose|is|are|was|were|do|does|did|can|could|would|should)\b",
+        r"^(?:what|who|where|when|why|how|which|whose|tell|show|list|give|explain|define|name|describe|is|are|was|were|do|does|did|can|could|would|should)\b",
     )
+
+    # Categories that are inherently informational — people ask about
+    # them without necessarily filing a complaint.  A match in these
+    # categories alone does NOT mean the query is a grievance.
+    _INFORMATIONAL_CATEGORIES = frozenset({
+        GrievanceCategory.COOPERATIVE,
+        GrievanceCategory.AGRICULTURE,
+        GrievanceCategory.BANKING,
+        GrievanceCategory.SOCIAL_WELFARE,
+        GrievanceCategory.EDUCATION,
+        GrievanceCategory.REVENUE,
+    })
 
     def is_grievance_query(self, text: str) -> bool:
         """Quick check if text is likely a grievance query."""
         text_lower = text.lower().strip()
-
-        classification = self.classifier.classify(text)
 
         has_problem_signal = any(
             indicator in text_lower for indicator in self._PROBLEM_INDICATORS
@@ -786,8 +798,16 @@ class GrievanceWorkflow:
         if looks_informational and not has_problem_signal:
             return False
 
-        # If classifier assigns a specific category (not OTHER), treat as grievance.
+        classification = self.classifier.classify(text)
+
+        # If classifier assigns a specific category (not OTHER), treat as
+        # grievance — UNLESS the category is inherently informational
+        # (e.g. COOPERATIVE, AGRICULTURE) and there are no explicit
+        # problem signals.  A cooperative-related query about rules or
+        # regulations is NOT a grievance; "garbage piling up" IS.
         if classification.category != GrievanceCategory.OTHER:
+            if classification.category in self._INFORMATIONAL_CATEGORIES and not has_problem_signal:
+                return False
             return True
 
         # Fallback: rely on problem signals.

@@ -697,9 +697,18 @@ class GrievanceSemanticExtractor:
                 locality_match = _LOCALITY_CUE_RE.search(clause)
 
                 if locality_match:
-                    extracted["locality"] = _clean_value(
+                    raw_locality = _clean_value(
                         locality_match.group(1)
                     )
+                    extracted["locality"] = raw_locality
+                    # If locality contains a comma, extract city from
+                    # the last segment (e.g. "Manjalpur, Vadodara"
+                    # → city="Vadodara").
+                    if "city" not in extracted and "," in raw_locality:
+                        parts = [p.strip() for p in raw_locality.split(",")]
+                        if len(parts) >= 2:
+                            extracted["city"] = parts[-1]
+
                     # If locality stopped at city/town, extract city from
                     # tail (shared with the Gemini-path backfill above).
                     if "city" not in extracted:

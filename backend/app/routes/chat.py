@@ -68,7 +68,7 @@ def _should_route_to_grievance(
       1. domain=="grievance" or intent=="GRIEVANCE" → True  (explicit complaint)
       2. intent in _GUIDANCE_INTENTS               → False (explicit guidance)
          BUT if the raw query also contains a grievance keyword, override → True
-      3. Non-English query                          → False (is_grievance_query is English-only)
+      3. Non-English query                          → scan raw keywords, then False
       4. Ambiguous (INFORMATIONAL/STATUS/unknown)   → fall back to is_grievance_query()
     """
     if classification.domain == "grievance" or classification.intent == "GRIEVANCE":
@@ -81,11 +81,16 @@ def _should_route_to_grievance(
         if any(kw in query_text.lower() for kw in _grievance_kws):
             return True
         return False
-    # Non-English queries that reach this point: is_grievance_query() is
-    # English-only (regex + English keywords).  When translation failed,
-    # we cannot reliably detect grievance intent.  Fall through to the
-    # post-context check which uses translated english_query.
+    # Non-English queries: scan raw text against multilingual grievance
+    # keywords before giving up.  is_grievance_query() is English-only
+    # (regex + English keywords), but INTENT_KEYWORDS["GRIEVANCE"] already
+    # includes Indic words (e.g. ફરિયાદ, शिकायत, रिपोर्ट).  If any of
+    # those match, route to grievance immediately.  Otherwise fall through
+    # to the post-context check which uses translated english_query.
     if input_lang != "en":
+        _grievance_kws = INTENT_KEYWORDS.get("GRIEVANCE", [])
+        if any(kw in query_text.lower() for kw in _grievance_kws):
+            return True
         return False
     # Ambiguous intent — let the grievance detector act as tiebreaker.
     return _get_grievance_workflow().is_grievance_query(query_text)
@@ -101,6 +106,14 @@ class _GrievanceResult:
     draft_summary: dict | None = None
     fields_schema: dict | None = None
     finalized: bool = False
+
+
+def _normalize_grievance_result(result) -> _GrievanceResult:
+    """Coerce a string or _GrievanceResult into _GrievanceResult."""
+    if isinstance(result, _GrievanceResult):
+        return result
+    text = str(result)
+    return _GrievanceResult(text=text)
 
 
 # ── Singleton lazy-init helpers ──────────────────────────────────────────────
@@ -207,6 +220,7 @@ def _process_grievance_message(
 
     if result.draft:
         portal_name = None
+        english_portal_name = None
         portal_url = None
         submission_dept = None
         submission_level = None
@@ -240,6 +254,7 @@ def _process_grievance_message(
                     pass  # fall back to workflow's English route
 
             portal_name = _localized_route.portal_name
+            english_portal_name = portal_name
             portal_url = _localized_route.portal_url
             submission_dept = _localized_route.department
             submission_level = _localized_route.level
@@ -364,7 +379,7 @@ def _process_grievance_message(
                 english_mirror = None
 
         grievance_dict = result.draft.to_canonical_dict(
-            portal_name=portal_name,
+            portal_name=english_portal_name,
             portal_url=portal_url,
             submission_department=submission_dept,
             submission_level=submission_level,
@@ -376,28 +391,11 @@ def _process_grievance_message(
             english_mirror=english_mirror,
         )
 
-        # These top-level fields ARE localized for display below (matching
-        # draft_summary and the rest of the grievance UI) — the pure
-        # untranslated English values are separately preserved in
-        # `grievance_dict["english"]` (the mirror built above) for the
-        # "Show English draft" toggle. See app/grievance/models.py
-        # GrievanceDraft.to_canonical_dict's `english_mirror` param.
-        if input_lang and input_lang != "en" and settings is not None:
-            grievance_dict["category"] = _localize(
-                grievance_dict["category"], input_lang, "category", settings,
-            )
-            grievance_dict["sub_category"] = _localize(
-                grievance_dict["sub_category"], input_lang, "subcategory", settings,
-            )
-            grievance_dict["department"] = _localize(
-                grievance_dict["department"], input_lang, "department", settings,
-            )
-            grievance_dict["jurisdiction"] = _localize(
-                grievance_dict["jurisdiction"], input_lang, "jurisdiction", settings,
-            )
-            grievance_dict["title"] = _localize(
-                grievance_dict["title"], input_lang, "title", settings,
-            )
+        # NOTE: grievance_dict top-level fields (category, sub_category,
+        # department, jurisdiction, title) intentionally stay in ENGLISH.
+        # Localized versions are in draft_summary and in the per-field
+        # submission metadata below.  The canonical JSON contract
+        # requires English labels; see test_language_boundary_e2e.
 
         # ── Build structured grievance metadata for frontend UI ──
         from app.grievance.models import GrievanceStage
@@ -833,15 +831,17 @@ async def chat(req: ChatRequest) -> dict:
 
         # ── Active grievance workflow takes priority over fresh classification ──
         if _has_active_grievance(req.session_id):
-            grievance_result = _process_grievance_message(
-                req.question, req.session_id,
-                input_lang=detected_lang, settings=settings,
+            grievance_result = _normalize_grievance_result(
+                _process_grievance_message(
+                    req.question, req.session_id,
+                    input_lang=detected_lang, settings=settings,
+                )
             )
             resp = {
                 "answer": grievance_result.text,
                 "language": detected_lang,
                 "domain": "grievance",
-                "intent": "grievance",
+                "intent": "GRIEVANCE",
                 "entities": [],
                 "confidence": 1.0,
                 "confidence_level": "high",
@@ -881,15 +881,17 @@ async def chat(req: ChatRequest) -> dict:
         _input_lang_early = (detect_query_languages(req.question).get("dominant") or "en")
         if _should_route_to_grievance(raw_classification, req.question, input_lang=_input_lang_early):
             # Process via the full grievance workflow, preserving all response fields.
-            grievance_result = _process_grievance_message(
-                req.question, req.session_id,
-                input_lang=detected_lang, settings=settings,
+            grievance_result = _normalize_grievance_result(
+                _process_grievance_message(
+                    req.question, req.session_id,
+                    input_lang=detected_lang, settings=settings,
+                )
             )
             resp = {
                 "answer": grievance_result.text,
                 "language": detected_lang,
                 "domain": "grievance",
-                "intent": raw_classification.intent,
+                "intent": "GRIEVANCE",
                 "entities": [],
                 "confidence": raw_classification.confidence,
                 "confidence_level": _confidence_level(raw_classification.confidence),
@@ -926,15 +928,17 @@ async def chat(req: ChatRequest) -> dict:
 
         # Grievance queries → dedicated workflow (fallback after context)
         if _should_route_to_grievance(ctx.classification, ctx.english_query, input_lang=ctx.lang):
-            grievance_result = _process_grievance_message(
-                req.question, req.session_id,
-                input_lang=ctx.lang, settings=ctx.settings,
+            grievance_result = _normalize_grievance_result(
+                _process_grievance_message(
+                    req.question, req.session_id,
+                    input_lang=ctx.lang, settings=ctx.settings,
+                )
             )
             resp = {
                 "answer": grievance_result.text,
                 "language": ctx.lang,
                 "domain": "grievance",
-                "intent": ctx.classification.intent,
+                "intent": "GRIEVANCE",
                 "entities": [],
                 "confidence": ctx.classification.confidence,
                 "confidence_level": _confidence_level(ctx.classification.confidence),
@@ -1034,7 +1038,7 @@ _THINKING_MESSAGES = {
 
 
 def _sse_event(event: str, data: dict | str) -> str:
-    payload = json.dumps(data) if isinstance(data, dict) else data
+    payload = json.dumps(data, default=str) if isinstance(data, dict) else data
     return f"event: {event}\ndata: {payload}\n\n"
 
 
@@ -1056,9 +1060,11 @@ async def chat_stream(req: ChatRequest):
                     req.session_id, req.question,
                     req.language if req.ui_language_explicit else None,
                 )
-                grievance_result = _process_grievance_message(
-                    req.question, req.session_id,
-                    input_lang=_detected_lang, settings=_settings,
+                grievance_result = _normalize_grievance_result(
+                    _process_grievance_message(
+                        req.question, req.session_id,
+                        input_lang=_detected_lang, settings=_settings,
+                    )
                 )
                 meta = {
                     "domain": "grievance", "confidence": 1.0,
@@ -1112,9 +1118,11 @@ async def chat_stream(req: ChatRequest):
             if _should_route_to_grievance(raw_classification, req.question, input_lang=_input_lang_stream_early):
                 thinking_msgs = _THINKING_MESSAGES.get(_detected_lang2, _THINKING_MESSAGES["en"])
                 yield _sse_event("thinking", {"text": thinking_msgs[0]})
-                grievance_result = _process_grievance_message(
-                    req.question, req.session_id,
-                    input_lang=_detected_lang2, settings=_settings2,
+                grievance_result = _normalize_grievance_result(
+                    _process_grievance_message(
+                        req.question, req.session_id,
+                        input_lang=_detected_lang2, settings=_settings2,
+                    )
                 )
                 meta = {
                     "domain": "grievance", "confidence": raw_classification.confidence,
@@ -1155,9 +1163,11 @@ async def chat_stream(req: ChatRequest):
             # contextual disambiguation in _resolve_context changes the query)
             if _should_route_to_grievance(ctx.classification, ctx.english_query, input_lang=ctx.lang):
                 yield _sse_event("thinking", {"text": thinking_msgs[0]})
-                grievance_result = _process_grievance_message(
-                    req.question, req.session_id,
-                    input_lang=ctx.lang, settings=ctx.settings,
+                grievance_result = _normalize_grievance_result(
+                    _process_grievance_message(
+                        req.question, req.session_id,
+                        input_lang=ctx.lang, settings=ctx.settings,
+                    )
                 )
                 meta = {
                     "domain": "grievance", "confidence": ctx.classification.confidence,
