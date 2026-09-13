@@ -257,13 +257,15 @@ export function ChatWindow() {
   }, []);
 
   const loadConversation = useCallback((conv: Conversation) => {
+    resetSessionId();
     setMsgs(conv.messages);
     setActiveConvId(conv.id);
     localStorage.setItem(ACTIVE_CONV_KEY, conv.id);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setUserHasSetSidebar(true);
       setSidebarOpen(false);
     }
-  }, []);
+  }, [resetSessionId]);
 
   const togglePinConversation = useCallback((convId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -285,12 +287,13 @@ export function ChatWindow() {
         return next;
       });
       if (activeConvId === convId) {
+        resetSessionId();
         setMsgs([]);
         setActiveConvId(null);
         localStorage.removeItem(ACTIVE_CONV_KEY);
       }
     },
-    [activeConvId]
+    [activeConvId, resetSessionId]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -405,9 +408,21 @@ export function ChatWindow() {
         confidence_level: (metaSnapshot.confidence_level as ChatResponse["confidence_level"]) || "none",
         citations: (metaSnapshot.citations as ChatResponse["citations"]) || [],
         abstained: (metaSnapshot.abstained as boolean) || false,
+        mode: metaSnapshot.mode as string | undefined,
+        grievance: (metaSnapshot.grievance as ChatResponse["grievance"]) ?? null,
+        grievance_stage: (metaSnapshot.grievance_stage as ChatResponse["grievance_stage"]) ?? null,
+        grievance_draft_summary: (metaSnapshot.grievance_draft_summary as ChatResponse["grievance_draft_summary"]) ?? null,
+        grievance_fields_schema: (metaSnapshot.grievance_fields_schema as ChatResponse["grievance_fields_schema"]) ?? null,
+        grievance_finalized: (metaSnapshot.grievance_finalized as boolean) ?? false,
+        conversation_id: (metaSnapshot.conversation_id as string) || sessionId,
+        speech_text: (metaSnapshot.speech_text as string) || undefined,
+        speech_segments: (metaSnapshot.speech_segments as ChatResponse["speech_segments"]) || undefined,
         follow_up_question: null,
       };
-      setMsgs((m) => [...m, { role: "assistant", resp: finalResp }]);
+      const msgObj = { role: "assistant" as const, resp: finalResp };
+      setMsgs((m) => {
+        return [...m, msgObj];
+      });
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") return;
       const assistantMsg: Msg = { role: "assistant", resp: fallback(lang) };
@@ -424,15 +439,37 @@ export function ChatWindow() {
   }
 
   function handleNewChat() {
+    resetSessionId();
     setMsgs([]);
     setInput("");
     if (taRef.current) { taRef.current.style.height = "auto"; taRef.current.style.overflowY = "hidden"; }
     setActiveConvId(null);
     localStorage.removeItem(ACTIVE_CONV_KEY);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setUserHasSetSidebar(true);
       setSidebarOpen(false);
     }
   }
+
+  // Called by GrievanceFlow after the /finalize API succeeds.  Patches the
+  // last assistant message in the conversation with the finalized grievance
+  // data so it persists through localStorage save/restore, page refresh,
+  // and navigation away + back.
+  const handleGrievanceFinalized = useCallback((finalizedResponse: ChatResponse) => {
+    setMsgs((prev) => {
+      if (prev.length === 0) return prev;
+      // Find the last assistant message and replace its response
+      const lastIdx = prev.length - 1;
+      const last = prev[lastIdx];
+      if (last.role === "assistant" && last.resp) {
+        const updated = [...prev];
+        updated[lastIdx] = { ...last, resp: finalizedResponse };
+        return updated;
+      }
+      // Fallback: append as a new assistant message
+      return [...prev, { role: "assistant" as const, resp: finalizedResponse }];
+    });
+  }, []);
 
   function handleBack() {
     if (window.history.length > 1) {
@@ -701,6 +738,7 @@ export function ChatWindow() {
                 <button
                   type="button"
                   onClick={() => {
+                    resetSessionId();
                     setConversations([]);
                     saveConversations([]);
                     setMsgs([]);
@@ -936,17 +974,33 @@ export function ChatWindow() {
             )}
 
             {/* Conversation Messages */}
-            {hydrated && msgs.map((m, i) =>
-              m.role === "user" ? (
-                <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-[var(--shadow-sm)]">
-                    {m.text}
+            {hydrated && (() => {
+              // Find the last assistant message index for active grievance rendering
+              let lastAssistantIdx = -1;
+              for (let i = msgs.length - 1; i >= 0; i--) {
+                if (msgs[i].role === "assistant") {
+                  lastAssistantIdx = i;
+                  break;
+                }
+              }
+              return msgs.map((m, i) =>
+                m.role === "user" ? (
+                  <div key={i} className="flex justify-end">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-2xs">
+                      {m.text}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <MessageBubble key={i} resp={m.resp!} />
-              )
-            )}
+                ) : (
+                  <MessageBubble
+                    key={i}
+                    resp={m.resp!}
+                    onSendMessage={ask}
+                    onGrievanceFinalized={handleGrievanceFinalized}
+                    isActive={i === lastAssistantIdx}
+                  />
+                )
+              );
+            })()}
 
             {typing && !isStreaming && (
               <div className="flex gap-3">
