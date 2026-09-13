@@ -23,7 +23,7 @@ export function MobileNav() {
     <>
       <nav
         aria-label="Primary mobile"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border-soft)] bg-[var(--canvas)] pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--border-soft)] bg-[var(--canvas)]/95 backdrop-blur-sm pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <div className="grid grid-cols-6">
           {LINKS.map((l) => {
@@ -33,9 +33,9 @@ export function MobileNav() {
                 key={l.href}
                 href={l.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex flex-col items-center gap-1 py-2 text-[11px] transition-colors duration-[200ms] ${isActive ? "text-[var(--ink)]" : "text-[var(--text-tertiary)]"}`}
+                className={`flex flex-col items-center gap-1 py-2 text-[11px] transition-colors duration-[200ms] ${isActive ? "text-[var(--accent-primary)]" : "text-[var(--text-tertiary)]"}`}
               >
-                <span className={`rounded-[var(--radius-cta)] px-2 py-0.5 ${isActive ? "bg-[var(--cream-2)]" : ""}`}>{l.icon}</span>
+                <span className={`rounded-[var(--radius-cta)] px-2 py-0.5 transition-colors ${isActive ? "bg-[var(--accent-tint-soft)]" : ""}`}>{l.icon}</span>
                 <span className="truncate">{t(l.key)}</span>
               </Link>
             );

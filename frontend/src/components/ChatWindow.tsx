@@ -66,9 +66,6 @@ function saveConversations(convs: Conversation[]) {
   }
 }
 
-// Re-translate a previously received answer into the current UI language via the
-// server-side /api/translate proxy (Azure Translator). Falls back to the original
-// text if translation is unavailable/unconfigured so the UI stays functional.
 async function translate(text: string, locale: Locale): Promise<string> {
   try {
     const res = await fetch("/api/translate", {
@@ -187,9 +184,19 @@ export function ChatWindow() {
   const [explicitPending, setExplicitPending] = useState(false);
   const prevLocaleRef = useRef<Locale>(locale);
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  function autoResize() {
+    const el = taRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    const maxH = window.innerWidth < 640 ? 180 : 220;
+    el.style.height = `${Math.min(el.scrollHeight, maxH)}px`;
+    el.style.overflowY = el.scrollHeight > maxH ? "auto" : "hidden";
+  }
+
+  useEffect(() => { autoResize(); }, [input]);
   const lang: Locale = locale;
 
-  // Streaming state
   const [thinkingText, setThinkingText] = useState("");
   const [streamingAnswer, setStreamingAnswer] = useState("");
   const [streamingMeta, setStreamingMeta] = useState<Record<string, unknown> | null>(null);
@@ -197,10 +204,6 @@ export function ChatWindow() {
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
 
-  // Auto-save current conversation when msgs change
-  // Flag the next message as an explicit language choice when the UI language
-  // changes (covers the first switch away from the default too). Consumed + cleared
-  // by ask().
   useEffect(() => {
     if (prevLocaleRef.current !== lang) {
       prevLocaleRef.current = lang;
@@ -233,7 +236,6 @@ export function ChatWindow() {
     return () => clearTimeout(timeoutId);
   }, [msgs, activeConvId]);
 
-  // Create a new conversation
   const createConversation = useCallback((firstMsg: Msg) => {
     const conv: Conversation = {
       id: crypto.randomUUID(),
@@ -254,7 +256,6 @@ export function ChatWindow() {
     return conv.id;
   }, []);
 
-  // Load a conversation from sidebar
   const loadConversation = useCallback((conv: Conversation) => {
     setMsgs(conv.messages);
     setActiveConvId(conv.id);
@@ -264,7 +265,6 @@ export function ChatWindow() {
     }
   }, []);
 
-  // Pin/Unpin a conversation
   const togglePinConversation = useCallback((convId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     setConversations((prev) => {
@@ -276,7 +276,6 @@ export function ChatWindow() {
     });
   }, []);
 
-  // Delete a conversation
   const deleteConversation = useCallback(
     (convId: string, e: React.MouseEvent) => {
       e.stopPropagation();
@@ -294,7 +293,6 @@ export function ChatWindow() {
     [activeConvId]
   );
 
-  // Smart auto-scroll: only scroll if user is near bottom
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const isNearBottomRef = useRef(true);
 
@@ -323,7 +321,6 @@ export function ChatWindow() {
     scrollToBottom();
   }, [msgs, typing, streamingAnswer, scrollToBottom]);
 
-  // Auto-grow composer
   useEffect(() => {
     const el = taRef.current;
     if (!el) return;
@@ -331,10 +328,12 @@ export function ChatWindow() {
     el.style.height = Math.min(el.scrollHeight, 180) + "px";
   }, [input]);
 
+
   async function ask(q?: string) {
     const question = (q ?? input).trim();
     if (!question || typing) return;
     setInput("");
+    if (taRef.current) { taRef.current.style.height = "auto"; taRef.current.style.overflowY = "hidden"; }
 
     const userMsg: Msg = { role: "user", text: question };
 
@@ -395,7 +394,6 @@ export function ChatWindow() {
         abortController.signal,
       );
 
-      // Build final response from ref (synchronous, no stale state)
       const finalAnswer = tokenBufferRef.current.replace(/INSUFFICIENT_EVIDENCE/g, "").trim();
       const finalResp: ChatResponse = {
         answer: finalAnswer,
@@ -428,6 +426,7 @@ export function ChatWindow() {
   function handleNewChat() {
     setMsgs([]);
     setInput("");
+    if (taRef.current) { taRef.current.style.height = "auto"; taRef.current.style.overflowY = "hidden"; }
     setActiveConvId(null);
     localStorage.removeItem(ACTIVE_CONV_KEY);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -464,10 +463,10 @@ export function ChatWindow() {
   }
 
   const suggestedActions = [
-    { icon: "🌾", label: t("nav.schemes") || "Crop Insurance", prompt: t("chat.starter1") },
-    { icon: "⚡", label: t("nav.services") || "Services", prompt: t("chat.starter2") },
-    { icon: "🏛️", label: t("nav.library") || "PACS Services", prompt: t("chat.starter3") },
-    { icon: "⚖️", label: t("nav.legal") || "Legal Framework", prompt: t("chat.starter4") },
+    { key: "schemes", label: t("nav.schemes") || "Crop Insurance", prompt: t("chat.starter1"), accent: "#526B58" },
+    { key: "services", label: t("nav.services") || "Services", prompt: t("chat.starter2"), accent: "#C65D2E" },
+    { key: "library", label: t("nav.library") || "PACS Services", prompt: t("chat.starter3"), accent: "#27364A" },
+    { key: "legal", label: t("nav.legal") || "Legal Framework", prompt: t("chat.starter4"), accent: "#27364A" },
   ];
 
   function formatTime(ts: number) {
@@ -479,7 +478,6 @@ export function ChatWindow() {
     return d.toLocaleDateString([], { month: "short", day: "numeric" });
   }
 
-  // Filter conversations
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) return conversations;
     return conversations.filter((c) =>
@@ -517,23 +515,21 @@ export function ChatWindow() {
             title={t("chat.openSidebar")}
             className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
-            <IconSidebar className="h-5 w-5" />
+            <IconSidebar className="h-[18px] w-[18px]" />
           </button>
 
-          {/* New Chat Icon */}
           <button
             type="button"
             onClick={handleNewChat}
             title={t("chat.newChat")}
-            className="mt-2 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            className="mt-1 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
-            <IconEdit className="h-5 w-5" />
+            <IconEdit className="h-[18px] w-[18px]" />
           </button>
 
-          <div className="my-2 h-[1px] w-8 bg-[var(--border-soft)]" />
+          <div className="my-2 h-[1px] w-7 bg-[var(--border-soft)]" />
 
-          {/* Icon List of Conversations */}
-          <div suppressHydrationWarning className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
+          <div suppressHydrationWarning className="flex-1 w-full overflow-y-auto space-y-1 px-2">
             {hydrated && conversations.map((conv) => (
               <button
                 key={conv.id}
@@ -541,7 +537,7 @@ export function ChatWindow() {
                 onClick={() => loadConversation(conv)}
                 title={conv.title}
                 className={`group flex h-9 w-full items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
-                  activeConvId === conv.id ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-faint)]"
+                  activeConvId === conv.id ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]" : "text-[var(--text-faint)]"
                 }`}
               >
                 {conv.pinned ? (
@@ -553,11 +549,10 @@ export function ChatWindow() {
             ))}
           </div>
 
-          {/* Footer User Profile */}
           <div className="mt-auto pt-2">
             <Link
               href="/"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs transition-transform hover:scale-105"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-[var(--shadow-sm)] transition-transform hover:scale-105"
               title={t("chat.home")}
             >
               <IconBot className="h-5 w-5" />
@@ -566,7 +561,7 @@ export function ChatWindow() {
         </aside>
       )}
 
-      {/* Expanded Sidebar (ChatGPT Style) */}
+      {/* Expanded Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--border-soft)] bg-[var(--cream)] transition-all duration-300 lg:relative lg:z-0 ${
           effectiveSidebarOpen
@@ -588,19 +583,16 @@ export function ChatWindow() {
           </div>
 
           <div className="flex items-center gap-1">
-            {/* Search Toggle */}
             <button
               type="button"
               onClick={() => setShowSearchInput((s) => !s)}
               title={t("chat.searchHistory")}
               className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
-                showSearchInput ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-body)]"
+                showSearchInput ? "bg-[var(--accent-primary)]/10 text-[var(--accent-primary)]" : "text-[var(--text-body)]"
               }`}
             >
               <IconSearch className="h-4 w-4" />
             </button>
-
-            {/* New Chat Button */}
             <button
               type="button"
               onClick={handleNewChat}
@@ -612,10 +604,10 @@ export function ChatWindow() {
           </div>
         </div>
 
-        {/* Search Input Bar (if open) */}
+        {/* Search Input */}
         {showSearchInput && (
           <div className="px-3 pt-2.5 pb-1">
-            <div className="relative flex items-center rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] px-2.5 py-1.5 shadow-2xs">
+            <div className="relative flex items-center rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] px-2.5 py-1.5 shadow-[var(--shadow-sm)]">
               <IconSearch className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)]" />
               <input
                 type="text"
@@ -637,9 +629,9 @@ export function ChatWindow() {
           </div>
         )}
 
-        {/* Main Sidebar Navigation & History List */}
+        {/* Sidebar Content */}
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
-          {/* ChatGPT Style Top Links */}
+          {/* New Session */}
           <div className="space-y-0.5">
             <button
               type="button"
@@ -651,7 +643,7 @@ export function ChatWindow() {
             </button>
           </div>
 
-          {/* PINNED SECTION */}
+          {/* Pinned */}
           {hydrated && pinnedConversations.length > 0 && (
             <div>
               <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
@@ -676,7 +668,7 @@ export function ChatWindow() {
                     }}
                     className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
                       activeConvId === conv.id
-                        ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                        ? "bg-[var(--accent-primary)]/10 font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
                         : "text-[var(--ink)]"
                     }`}
                   >
@@ -698,7 +690,7 @@ export function ChatWindow() {
             </div>
           )}
 
-          {/* RECENT HISTORY SECTION */}
+          {/* Recent History */}
           <div>
             <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               <span className="flex items-center gap-1.5">
@@ -724,9 +716,11 @@ export function ChatWindow() {
 
             <div className="space-y-0.5">
               {hydrated && recentConversations.length === 0 && pinnedConversations.length === 0 && (
-                <p className="px-2 py-6 text-center text-xs text-[var(--text-faint)] italic">
-                  {t("chat.noHistory")}
-                </p>
+                <div className="px-2 py-8 text-center">
+                  <p className="text-xs text-[var(--text-faint)]">
+                    {t("chat.noHistory")}
+                  </p>
+                </div>
               )}
 
               {hydrated && recentConversations.map((conv) => (
@@ -743,7 +737,7 @@ export function ChatWindow() {
                   }}
                   className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
                     activeConvId === conv.id
-                      ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                      ? "bg-[var(--accent-primary)]/10 font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
                       : "text-[var(--ink)]"
                   }`}
                 >
@@ -778,9 +772,9 @@ export function ChatWindow() {
           </div>
         </div>
 
-        {/* Sidebar Footer with User Account */}
+        {/* Sidebar Footer Profile */}
         <div className="border-t border-[var(--border-soft)] p-3">
-          <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--canvas)] p-2 shadow-2xs">
+          <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--surface-elevated)] p-2.5 shadow-[var(--shadow-sm)]">
             <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
               <IconUser className="h-4 w-4" />
             </div>
@@ -792,33 +786,30 @@ export function ChatWindow() {
         </div>
       </aside>
 
-      {/* ==================== MAIN CENTERED CHAT AREA ==================== */}
+      {/* ==================== MAIN CHAT AREA ==================== */}
       <main className="flex flex-1 flex-col overflow-hidden bg-[var(--canvas)] min-w-0">
         {/* Top Header Bar */}
-        <header className="flex h-13 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--canvas)] px-3 sm:px-4">
+        <header className="flex h-13 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--canvas)]/95 backdrop-blur-sm px-3 sm:px-4">
           <div className="flex items-center gap-2">
-            {/* BACK BUTTON TO LEAVE CHAT ROUTE */}
             <button
               type="button"
               onClick={handleBack}
               title={t("chat.back")}
-              className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-body)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--ink)]"
             >
               <IconArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Back</span>
             </button>
 
-            {/* Sidebar toggle */}
             <button
               type="button"
               onClick={() => { setUserHasSetSidebar(true); setSidebarOpen(!effectiveSidebarOpen); }}
               title={t("chat.toggleSidebar")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--ink)]"
             >
               <IconSidebar className="h-4 w-4" />
             </button>
 
-            {/* Model Badge */}
             <div className="relative ml-1">
               <span className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2.5 py-1 text-sm font-semibold text-[var(--ink)]">
                 <span>{model}</span>
@@ -833,32 +824,89 @@ export function ChatWindow() {
               type="button"
               onClick={handleNewChat}
               title={t("chat.newChat")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream)] hover:text-[var(--ink)]"
             >
               <IconPlus className="h-4 w-4" />
             </button>
           </div>
         </header>
 
-        {/* Center Aligned Message Stream Area */}
+        {/* Message Stream Area */}
         <div ref={scrollContainerRef} className="flex-1 overflow-y-auto w-full">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-6 space-y-6">
-            {/* ChatGPT Style Empty State Hero */}
+            {/* Empty State Hero */}
             {hydrated && msgs.length === 0 && (
               <Reveal trigger="load">
-                <div className="py-12 sm:py-20 text-center space-y-4">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-md">
-                    <IconBot className="h-7 w-7" />
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--ink)]">
-                    {t("chat.emptyTitle")}
-                  </h1>
-                  <p className="text-sm text-[var(--text-body)] max-w-md mx-auto">
-                    {t("chat.emptySubtitle")}
-                  </p>
+                <div className="py-12 sm:py-20 text-center">
+                  {/* Architectural watermark */}
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none" aria-hidden="true">
+                      <svg viewBox="0 0 200 200" className="w-64 h-64 opacity-[0.03] text-[var(--ink)]" fill="none" stroke="currentColor" strokeWidth="0.5">
+                        <rect x="40" y="20" width="120" height="160" rx="4" />
+                        <line x1="60" y1="50" x2="140" y2="50" />
+                        <line x1="60" y1="70" x2="140" y2="70" />
+                        <line x1="60" y1="90" x2="120" y2="90" />
+                        <line x1="60" y1="110" x2="130" y2="110" />
+                        <line x1="60" y1="130" x2="110" y2="130" />
+                        <circle cx="100" cy="155" r="8" />
+                      </svg>
+                    </div>
 
-                  {/* 2x2 Suggested Actions Grid Centered */}
-                  <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-2xl mx-auto">
+                    <div className="relative z-10 space-y-4">
+                      {/* Sahakarita AI Emblem */}
+                      <div className="mx-auto relative" style={{ width: 80, height: 80 }}>
+                        <svg viewBox="0 0 80 80" className="w-20 h-20" fill="none" aria-hidden="true">
+                          {/* Outer ring */}
+                          <circle cx="40" cy="40" r="38" stroke="var(--accent-primary)" strokeWidth="1" opacity="0.3" />
+                          {/* Inner ring */}
+                          <circle cx="40" cy="40" r="32" stroke="var(--accent-primary)" strokeWidth="0.5" opacity="0.15" strokeDasharray="3 3" />
+                          {/* Background fill */}
+                          <circle cx="40" cy="40" r="28" fill="var(--dark)" />
+                          {/* Cooperative network nodes - subtle connection motif */}
+                          <g opacity="0.2" stroke="var(--on-dark-strong)" strokeWidth="0.5">
+                            <circle cx="40" cy="16" r="1.5" fill="var(--on-dark-strong)" />
+                            <circle cx="60" cy="28" r="1.5" fill="var(--on-dark-strong)" />
+                            <circle cx="60" cy="52" r="1.5" fill="var(--on-dark-strong)" />
+                            <circle cx="40" cy="64" r="1.5" fill="var(--on-dark-strong)" />
+                            <circle cx="20" cy="52" r="1.5" fill="var(--on-dark-strong)" />
+                            <circle cx="20" cy="28" r="1.5" fill="var(--on-dark-strong)" />
+                            <line x1="40" y1="16" x2="60" y2="28" />
+                            <line x1="60" y1="28" x2="60" y2="52" />
+                            <line x1="60" y1="52" x2="40" y2="64" />
+                            <line x1="40" y1="64" x2="20" y2="52" />
+                            <line x1="20" y1="52" x2="20" y2="28" />
+                            <line x1="20" y1="28" x2="40" y2="16" />
+                          </g>
+                          {/* Central document + check symbol */}
+                          <g transform="translate(28, 24)">
+                            {/* Document outline */}
+                            <rect x="0" y="0" width="24" height="28" rx="2" stroke="var(--on-dark-strong)" strokeWidth="1.2" fill="none" opacity="0.9" />
+                            {/* Document lines */}
+                            <line x1="5" y1="8" x2="19" y2="8" stroke="var(--on-dark-strong)" strokeWidth="0.8" opacity="0.4" />
+                            <line x1="5" y1="13" x2="19" y2="13" stroke="var(--on-dark-strong)" strokeWidth="0.8" opacity="0.4" />
+                            <line x1="5" y1="18" x2="14" y2="18" stroke="var(--on-dark-strong)" strokeWidth="0.8" opacity="0.4" />
+                            {/* Check mark - evidence verified */}
+                            <circle cx="17" cy="21" r="5" fill="var(--accent-primary)" opacity="0.9" />
+                            <path d="M14.5 21 L16 22.5 L19.5 19" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          </g>
+                        </svg>
+                      </div>
+
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--accent-primary)] mb-2">Civic Assistance Desk</p>
+                        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[var(--ink)] leading-tight">
+                          {t("chat.emptyTitle")}
+                        </h1>
+                      </div>
+
+                      <p className="text-sm text-[var(--text-body)] max-w-md mx-auto leading-relaxed">
+                        {t("chat.emptySubtitle")}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Suggestion Cards */}
+                  <div className="pt-8 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-2xl mx-auto">
                     {suggestedActions.map((action) => (
                       <button
                         key={action.label}
@@ -867,13 +915,17 @@ export function ChatWindow() {
                           setInput(action.prompt);
                           taRef.current?.focus();
                         }}
-                        className="group flex flex-col justify-between rounded-xl border border-[var(--border-soft)] bg-[var(--cream)] p-3.5 transition-all hover:border-[var(--accent-primary)]/40 hover:bg-[var(--cream-2)] hover:shadow-sm"
+                        className="group flex flex-col justify-between rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-4 transition-all duration-200 ease-[var(--ease-out-cubic)] hover:border-[var(--ink)]/15 hover:bg-[var(--cream)] hover:shadow-[var(--shadow-sm)]"
                       >
-                        <div className="flex items-center gap-2 font-medium text-xs text-[var(--ink)]">
-                          <span className="text-base">{action.icon}</span>
-                          <span>{action.label}</span>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-widest" style={{ color: action.accent }}>
+                            {action.label}
+                          </span>
+                          <svg viewBox="0 0 16 16" className="w-4 h-4 text-[var(--text-faint)] group-hover:text-[var(--ink)] transition-colors" fill="none" stroke="currentColor" strokeWidth="1.5">
+                            <path d="M6 4l4 4-4 4" />
+                          </svg>
                         </div>
-                        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] line-clamp-2">
+                        <p className="mt-2 text-xs text-[var(--text-tertiary)] line-clamp-2 leading-relaxed">
                           {action.prompt}
                         </p>
                       </button>
@@ -887,7 +939,7 @@ export function ChatWindow() {
             {hydrated && msgs.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-2xs">
+                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-[var(--shadow-sm)]">
                     {m.text}
                   </div>
                 </div>
@@ -905,7 +957,6 @@ export function ChatWindow() {
               </div>
             )}
 
-            {/* Streaming thinking + answer */}
             {isStreaming && thinkingText && !streamingAnswer && (
               <ThinkingBubble thinkingText={thinkingText} lang={lang} />
             )}
@@ -933,7 +984,7 @@ export function ChatWindow() {
         {/* Floating Input Composer */}
         <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
-            <div className="ask-input-wrap relative flex flex-col rounded-3xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
+            <div className="ask-input-wrap relative flex flex-col rounded-2xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-[var(--shadow-md)] transition-all duration-200 ease-[var(--ease-out-cubic)] focus-within:border-[var(--accent-primary)] focus-within:shadow-[var(--ask-glow)]">
               <textarea
                 ref={taRef}
                 value={input}
@@ -942,12 +993,10 @@ export function ChatWindow() {
                 rows={1}
                 placeholder={t("chat.placeholder")}
                 aria-label={t("chat.placeholder")}
-                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none min-h-[40px]"
+                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none max-h-[180px] sm:max-h-[220px] overflow-y-hidden"
               />
 
-              {/* Input Toolbar */}
               <div className="mt-2 flex items-center justify-end pt-1 gap-2">
-                {/* Speech Mic */}
                 {hydrated && speech.supported && (
                   <button
                     type="button"
@@ -963,20 +1012,18 @@ export function ChatWindow() {
                   </button>
                 )}
 
-                {/* ChatGPT Circular Send Button */}
                 <button
                   type="button"
                   aria-label={t("common.send")}
                   disabled={!input.trim() || typing}
                   onClick={() => ask()}
-                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[var(--accent-primary)] text-[var(--accent-contrast)] shadow-sm transition-all hover:bg-[var(--accent-hover)] hover:scale-105 active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[var(--accent-primary)] text-[var(--accent-contrast)] shadow-[var(--shadow-sm)] transition-all duration-200 ease-[var(--ease-out-cubic)] hover:bg-[var(--accent-hover)] hover:shadow-[var(--shadow-md)] hover:scale-105 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   <IconSend className="h-4 w-4" />
                 </button>
               </div>
             </div>
 
-            {/* Sub-caption Disclaimer Centered */}
             <p className="mt-2 text-center text-[10px] sm:text-xs text-[var(--text-faint)]">
               {t("chat.disclaimer")}
             </p>

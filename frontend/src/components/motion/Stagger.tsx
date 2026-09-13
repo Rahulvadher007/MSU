@@ -11,9 +11,9 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export function Stagger({
   children,
   className = "",
-  y = 10,
+  y = 14,
   delay = 0,
-  stagger = 0.05,
+  stagger = 0.06,
   as: Tag = "div",
 }: {
   children: ReactNode;
