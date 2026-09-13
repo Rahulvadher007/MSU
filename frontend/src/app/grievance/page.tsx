@@ -48,19 +48,21 @@ export default function GrievancePage() {
   if (record) {
     const track = getGrievanceStatus(record.id);
     return (
-      <div className="rail-frame page-container">
+      <div className="page-container">
         <Reveal trigger="load">
-          <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("grievance.title")}</h1>
-          <p className="mt-1 text-[var(--text-body)]">{t("grievance.subtitle")}</p>
+          <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+              style={{ fontFamily: "var(--font-display)" }}>{t("grievance.title")}</h1>
+          <p className="mt-1 text-[var(--body)]">{t("grievance.subtitle")}</p>
         </Reveal>
         <div className="mx-auto mt-8 max-w-xl">
-          <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--cream)] text-[var(--state-success)]">
+          <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--canvas)] p-8 text-center shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--cream)] text-[var(--success)]">
               <IconShield className="h-8 w-8" />
             </div>
-            <h2 className="display mt-4 text-2xl tracking-tight text-[var(--ink)] md:text-3xl">{t("grievance.successTitle")}</h2>
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">{t("grievance.complaintIdLabel")}</p>
-            <p className="mt-1 font-mono text-xl font-semibold text-[var(--accent-primary)]">{record.id}</p>
+            <h2 className="mt-4 text-2xl font-medium tracking-tight text-[var(--ink)] md:text-3xl"
+                style={{ fontFamily: "var(--font-display)" }}>{t("grievance.successTitle")}</h2>
+            <p className="mt-2 text-sm text-[var(--body)]">{t("grievance.complaintIdLabel")}</p>
+            <p className="mt-1 font-mono text-xl font-semibold text-[var(--primary)]">{record.id}</p>
             <div className="mt-4">
               {track ? <Badge tone="neutral">{t(`status.${track.status}`)}</Badge> : null}
             </div>
@@ -79,20 +81,21 @@ export default function GrievancePage() {
   }
 
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("grievance.title")}</h1>
-        <p className="mt-1 text-[var(--text-body)]">{t("grievance.subtitle")}</p>
+        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}>{t("grievance.title")}</h1>
+        <p className="mt-1 text-[var(--body)]">{t("grievance.subtitle")}</p>
       </Reveal>
 
       <div className="mx-auto mt-8 max-w-2xl">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--canvas)] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:p-8">
           <Stepper steps={steps} current={step} />
 
           <div className="mt-8">
             {step === 0 && (
               <div>
-                <h2 className="font-semibold text-[var(--text-primary)]">{t("grievance.categoryTitle")}</h2>
+                <h2 className="font-semibold text-[var(--ink)]">{t("grievance.categoryTitle")}</h2>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
                   {categories.map((c) => (
                     <button
@@ -103,14 +106,14 @@ export default function GrievancePage() {
                       className={`group rounded-[var(--radius-md)] border p-4 text-left font-medium transition-all duration-[200ms] ease-[var(--ease-out-cubic)] ${
                         categoryId === c.id
                           ? "border-[var(--ink)] bg-[var(--cream-2)] text-[var(--ink)] shadow-sm"
-                          : "border-[var(--border-soft)] bg-[var(--canvas)] text-[var(--text-body)] hover:border-[var(--border-hover)] hover:bg-[var(--cream)]"
+                          : "border-[var(--hairline)] bg-[var(--canvas)] text-[var(--body)] hover:border-[var(--border-hover)] hover:bg-[var(--cream)]"
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-semibold">{t(c.labelKey)}</span>
                         <div
                           className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                            categoryId === c.id ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--border-default)]"
+                            categoryId === c.id ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--hairline)]"
                           }`}
                         >
                           {categoryId === c.id && <div className="h-1.5 w-1.5 rounded-full bg-[var(--canvas)]" />}
@@ -119,7 +122,7 @@ export default function GrievancePage() {
                     </button>
                   ))}
                 </div>
-                <div className="mt-8 flex justify-end border-t border-[var(--border-soft)] pt-5">
+                <div className="mt-8 flex justify-end border-t border-[var(--hairline)] pt-5">
                   <Button onClick={() => setStep(1)}>{t("common.next")}</Button>
                 </div>
               </div>
@@ -129,7 +132,7 @@ export default function GrievancePage() {
               <div className="space-y-5">
                 <div>
                   <label htmlFor="details" className="block text-sm font-medium text-[var(--ink)]">
-                    {t("grievance.detailsLabel")} <span className="text-[var(--state-error)]">*</span>
+                    {t("grievance.detailsLabel")} <span className="text-[var(--error)]">*</span>
                   </label>
                   <textarea
                     id="details"
@@ -142,10 +145,10 @@ export default function GrievancePage() {
                     placeholder={t("grievance.placeholder")}
                     aria-invalid={detailsError || undefined}
                     aria-describedby={detailsError ? "details-error" : undefined}
-                    className="mt-1.5 w-full rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--canvas)] px-3.5 py-2.5 font-answer text-[var(--text-base)] text-[var(--ink)] placeholder:text-[var(--text-faint)] transition-colors focus:border-[var(--accent-primary)] focus:outline-none"
+                    className="mt-1.5 w-full rounded-[var(--radius-cta)] border border-[var(--hairline)] bg-[var(--canvas)] px-3.5 py-2.5 font-answer text-base text-[var(--ink)] placeholder:text-[var(--muted-soft)] transition-colors focus:border-[var(--primary)] focus:outline-none"
                   />
                   {detailsError ? (
-                    <p id="details-error" className="mt-1.5 text-xs font-medium text-[var(--state-error)]">
+                    <p id="details-error" className="mt-1.5 text-xs font-medium text-[var(--error)]">
                       {t("grievance.detailsRequired")}
                     </p>
                   ) : null}
@@ -165,7 +168,7 @@ export default function GrievancePage() {
                   <Input id="contact" value={contact} onChange={(e) => setContact(e.target.value)} className="mt-1.5" />
                 </div>
 
-                <div className="flex items-center justify-between border-t border-[var(--border-soft)] pt-5">
+                <div className="flex items-center justify-between border-t border-[var(--hairline)] pt-5">
                   <Button variant="secondary" onClick={() => setStep(0)}>
                     {t("common.back")}
                   </Button>
@@ -176,19 +179,19 @@ export default function GrievancePage() {
 
             {step === 2 && (
               <div className="space-y-5">
-                <h2 className="font-semibold text-[var(--text-primary)]">{t("grievance.reviewTitle")}</h2>
+                <h2 className="font-semibold text-[var(--ink)]">{t("grievance.reviewTitle")}</h2>
                 <Card className="space-y-3 p-5">
                   <Badge tone="neutral">{t(categories.find((c) => c.id === categoryId)!.labelKey)}</Badge>
                   <p className="font-answer text-sm leading-relaxed text-[var(--ink)]">{details}</p>
                   {(name || contact) && (
-                    <div className="border-t border-[var(--border-soft)] pt-2 text-xs text-[var(--text-secondary)]">
+                    <div className="border-t border-[var(--hairline)] pt-2 text-xs text-[var(--body)]">
                       {name && <span>{name}</span>}
                       {name && contact && <span> · </span>}
                       {contact && <span>{contact}</span>}
                     </div>
                   )}
                 </Card>
-                <div className="flex items-center justify-between border-t border-[var(--border-soft)] pt-5">
+                <div className="flex items-center justify-between border-t border-[var(--hairline)] pt-5">
                   <Button variant="secondary" onClick={() => setStep(1)}>
                     {t("common.back")}
                   </Button>

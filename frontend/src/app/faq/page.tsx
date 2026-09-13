@@ -46,10 +46,11 @@ export default function FaqPage() {
   }
 
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <h1 className="display text-3xl tracking-tight text-[var(--ink)] md:text-4xl">{t("faq.title")}</h1>
-        <p className="mt-1 text-[var(--text-body)]">{t("faq.subtitle")}</p>
+        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}>{t("faq.title")}</h1>
+        <p className="mt-1 text-[var(--body)]">{t("faq.subtitle")}</p>
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("faq.searchPlaceholder")} className="mt-4 max-w-sm" />
         <div className="mt-4">
           <Chips<Filter>
@@ -67,7 +68,7 @@ export default function FaqPage() {
           {filtered.map((f) => {
             const isOpen = open.has(f.id);
             return (
-              <li key={f.id} className={`rounded-[var(--radius-md)] border transition-colors duration-[200ms] ${isOpen ? "border-[var(--border-hover)] bg-[var(--cream)]" : "border-[var(--border-soft)] bg-[var(--canvas)]"}`}>
+              <li key={f.id} className={`rounded-[var(--radius-md)] border transition-colors duration-[200ms] ${isOpen ? "border-[var(--border-hover)] bg-[var(--cream)]" : "border-[var(--hairline)] bg-[var(--canvas)]"}`}>
                 <button
                   type="button"
                   aria-expanded={isOpen}
@@ -75,11 +76,11 @@ export default function FaqPage() {
                   className="flex w-full items-center justify-between gap-3 px-[var(--space-4)] py-[var(--space-4)] text-left font-answer"
                 >
                   <span className="font-medium text-[var(--ink)]">{f.question}</span>
-                  <IconChevronRight className={`h-5 w-5 shrink-0 text-[var(--text-faint)] transition-transform duration-[200ms] ${isOpen ? "rotate-90" : ""}`} />
+                  <IconChevronRight className={`h-5 w-5 shrink-0 text-[var(--muted-soft)] transition-transform duration-[200ms] ${isOpen ? "rotate-90" : ""}`} />
                 </button>
                 {isOpen && (
                   <div className="px-[var(--space-4)] pb-[var(--space-4)]">
-                    <p className="font-answer text-[var(--text-base)] leading-relaxed text-[var(--text-body)]">{f.answer}</p>
+                    <p className="font-answer text-base leading-relaxed text-[var(--body)]">{f.answer}</p>
                     <Link
                       href={`/chat?q=${encodeURIComponent(f.question)}`}
                       className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-[var(--radius-cta)] border border-[var(--ink)] bg-[var(--canvas)] px-4 text-sm font-semibold text-[var(--ink)] transition-colors duration-[200ms] hover:bg-[var(--cream-2)]"
