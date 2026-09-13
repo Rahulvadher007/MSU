@@ -106,12 +106,14 @@ class TestLanguageBoundary:
 class TestProcessGrievanceMessageTranslation:
     """Verify _process_grievance_message translates input and output."""
 
+    @patch("app.routes.chat._translate_to_english", return_value="English translated text")
     @patch("app.routes.chat.save_message")
     @patch("app.routes.chat.trim_messages")
     @patch("app.routes.chat.ensure_conversation")
     @patch("app.routes.chat._get_grievance_workflow")
     def test_translates_input_to_english(
         self, mock_wf_factory, mock_ensure, mock_trim, mock_save,
+        mock_to_en,
     ):
         from app.routes.chat import _process_grievance_message
 
@@ -130,11 +132,13 @@ class TestProcessGrievanceMessageTranslation:
             settings=settings,
         )
 
+        # _translate_to_english must have been called with the Gujarati text
+        mock_to_en.assert_called_once_with("ગુજરાતી text", "gu", settings)
         # The workflow should have received English text, not Gujarati
         call_args = mock_workflow.process_message.call_args
         passed_message = call_args.kwargs.get("user_message") or call_args[1].get("user_message") or call_args[0][0]
+        assert passed_message == "English translated text"
         assert passed_message != "ગુજરાતી text", "Gujarati text was passed directly to workflow"
-        assert isinstance(passed_message, str)
 
     @patch("app.routes.chat.save_message")
     @patch("app.routes.chat.trim_messages")

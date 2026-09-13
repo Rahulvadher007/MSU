@@ -172,12 +172,14 @@ class TestOtherLanguagesTranslated:
 
 # ── G. English workflow receives only English ────────────────────────────
 class TestWorkflowReceivesOnlyEnglish:
+    @patch("app.routes.chat._translate_to_english", return_value="Garbage in my area")
     @patch("app.routes.chat.save_message")
     @patch("app.routes.chat.trim_messages")
     @patch("app.routes.chat.ensure_conversation")
     @patch("app.routes.chat._get_grievance_workflow")
     def test_workflow_never_sees_non_english(
         self, mock_wf_factory, mock_ensure, mock_trim, mock_save,
+        mock_to_en,
     ):
         from app.routes.chat import _process_grievance_message
 
@@ -195,9 +197,15 @@ class TestWorkflowReceivesOnlyEnglish:
             session_id="test-gu2", input_lang="gu", settings=settings,
         )
 
+        # _translate_to_english must have been called
+        mock_to_en.assert_called_once_with(
+            "મારી આસપાસના વિસ્તારમાં કચરો છે", "gu", settings,
+        )
         call_args = mock_workflow.process_message.call_args
         passed_message = call_args.kwargs.get("user_message") or call_args[1].get("user_message") or call_args[0][0]
+        # Workflow receives only English — no Gujarati characters in the range
         assert all(ord(c) < 0x0A80 or ord(c) > 0x0AFF for c in passed_message)
+        assert passed_message == "Garbage in my area"
 
 
 # ── H. Target language is preserved separately ───────────────────────────

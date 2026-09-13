@@ -20,10 +20,11 @@ def test_grievance_intent(msg, lang):
     result = chat(msg, language=lang)
     # Must not be abstained
     assert not result.get("abstained", True)
-    # Must have grievance workflow fields
-    assert "grievance" in result
+    # Must route to grievance domain with GRIEVANCE intent
     assert result["domain"] == "grievance"
     assert result["intent"] == "GRIEVANCE"
+    # Must contain a grievance payload (not just the key)
+    assert isinstance(result.get("grievance"), dict)
 
 def test_non_grievance_question():
     result = chat("What is the capital of Gujarat?", language="en")
