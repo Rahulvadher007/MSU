@@ -6,6 +6,7 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
 
 const LINKS = [
+  { href: "/", key: "nav.home" },
   { href: "/schemes", key: "nav.schemes" },
   { href: "/services", key: "nav.services" },
   { href: "/library", key: "nav.library" },

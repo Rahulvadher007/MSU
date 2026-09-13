@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const LINKS = [
+  { href: "/", key: "nav.home" },
   { href: "/schemes", key: "nav.schemes" },
   { href: "/services", key: "nav.services" },
   { href: "/library", key: "nav.library" },

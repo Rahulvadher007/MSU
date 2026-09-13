@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
@@ -96,7 +95,6 @@ const HOW_STEPS = [
 ];
 
 export default function HomePage() {
-  const router = useRouter();
   const { t } = useI18n();
 
   const stats = [
