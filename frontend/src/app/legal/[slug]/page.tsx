@@ -39,7 +39,7 @@ export default function LegalDetailPage() {
   return (
     <div className="rail-frame page-container">
       <Reveal trigger="load">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-legal)] bg-[var(--cream)] p-6 shadow-[var(--shadow-sm)] md:p-8">
           <Badge deco={deco(sc.category)}>{t(`legalCategory.${sc.category}`)}</Badge>
           <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.title}</h1>
           <p className="mt-1 text-[var(--text-body)]">{sc.overview}</p>
@@ -51,23 +51,23 @@ export default function LegalDetailPage() {
           </Link>
         </div>
       </Reveal>
-      <Stagger className="mt-6 space-y-6">
-        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.overview")}</h2>
-          <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">{sc.overview}</p>
+      <Stagger className="mt-6 space-y-4">
+        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
+          <h2 className="font-semibold text-[var(--text-primary)]">{t("legal.overview")}</h2>
+          <p className="mt-2 font-answer text-base leading-relaxed text-[var(--text-secondary)]">{sc.overview}</p>
         </section>
         {SECTIONS.map((s) => (
-          <section key={s} className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-            <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t(`legal.${s}`)}</h2>
-            <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--text-secondary)]">
+          <section key={s} className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
+            <h2 className="font-semibold text-[var(--text-primary)]">{t(`legal.${s}`)}</h2>
+            <ul className="mt-2 font-answer list-disc space-y-1 pl-5 text-base leading-relaxed text-[var(--text-secondary)]">
               {sc[s].map((item, i) => (
                 <li key={i}>{item}</li>
               ))}
             </ul>
           </section>
         ))}
-        <section className="rounded-[var(--radius-xl)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
-          <h2 className="font-[var(--font-semibold)] text-[var(--text-primary)]">{t("legal.source")}</h2>
+        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
+          <h2 className="font-semibold text-[var(--text-primary)]">{t("legal.source")}</h2>
           <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--accent-primary)] underline">
             {sc.source.label}
           </a>

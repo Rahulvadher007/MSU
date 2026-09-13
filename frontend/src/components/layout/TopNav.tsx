@@ -20,7 +20,7 @@ export function TopNav() {
   const active = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--border-soft)] bg-[var(--canvas)]">
+    <header className="sticky top-0 z-20 border-b border-[var(--border-soft)] bg-[var(--canvas)]/95 backdrop-blur-sm">
       <div className="mx-auto flex h-14 w-full items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" className="group flex shrink-0 flex-col leading-none">
           <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
@@ -37,7 +37,7 @@ export function TopNav() {
                 aria-current={isActive ? "page" : undefined}
                 className={`flex h-14 items-center border-b-2 px-3 text-sm transition-colors duration-[200ms] ${
                   isActive
-                    ? "border-[var(--ink)] font-medium text-[var(--ink)]"
+                    ? "border-[var(--accent-primary)] font-medium text-[var(--ink)]"
                     : "border-transparent text-[var(--text-tertiary)] hover:text-[var(--ink)]"
                 }`}
               >

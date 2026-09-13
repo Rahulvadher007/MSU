@@ -50,3 +50,31 @@ export function deco(key: string): string {
 export function decoTint(key: string): string {
   return `${deco(key)}29`;
 }
+
+// Domain-aware accent colors for editorial card styling
+// Maps category → institutional accent color
+export const DOMAIN_ACCENTS: Record<string, { accent: string; label: string }> = {
+  // Schemes
+  "crop-insurance": { accent: "#526B58", label: "Agriculture" },
+  pacs: { accent: "#C65D2E", label: "Cooperative" },
+  financial: { accent: "#27364A", label: "Financial" },
+  subsidy: { accent: "#526B58", label: "Agriculture" },
+  // Services
+  credit: { accent: "#27364A", label: "Financial" },
+  storage: { accent: "#526B58", label: "Agriculture" },
+  insurance: { accent: "#27364A", label: "Financial" },
+  "agro-inputs": { accent: "#526B58", label: "Agriculture" },
+  membership: { accent: "#C65D2E", label: "Cooperative" },
+  // Legal
+  act: { accent: "#27364A", label: "Legal" },
+  "bye-laws": { accent: "#27364A", label: "Legal" },
+  provisions: { accent: "#27364A", label: "Legal" },
+};
+
+export function domainAccent(category: string): string {
+  return DOMAIN_ACCENTS[category]?.accent ?? "#6F706A";
+}
+
+export function domainLabel(category: string): string {
+  return DOMAIN_ACCENTS[category]?.label ?? "Information";
+}

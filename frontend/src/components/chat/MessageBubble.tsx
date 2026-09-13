@@ -100,54 +100,73 @@ function EvidenceCard({
     <div
       ref={cardRef}
       id={citation.chunk_id ? `evidence-${citation.chunk_id}` : undefined}
-      className={`rounded-[var(--radius-md)] border transition-colors ${
+      className={`rounded-[var(--radius-md)] border transition-all duration-200 ${
         isHighlighted
-          ? "border-[var(--accent-primary)] bg-[var(--accent-tint-soft)]"
-          : "border-[var(--border-soft)] bg-white/60"
+          ? "border-[var(--accent-legal)] bg-[var(--surface-elevated)] shadow-[var(--shadow-sm)]"
+          : "border-[var(--border-soft)] bg-[var(--canvas)]"
       }`}
     >
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isExpanded}
-        className="flex w-full items-center gap-2 p-2.5 text-left"
+        className="flex w-full items-start gap-3 p-3 text-left"
       >
-        <span
-          className={`inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-semibold ${
-            isWeb ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
-          }`}
-        >
-          {citation.source_label || (isWeb ? "Web" : "Doc")}
-        </span>
-        <span className="min-w-0 flex-1 text-xs font-semibold text-[var(--ink)] truncate">
-          {citation.title}
-        </span>
-        {citation.page && (
-          <span className="text-[10px] text-[var(--text-faint)]">p.{citation.page}</span>
-        )}
+        {/* Document icon */}
+        <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded ${
+          isWeb ? "bg-[var(--accent-legal)]/10 text-[var(--accent-legal)]" : "bg-[var(--accent-agriculture)]/10 text-[var(--accent-agriculture)]"
+        }`}>
+          <IconDoc className="h-3.5 w-3.5" />
+        </div>
+
+        <div className="min-w-0 flex-1 space-y-1">
+          {/* Source type label */}
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-faint)]">
+            {isWeb ? t("chat.viewSource") : t("chat.viewDocument")}
+          </p>
+
+          {/* Document title */}
+          <p className="text-sm font-semibold leading-snug text-[var(--ink)] line-clamp-2">
+            {citation.title}
+          </p>
+
+          {/* Metadata row: page · section */}
+          {(citation.page || citation.section) && (
+            <p className="text-xs text-[var(--text-tertiary)]">
+              {citation.page && <span>Page {citation.page}</span>}
+              {citation.page && citation.section && <span className="mx-1.5">·</span>}
+              {citation.section && <span>Section {citation.section}</span>}
+            </p>
+          )}
+        </div>
+
         <IconChevronRight
-          className={`h-3 w-3 shrink-0 text-[var(--text-faint)] transition-transform ${
+          className={`mt-1 h-4 w-4 shrink-0 text-[var(--text-faint)] transition-transform duration-200 ${
             isExpanded ? "rotate-90" : ""
           }`}
         />
       </button>
 
-      {isExpanded && citation.content && (
-        <div className="px-2.5 pb-2.5 space-y-2">
-          <div className="rounded bg-[var(--cream)] p-2 text-xs leading-relaxed text-[var(--ink)] whitespace-pre-wrap max-h-64 overflow-y-auto">
-            {citation.content}
-          </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[var(--text-faint)]">
-            {citation.section && <span>Section: {citation.section}</span>}
-            {citation.page && <span>Page: {citation.page}</span>}
+      {isExpanded && (
+        <div className="px-3 pb-3 space-y-2.5">
+          {/* Excerpt */}
+          {citation.content && (
+            <div className="rounded-[var(--radius-sm)] border border-[var(--border-soft)] bg-[var(--cream)] p-3 text-xs leading-relaxed text-[var(--ink)] whitespace-pre-wrap max-h-64 overflow-y-auto">
+              {citation.content}
+            </div>
+          )}
+
+          {/* View action */}
+          <div className="flex items-center gap-3">
             {isWeb && citation.url && (
               <a
                 href={citation.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-legal)] transition-colors hover:text-[var(--accent-primary)]"
               >
-                {t("chat.openSource")} ↗
+                {t("chat.viewSource")}
+                <span className="text-[10px]">↗</span>
               </a>
             )}
             {!isWeb && citation.source_file && (
@@ -155,9 +174,10 @@ function EvidenceCard({
                 href={`/api/documents/pdf/${encodeURIComponent(citation.source_file)}${citation.page ? `#page=${citation.page}` : ""}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-legal)] transition-colors hover:text-[var(--accent-primary)]"
               >
-                {t("chat.openDocument")} ↗
+                {t("chat.viewDocument")}
+                <span className="text-[10px]">↗</span>
               </a>
             )}
             {!isWeb && !citation.source_file && citation.url && (
@@ -165,9 +185,10 @@ function EvidenceCard({
                 href={citation.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="link inline-flex items-center gap-1 hover:text-[var(--accent-primary)]"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent-legal)] transition-colors hover:text-[var(--accent-primary)]"
               >
-                {t("chat.openDocument")} ↗
+                {t("chat.viewDocument")}
+                <span className="text-[10px]">↗</span>
               </a>
             )}
           </div>
@@ -193,22 +214,31 @@ function EvidencePanel({
   return (
     <div
       data-evidence="true"
-      className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3 space-y-2"
+      className="mt-3 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] overflow-hidden"
     >
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-[var(--text-tertiary)]">
-          {t("chat.sourcesReferences")}
-        </p>
+      {/* Panel header */}
+      <div className="flex items-center justify-between border-b border-[var(--border-soft)] bg-[var(--cream)] px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          <IconDoc className="h-4 w-4 text-[var(--accent-legal)]" />
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+            {t("chat.sourcesReferences")}
+          </p>
+          <span className="rounded-full bg-[var(--accent-legal)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--accent-legal)]">
+            {citations.length}
+          </span>
+        </div>
         <button
           type="button"
           onClick={onClose}
-          className="text-[var(--text-tertiary)] hover:text-[var(--ink)] text-xs"
+          className="text-[var(--text-tertiary)] hover:text-[var(--ink)] text-xs transition-colors rounded-[var(--radius-sm)] px-1.5 py-0.5 hover:bg-[var(--cream-2)]"
           aria-label="Close evidence panel"
         >
           ✕
         </button>
       </div>
-      <div className="space-y-1.5">
+
+      {/* Source cards */}
+      <div className="p-2.5 space-y-2">
         {citations.map((c, i) => (
           <EvidenceCard
             key={c.chunk_id || i}
@@ -240,7 +270,7 @@ function CitationTag({
     // Unknown ID — render as inert text
     return (
       <span
-        className="inline-flex items-center rounded bg-gray-100 px-1 py-0.5 text-[10px] font-mono text-gray-500"
+        className="inline-flex items-center rounded bg-[var(--cream)] px-1 py-0.5 text-[10px] font-mono text-[var(--text-faint)] border border-[var(--border-soft)]"
         aria-label={`Unknown citation: ${id}`}
       >
         [{id}]
@@ -255,11 +285,11 @@ function CitationTag({
         onClick={onToggle}
         aria-expanded={isExpanded}
         aria-label={`Evidence for citation ${id}`}
-        className={`inline-flex items-center gap-0.5 rounded px-1 py-0.5 text-[10px] font-semibold transition-colors ${
+        className={`inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-bold transition-all ${
           citation.source === "web"
-            ? "bg-blue-50 text-blue-700 hover:bg-blue-100"
-            : "bg-green-50 text-green-700 hover:bg-green-100"
-        } ${isExpanded ? "ring-1 ring-current" : ""}`}
+            ? "bg-[var(--accent-legal)]/8 text-[var(--accent-legal)] hover:bg-[var(--accent-legal)]/15"
+            : "bg-[var(--accent-agriculture)]/8 text-[var(--accent-agriculture)] hover:bg-[var(--accent-agriculture)]/15"
+        } ${isExpanded ? "ring-1 ring-current shadow-[var(--shadow-sm)]" : ""}`}
       >
         <IconDoc className="h-2.5 w-2.5" />
         {id}
@@ -375,9 +405,21 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
 
   if (resp.abstained) {
     return (
-      <Alert tone="warn">
-        <span>{t("abstained.title")}</span>
-      </Alert>
+      <div className="group flex gap-3 text-sm sm:text-base leading-relaxed text-[var(--ink)]">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
+            </div>
+          </div>
+          <Alert tone="warn">
+            <div className="space-y-1">
+              <p className="font-semibold">{t("abstained.title")}</p>
+              <p className="text-xs opacity-80">{t("abstained.description")}</p>
+            </div>
+          </Alert>
+        </div>
+      </div>
     );
   }
 
@@ -389,12 +431,12 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             <Badge deco={deco(resp.domain)}>{domainLabel}</Badge>
             {resp.mode && (
               <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-medium ${
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] sm:text-xs font-semibold ${
                   resp.mode === "web"
-                    ? "bg-blue-100 text-blue-800"
+                    ? "bg-[var(--accent-legal)]/10 text-[var(--accent-legal)]"
                     : resp.mode === "grievance"
-                      ? "bg-orange-100 text-orange-800"
-                      : "bg-gray-100 text-gray-600"
+                      ? "bg-[var(--accent-grievance)]/10 text-[var(--accent-grievance)]"
+                      : "bg-[var(--cream)] text-[var(--text-tertiary)]"
                 }`}
               >
                 {resp.mode === "web" ? t("chat.mode.webSearch") : resp.mode === "grievance" ? t("chat.mode.grievance") : t("chat.mode.staticRag")}
@@ -444,6 +486,20 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             );
           })}
         </div>
+
+        {/* Grounded indicator — when citations exist */}
+        {resp.citations.length > 0 && !evidencePanelOpen && (
+          <div className="flex items-center gap-2 py-1">
+            <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[var(--accent-legal)]/10">
+              <svg className="h-2.5 w-2.5 text-[var(--accent-legal)]" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 6l3 3 5-5" />
+              </svg>
+            </span>
+            <span className="text-xs font-medium text-[var(--accent-legal)]">
+              {t("chat.grounded")}
+            </span>
+          </div>
+        )}
 
         {/* Unified Evidence Panel */}
         {evidencePanelOpen && resp.citations.length > 0 && (
@@ -546,11 +602,15 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
                 setExpandedChunkId(null);
               }}
               aria-expanded={evidencePanelOpen}
-              className="ml-auto inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--cream-2)] px-2 py-1 text-xs text-[var(--text-body)] transition-colors hover:bg-[var(--border-soft)] hover:text-[var(--ink)]"
+              className={`ml-auto inline-flex items-center gap-1.5 rounded-[var(--radius-md)] border px-2.5 py-1.5 text-xs font-semibold transition-all ${
+                evidencePanelOpen
+                  ? "border-[var(--accent-legal)]/30 bg-[var(--accent-legal)]/5 text-[var(--accent-legal)]"
+                  : "border-[var(--border-soft)] bg-[var(--cream)] text-[var(--text-body)] hover:border-[var(--accent-legal)]/30 hover:text-[var(--accent-legal)]"
+              }`}
             >
-              <IconDoc className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              <IconDoc className="h-3.5 w-3.5" />
               <span>{resp.citations.length} {t("common.source")}</span>
-              <IconChevronRight className={`h-3 w-3 transition-transform ${evidencePanelOpen ? "rotate-90" : ""}`} />
+              <IconChevronRight className={`h-3 w-3 transition-transform duration-200 ${evidencePanelOpen ? "rotate-90" : ""}`} />
             </button>
           )}
         </div>
