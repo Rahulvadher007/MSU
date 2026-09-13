@@ -18,10 +18,10 @@ export function Stepper({
             <span
               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
                 active
-                  ? "bg-[var(--dark)] text-[var(--on-dark-strong)]"
+                  ? "bg-[var(--primary)] text-[var(--on-primary)]"
                   : done
-                    ? "bg-[var(--cream-2)] text-[var(--ink)]"
-                    : "border border-[var(--border-default)] bg-[var(--canvas)] text-[var(--text-faint)]"
+                    ? "bg-[var(--success)] text-white"
+                    : "border border-[var(--hairline)] bg-[var(--canvas)] text-[var(--muted)]"
               }`}
               aria-current={active ? "step" : undefined}
             >
@@ -33,7 +33,7 @@ export function Stepper({
             {!last && (
               <span
                 aria-hidden="true"
-                className={`absolute left-[calc(50%+1.2rem)] top-3.5 right-[calc(-50%+1.2rem)] h-px ${done ? "bg-[var(--ink)]" : "bg-[var(--border-soft)]"}`}
+                className={`absolute left-[calc(50%+1.2rem)] top-3.5 right-[calc(-50%+1.2rem)] h-px ${done ? "bg-[var(--success)]" : "bg-[var(--hairline)]"}`}
               />
             )}
           </li>

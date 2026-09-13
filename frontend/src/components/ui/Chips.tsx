@@ -24,10 +24,10 @@ export function Chips<T extends string>({
             aria-pressed={selected}
             disabled={disabled}
             onClick={() => onChange(o)}
-            className={`inline-flex h-10 items-center rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
+            className={`inline-flex h-10 items-center rounded-[var(--radius-pill)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
               selected
-                ? "border-[var(--dark)] bg-[var(--dark)] text-[var(--on-dark-strong)]"
-                : "border-[var(--border-default)] bg-[var(--cream-2)] text-[var(--text-body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
+                ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--on-primary)]"
+                : "border-[var(--hairline)] bg-[var(--cream-2)] text-[var(--body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"
             }`}
           >
             {render(o)}
