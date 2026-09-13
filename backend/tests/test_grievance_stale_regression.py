@@ -5,7 +5,7 @@ the classification changes correctly without leaving stale state.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.grievance.models import (
     GrievanceStage,
     GrievanceCategory,

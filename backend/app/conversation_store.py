@@ -29,7 +29,7 @@ def ensure_conversation(conversation_id: str, user_id: str) -> None:
         ).execute()
     except Exception:
         # In CI/tests the Supabase endpoint may be unreachable; ignore.
-        return None
+        return
 
 
 def list_conversations(user_id: str, limit: int = 50) -> list[dict]:

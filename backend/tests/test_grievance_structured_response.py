@@ -22,9 +22,7 @@ Covers tasks A–Q from the cleanup spec:
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.grievance.models import (
     GrievanceCategory,
@@ -334,7 +332,7 @@ class TestDisplayStateOnce:
         draft, _ = _resolved_draft()
         builder = GrievanceDraftBuilder()
         display = builder.format_draft_for_display(draft)
-        assert "Gujarat" in display, f"Expected 'Gujarat' in display"
+        assert "Gujarat" in display, "Expected 'Gujarat' in display"
 
 
 # ===================================================================

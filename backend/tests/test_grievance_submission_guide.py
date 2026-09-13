@@ -21,9 +21,7 @@ from app.grievance.models import (
     GrievanceCategory,
     GrievanceDraft,
     GrievanceEntity,
-    GrievanceStage,
     GrievanceSubCategory,
-    SubmissionRoute,
 )
 from app.grievance.submission_guide import GrievanceSubmissionGuide
 
@@ -111,7 +109,7 @@ class TestLocalityResolvesCity:
             missing_fields=[], required_fields=["locality"],
             optional_fields=[], jurisdiction="local", state="Gujarat",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city is None
 
     def test_district_entity_fallback(self, guide):
@@ -128,7 +126,7 @@ class TestLocalityResolvesCity:
             missing_fields=[], required_fields=["locality"],
             optional_fields=[], jurisdiction="local", state="Gujarat",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city == "Bharuch"
 
     def test_municipality_entity_fallback(self, guide):
@@ -145,7 +143,7 @@ class TestLocalityResolvesCity:
             missing_fields=[], required_fields=["locality"],
             optional_fields=[], jurisdiction="local", state="Gujarat",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city == "Rajkot"
 
     def test_description_regex_fallback(self, guide):
@@ -158,7 +156,7 @@ class TestLocalityResolvesCity:
             missing_fields=[], required_fields=["locality"],
             optional_fields=[], jurisdiction="local", state="Gujarat",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city == "Vadodara"
 
 

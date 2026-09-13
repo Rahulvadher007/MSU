@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for the QueryClassifier-authoritative routing hierarchy.
 
 Verifies that a confident QueryClassifier guidance intent is NOT overridden
@@ -6,8 +5,7 @@ by is_grievance_query(), while genuine complaints still reach the
 GrievanceWorkflow.
 """
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from app.routes.chat import _should_route_to_grievance, _GUIDANCE_INTENTS
 from app.web_rag.query_classifier import QueryClassifier
@@ -24,7 +22,7 @@ class TestRoutingHierarchy:
     def test_A_pan_card_docs_goes_to_rag(self):
         q = "What documents are required to apply for a PAN card in India?"
         cls = _classify(q)
-        assert cls.intent == "APPLICATION", "unexpected intent: %s" % cls.intent
+        assert cls.intent == "APPLICATION", f"unexpected intent: {cls.intent}"
         assert cls.domain != "grievance"
         assert not _should_route_to_grievance(cls, q)
 
@@ -37,7 +35,7 @@ class TestRoutingHierarchy:
     def test_C_pmfby_complaint_goes_to_grievance(self):
         q = "I applied for PMFBY and my claim hasn't been paid. I want to complain."
         cls = _classify(q)
-        assert cls.intent == "GRIEVANCE", "unexpected intent: %s" % cls.intent
+        assert cls.intent == "GRIEVANCE", f"unexpected intent: {cls.intent}"
         assert _should_route_to_grievance(cls, q)
 
     @patch("app.routes.chat._get_grievance_workflow")
@@ -53,14 +51,14 @@ class TestRoutingHierarchy:
     def test_E_hindi_passport_goes_to_rag(self):
         q = "\u092d\u093e\u0930\u0924 \u092e\u0947\u092a\u093e\u0938\u094d\u092a\u094b\u0930\u094d\u091f \u0915\u0947 \u0932\u093f\u090f \u0906\u0935\u0947\u0926\u0928 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0915\u094c\u0928-\u0915\u094c\u0928 \u0938\u0947 \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c\u093c \u0906\u0935\u0936\u094d\u092f\u0915 \u0939\u0948\u0902?"
         cls = _classify(q)
-        assert cls.intent in _GUIDANCE_INTENTS, "unexpected intent: %s" % cls.intent
+        assert cls.intent in _GUIDANCE_INTENTS, f"unexpected intent: {cls.intent}"
         assert not _should_route_to_grievance(cls, q)
 
     @patch("app.routes.chat._get_grievance_workflow")
     def test_F_electricity_bill_wrong_falls_through(self, mock_wf):
         q = "My electricity bill is wrong."
         cls = _classify(q)
-        assert cls.intent == "INFORMATIONAL", "unexpected intent: %s" % cls.intent
+        assert cls.intent == "INFORMATIONAL", f"unexpected intent: {cls.intent}"
         mock_wf.return_value.is_grievance_query.return_value = True
         assert _should_route_to_grievance(cls, q)
         mock_wf.return_value.is_grievance_query.assert_called_once_with(q)

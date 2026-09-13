@@ -1,13 +1,11 @@
 
 from __future__ import annotations
 
-import pytest
 
 from app.grievance.field_detector import is_field_satisfied
 from app.grievance.models import (
     GrievanceCategory,
     GrievanceDraft,
-    GrievanceEntity,
     GrievanceSubCategory,
 )
 

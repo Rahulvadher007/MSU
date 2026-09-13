@@ -17,7 +17,6 @@ import pytest
 from app.grievance.models import (
     GrievanceStage,
     GrievanceCategory,
-    GrievanceSubCategory,
 )
 from app.grievance.workflow import GrievanceWorkflow, GrievanceState
 

@@ -31,7 +31,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.grievance.models import (
     GrievanceCategory,
@@ -41,7 +40,6 @@ from app.grievance.models import (
 )
 from app.grievance.semantic_extractor import (
     GrievanceSemanticExtractor,
-    SemanticExtractionResult,
 )
 from app.grievance.submission_guide import GrievanceSubmissionGuide
 

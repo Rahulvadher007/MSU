@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 from app.grievance.models import (
     GrievanceCategory,
@@ -16,7 +15,6 @@ from app.grievance.models import (
 )
 from app.grievance.draft_builder import GrievanceDraftBuilder
 from app.grievance.entity_extractor import GrievanceEntityExtractor
-from app.grievance.submission_guide import GrievanceSubmissionGuide
 from app.grievance.semantic_extractor import (
     GrievanceSemanticExtractor,
     _LOCALITY_CUE_RE,
@@ -34,20 +32,20 @@ def _make_municipal_draft(
     sub = GrievanceSubCategory.GARBAGE
     required = extractor.get_required_fields(sub)
     optional = extractor.get_optional_fields(sub)
-    defaults = dict(
-        category=GrievanceCategory.MUNICIPAL,
-        sub_category=sub,
-        title="Test Municipal Grievance",
-        description="Garbage not collected in my area",
-        entities=entities or {},
-        missing_fields=[],
-        required_fields=required,
-        optional_fields=optional,
-        jurisdiction="local",
-        state="Gujarat",
-        department="Municipal Corporation",
-        reference_number="GRV-20260908-TEST0001",
-    )
+    defaults = {
+        "category": GrievanceCategory.MUNICIPAL,
+        "sub_category": sub,
+        "title": "Test Municipal Grievance",
+        "description": "Garbage not collected in my area",
+        "entities": entities or {},
+        "missing_fields": [],
+        "required_fields": required,
+        "optional_fields": optional,
+        "jurisdiction": "local",
+        "state": "Gujarat",
+        "department": "Municipal Corporation",
+        "reference_number": "GRV-20260908-TEST0001",
+    }
     defaults.update(extra)
     return GrievanceDraft(**defaults)
 

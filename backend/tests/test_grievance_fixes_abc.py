@@ -22,18 +22,14 @@ Covers:
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 from app.grievance.models import (
     GrievanceCategory,
     GrievanceDraft,
     GrievanceEntity,
-    GrievanceStage,
-    GrievanceState,
     GrievanceSubCategory,
-    SubmissionRoute,
 )
 from app.grievance.draft_builder import GrievanceDraftBuilder
 from app.grievance.semantic_extractor import (

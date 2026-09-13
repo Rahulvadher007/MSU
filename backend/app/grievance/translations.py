@@ -16,9 +16,6 @@ Supported languages: en, hi, gu, mr, bn, ta
 """
 from __future__ import annotations
 
-from typing import Any
-
-
 # ── Category translations ────────────────────────────────────────────────
 
 CATEGORY: dict[str, dict[str, str]] = {
@@ -2295,14 +2292,6 @@ SUBMISSION_STEPS: dict[str, dict[str, str]] = {
         "bn": "ব্যাংক: 30 দিন; লোকপাল: 60-90 দিন",
         "ta": "வங்கி: 30 நாட்கள்; லோக்பால்: 60-90 நாட்கள்",
     },
-    "Visit https://pgportal.gov.in/": {
-        "en": "Visit https://pgportal.gov.in/",
-        "hi": "https://pgportal.gov.in/ पर जाएं",
-        "gu": "https://pgportal.gov.in/ ની મુલાકાત લો",
-        "mr": "https://pgportal.gov.in/ वर जा",
-        "bn": "https://pgportal.gov.in/ এ যান",
-        "ta": "https://pgportal.gov.in/ க்குச் செல்லவும்",
-    },
     "Register and lodge grievance": {
         "en": "Register and lodge grievance",
         "hi": "पंजीकृत करें और शिकायत दर्ज करें",
@@ -2471,30 +2460,6 @@ SUBMISSION_STEPS: dict[str, dict[str, str]] = {
         "bn": "বিরোধের জন্য সহায়ক নথি",
         "ta": "விவாதத்திற்கான ஆதார ஆவணங்கள்",
     },
-    "RTI application copy": {
-        "en": "RTI application copy",
-        "hi": "आरटीआई आवेदन की प्रति",
-        "gu": "આરટીઆઈ અરજીની નકલ",
-        "mr": "आरटीआय अर्जाची प्रत",
-        "bn": "আরটিআই আবেদনের অনুলিপি",
-        "ta": "ஆர்டிஐ விண்ணப்ப நகல்",
-    },
-    "Proof of fee payment": {
-        "en": "Proof of fee payment",
-        "hi": "शुल्क भुगतान का प्रमाण",
-        "gu": "ફી ચુકવણીનો પુરાવો",
-        "mr": "शुल्क भरणेचा पुरावा",
-        "bn": "ফি পরিশোধের প্রমাণ",
-        "ta": "கட்டணம் செலுத்தியதற்கான சான்று",
-    },
-    "FAA order (for second appeal)": {
-        "en": "FAA order (for second appeal)",
-        "hi": "FAA आदेश (दूसरी अपील के लिए)",
-        "gu": "FAA હુકમ (બીજી અપીલ માટે)",
-        "mr": "FAA आदेश (दुसरी अपीलसाठी)",
-        "bn": "FAA আদেশ (দ্বিতীয় আপিলের জন্য)",
-        "ta": "FAA உத்தரவு (இரண்டாவது மேல்முறையீட்டுக்கு)",
-    },
 }
 
 # ── Estimated timeline translations ─────────────────────────────────────
@@ -2579,14 +2544,6 @@ TIMELINE: dict[str, dict[str, str]] = {
         "mr": "15-60 दिवस",
         "bn": "15-60 দিন",
         "ta": "15-60 நாட்கள்",
-    },
-    "15-30 days": {
-        "en": "15-30 days",
-        "hi": "15-30 दिन",
-        "gu": "15-30 દિવસ",
-        "mr": "15-30 दिवस",
-        "bn": "15-30 দিন",
-        "ta": "15-30 நாட்கள்",
     },
     "60-180 days (Labour Court longer)": {
         "en": "60-180 days (Labour Court longer)",

@@ -294,8 +294,6 @@ def test_stream_metadata_includes_speech_segments_for_grievance():
     speech_segments when a structured grievance dict is present. Without
     these, the frontend Read Aloud falls back to the old prose in resp.answer."""
     from app.speech_text import build_grievance_speech_text, segment_speech
-    from app.routes.chat import _sse_event
-    import json
 
     # Simulate what the streaming handler does when grievance.grievance is present
     grievance_dict = {
@@ -414,7 +412,7 @@ def test_finalize_returns_speech_segments():
     assert "APP-12345" in joined
 
     # Must include submission steps (may be translated to Hindi)
-    assert "File complaint" in joined or "complaint" in joined.lower() or len(segs) > 2
+    assert "File complaint" in joined or "complaint" in joined.lower() or len(speech_segs) > 2
 
     # No markdown artifacts
     assert "**" not in joined

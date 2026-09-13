@@ -22,7 +22,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.grievance.entity_extractor import GrievanceEntityExtractor
 from app.grievance.models import (
@@ -148,7 +147,7 @@ class TestStateResolution:
             },
             state_val="Maharashtra",
         )
-        city, state = guide._resolve_location_context(draft)
+        _city, state = guide._resolve_location_context(draft)
         assert state == "Maharashtra"
 
     def test_8_unknown_city_returns_none(self):
@@ -248,7 +247,7 @@ class TestEndToEnd:
             },
             state_val="Gujarat",
         )
-        city, state = guide._resolve_location_context(draft)
+        _city, state = guide._resolve_location_context(draft)
         assert state == "Gujarat"
 
     def test_14_state_never_bharuch(self):

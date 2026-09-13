@@ -3,7 +3,7 @@
 After completing a grievance, sending a new complaint message should start
 a new grievance intake, NOT return the old status lookup response.
 """
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import pytest
 
 from app.grievance.models import GrievanceState, GrievanceStage, GrievanceDraft, GrievanceCategory, GrievanceSubCategory, GrievanceEntity

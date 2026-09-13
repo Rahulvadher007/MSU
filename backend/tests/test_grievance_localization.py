@@ -8,7 +8,6 @@ Covers:
 - Category E: Workflow response prefix translations
 """
 
-import pytest
 
 from app.grievance.translations import (
     FIELD_PROMPTS,

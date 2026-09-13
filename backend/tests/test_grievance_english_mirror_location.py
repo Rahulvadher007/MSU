@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.grievance.models import (
     GrievanceCategory,
@@ -139,7 +138,7 @@ class TestEnglishMirrorLocation:
         english = result["grievance"]["english"]
         expected_desc = "Garbage has not been collected for exactly 9 days near the community hall."
         assert english["description"] == expected_desc, (
-            f"english_mirror description must match user input exactly"
+            "english_mirror description must match user input exactly"
         )
 
     def test_finalize_english_mirror_has_submission(self):

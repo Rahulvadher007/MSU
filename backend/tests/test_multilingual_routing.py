@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
 """Multilingual grievance routing tests.
 
 Verifies that translation failure does NOT change the intended routing.
 Tests both translation-success and translation-failure paths for 6 cases.
 """
 
-import pytest
-from unittest.mock import patch
 
 from app.routes.chat import _should_route_to_grievance, _GUIDANCE_INTENTS
 from app.web_rag.query_classifier import QueryClassifier

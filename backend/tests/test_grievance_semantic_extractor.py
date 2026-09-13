@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from app.grievance.semantic_extractor import (
     GrievanceSemanticExtractor,

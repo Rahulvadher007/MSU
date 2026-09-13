@@ -21,7 +21,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from app.grievance.models import (
     GrievanceCategory,
@@ -86,7 +85,7 @@ class TestCityPersists:
             state=None,
             department="Municipal Corp",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city == "Bharuch"
         # City should be persisted to entities
         assert "city_name" in draft.entities
@@ -112,7 +111,7 @@ class TestCityPersists:
             state=None,
             department="Municipal Corp",
         )
-        city, state = guide._resolve_location_context(draft)
+        city, _state = guide._resolve_location_context(draft)
         assert city == "Bharuch"
 
 

@@ -64,7 +64,7 @@ def save_grievance_state(state: GrievanceState) -> None:
         ).execute()
     except Exception:
         # In CI/tests Supabase may be unavailable; ignore.
-        return None
+        return
 
 
 def _contains_word(text_lower: str, words: tuple[str, ...] | list[str]) -> bool:

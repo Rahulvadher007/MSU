@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Targeted tests for the _INFORMATIONAL_RE regex fix.
 
 Verifies that informational questions route to RAG while genuine
@@ -6,10 +5,8 @@ grievances still reach the GrievanceWorkflow.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
 
 from app.grievance.workflow import GrievanceWorkflow
-from app.grievance.classifier import GrievanceClassifier
 from app.routes.chat import _should_route_to_grievance
 from app.web_rag.query_classifier import QueryClassifier
 

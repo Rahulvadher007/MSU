@@ -16,7 +16,6 @@ from app.providers.sarvam_translator import (
     SarvamTranslator,
     _raw_translate,
     _split_text_for_translation,
-    _TRANSLATION_MODEL_VERSION,
     _translate_cache,
 )
 
@@ -237,7 +236,7 @@ class TestEnToGuLongChunk1Fails:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(long_text, to="gu", source="en")
 
     def test_chunk1_failure_does_not_return_original(self):
@@ -258,7 +257,7 @@ class TestEnToGuLongChunk1Fails:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 result = translator.translate(long_text, to="gu", source="en")
                 # This line should never be reached
                 assert result != long_text
@@ -299,7 +298,7 @@ class TestEnToGuLongChunk2Fails:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(long_text, to="gu", source="en")
 
     def test_chunk2_failure_does_not_return_original(self):
@@ -320,7 +319,7 @@ class TestEnToGuLongChunk2Fails:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 result = translator.translate(long_text, to="gu", source="en")
                 # Should never reach here
                 assert result != long_text

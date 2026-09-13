@@ -391,7 +391,7 @@ def clarify_grievance(req: GrievanceClarifyRequest) -> dict:
     save_grievance_state(state)
 
     # Classify the new complaint
-    classification = classifier.classify(req.complaint)
+    classifier.classify(req.complaint)
 
     # Build field schema for the new classification
     field_detector = GrievanceFieldDetector()

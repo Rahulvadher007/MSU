@@ -20,7 +20,6 @@ from app.grievance.models import (
     GrievanceSubCategory,
 )
 from app.grievance.workflow import GrievanceWorkflow
-from app.grievance.draft_builder import GrievanceDraftBuilder
 from app.grievance.submission_guide import GrievanceSubmissionGuide
 
 

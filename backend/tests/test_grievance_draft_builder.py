@@ -1,7 +1,6 @@
 
 from __future__ import annotations
 
-import pytest
 from unittest.mock import MagicMock, patch
 
 from app.grievance.draft_builder import GrievanceDraftBuilder

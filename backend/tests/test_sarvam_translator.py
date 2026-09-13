@@ -10,13 +10,12 @@ F. Cache version safety
 """
 import pytest
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 
 import httpx
 
 from app.providers.sarvam_translator import (
     SarvamTranslator,
-    SarvamTranslatorError,
     _raw_translate,
     _translate_cache,
     _TRANSLATION_MODEL_VERSION,
@@ -110,7 +109,7 @@ class TestSarvamFailurePropagation:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(gujarati_text, to="en", source="gu")
 
     def test_translate_does_not_return_gujarati_on_failure(self):
@@ -132,7 +131,7 @@ class TestSarvamFailurePropagation:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 result = translator.translate(gujarati_text, to="en", source="gu")
                 # This line should never be reached, but verify regardless
                 assert result != gujarati_text
@@ -156,7 +155,7 @@ class TestSarvamFailurePropagation:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(hindi_text, to="en", source="hi")
 
     def test_raw_translate_raises_on_http_error(self):
@@ -266,7 +265,7 @@ class TestNonEnglishLeakPrevention:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(gujarati_text, to="en", source="gu")
 
     def test_bengali_not_returned_on_sarvam_failure(self):
@@ -288,7 +287,7 @@ class TestNonEnglishLeakPrevention:
             mock_ctx.__exit__ = MagicMock(return_value=False)
             MockClient.return_value = mock_ctx
 
-            with pytest.raises(Exception):
+            with pytest.raises(httpx.HTTPStatusError):
                 translator.translate(bengali_text, to="en", source="bn")
 
 

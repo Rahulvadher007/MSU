@@ -12,7 +12,6 @@ import uuid
 from unittest.mock import patch, MagicMock
 
 import httpx
-import pytest
 import respx
 from fastapi.testclient import TestClient
 
