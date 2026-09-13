@@ -5,18 +5,94 @@ import { useI18n } from "@/lib/i18n/provider";
 import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
-import { schemes as rawSchemes, services as rawServices, libraryDocs as rawLibraryDocs } from "@/lib/data";
-import { IconChat, IconMic, IconDoc, IconGlobe, IconChevronRight } from "@/components/ui/Icons";
+import {
+  schemes as rawSchemes,
+  services as rawServices,
+  libraryDocs as rawLibraryDocs,
+} from "@/lib/data";
+import {
+  IconGlobe,
+  IconDoc,
+  IconMic,
+  IconShield,
+  IconChevronRight,
+  IconSparkles,
+  IconChat,
+} from "@/components/ui/Icons";
 
-const FEATURES = [
-  { color: "brand-pink" as const, icon: <IconGlobe className="w-6 h-6" />, title: "landing.f1title", text: "landing.f1text" },
-  { color: "brand-teal" as const, icon: <IconDoc className="w-6 h-6" />, title: "landing.f2title", text: "landing.f2text" },
-  { color: "brand-lavender" as const, icon: <IconMic className="w-6 h-6" />, title: "landing.f3title", text: "landing.f3text" },
+const BENTO_CARDS = [
+  {
+    color: "brand-pink" as const,
+    textClass: "text-[var(--brand-pink-text)]",
+    bgClass: "bg-[var(--brand-pink)]",
+    icon: <IconGlobe className="w-7 h-7" />,
+    title: "landing.f1title",
+    text: "landing.f1text",
+    span: "col-span-2 row-span-2",
+  },
+  {
+    color: "brand-teal" as const,
+    textClass: "text-[var(--brand-teal-text)]",
+    bgClass: "bg-[var(--brand-teal)]",
+    icon: <IconDoc className="w-7 h-7" />,
+    title: "landing.f2title",
+    text: "landing.f2text",
+    span: "col-span-1 row-span-1",
+  },
+  {
+    color: "brand-lavender" as const,
+    textClass: "text-[var(--brand-lavender-text)]",
+    bgClass: "bg-[var(--brand-lavender)]",
+    icon: <IconMic className="w-7 h-7" />,
+    title: "landing.f3title",
+    text: "landing.f3text",
+    span: "col-span-1 row-span-1",
+  },
+  {
+    color: "brand-peach" as const,
+    textClass: "text-[var(--brand-peach-text)]",
+    bgClass: "bg-[var(--brand-peach)]",
+    icon: <IconShield className="w-7 h-7" />,
+    title: "landing.trust3",
+    text: "landing.f3text",
+    span: "col-span-1 row-span-1",
+  },
+  {
+    color: "brand-ochre" as const,
+    textClass: "text-[var(--brand-ochre-text)]",
+    bgClass: "bg-[var(--brand-ochre)]",
+    icon: <IconSparkles className="w-7 h-7" />,
+    title: "landing.trust4",
+    text: "landing.f2text",
+    span: "col-span-1 row-span-2",
+  },
+  {
+    color: "brand-mint" as const,
+    textClass: "text-[var(--brand-mint-text)]",
+    bgClass: "bg-[var(--brand-mint)]",
+    icon: <IconChat className="w-7 h-7" />,
+    title: "landing.how2title",
+    text: "landing.how2text",
+    span: "col-span-2 row-span-1",
+  },
 ];
-const HOW = [
-  { title: "landing.how1title", text: "landing.how1text" },
-  { title: "landing.how2title", text: "landing.how2text" },
-  { title: "landing.how3title", text: "landing.how3text" },
+
+const HOW_STEPS = [
+  {
+    num: "01",
+    title: "landing.how1title",
+    text: "landing.how1text",
+  },
+  {
+    num: "02",
+    title: "landing.how2title",
+    text: "landing.how2text",
+  },
+  {
+    num: "03",
+    title: "landing.how3title",
+    text: "landing.how3text",
+  },
 ];
 
 export default function HomePage() {
@@ -27,140 +103,186 @@ export default function HomePage() {
     { n: rawSchemes.length, label: t("nav.schemes") },
     { n: rawServices.length, label: t("nav.services") },
     { n: rawLibraryDocs.length, label: t("nav.library") },
+    { n: 6, label: t("landing.trust1") },
   ];
 
   return (
     <div className="page-container">
-      {/* Hero — Runway-style 7-5 split */}
-      <section className="flex flex-col gap-10 pb-12 md:pb-16 lg:flex-row lg:items-center lg:gap-12">
-        <Reveal trigger="load" className="flex max-w-2xl flex-col items-start">
+      {/* ── Section 1: Full-Bleed Hero ── */}
+      <section className="flex min-h-[85vh] flex-col items-center justify-center py-16 text-center md:py-24">
+        <Reveal trigger="load" className="flex flex-col items-center">
           <p className="eyebrow">{t("landing.badge")}</p>
-          <h1 className="mt-6 text-[36px] font-medium leading-[1.0] tracking-[-0.04em] text-[var(--ink)] md:text-[72px]"
-              style={{ fontFamily: "var(--font-display)" }}>
-            {t("landing.tagline").split("—")[0].trim()}
+
+          <h1
+            className="mt-6 max-w-4xl text-[40px] font-medium leading-[0.95] tracking-[-0.05em] text-[var(--ink)] md:text-[80px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {t("landing.tagline").split("—").map((part, i, arr) => (
+              <span key={i}>
+                {part.trim()}
+                {i < arr.length - 1 && (
+                  <span className="block text-[var(--muted)]">—</span>
+                )}
+              </span>
+            ))}
           </h1>
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-[var(--body)]">
+
+          <p className="mt-8 max-w-xl text-lg leading-relaxed text-[var(--body)] md:text-xl">
             {t("landing.f1text")}
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+
+          <div className="mt-10">
             <Link href="/chat">
-              <Button size="lg">{t("landing.ctaChat")} <IconChevronRight className="w-4 h-4" /></Button>
-            </Link>
-            <Link href="/schemes">
-              <Button size="lg" variant="secondary">{t("landing.ctaSchemes")}</Button>
+              <Button size="lg" className="h-14 px-8 text-[18px]">
+                {t("landing.ctaChat")}{" "}
+                <IconChevronRight className="w-5 h-5" />
+              </Button>
             </Link>
           </div>
-          <p className="mt-5 text-[13px] font-medium text-[var(--muted)]">{t("landing.trustText")}</p>
-        </Reveal>
 
-        {/* Chat UI mockup — static visual */}
-        <Reveal trigger="load" delay={0.1} className="lg:flex-1">
-          <div className="rounded-[var(--radius-xl)] bg-[var(--surface-card)] p-6">
-            <div className="rounded-[var(--radius-lg)] bg-[var(--canvas)] border border-[var(--hairline)] p-5">
-              {/* Mock user message */}
-              <div className="flex justify-end mb-4">
-                <div className="max-w-[80%] rounded-[var(--radius-lg)] bg-[var(--cream)] px-4 py-3 text-[14px] text-[var(--ink)]">
-                  What crop insurance schemes are available?
-                </div>
-              </div>
-              {/* Mock assistant message */}
-              <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-[var(--radius-lg)] bg-[var(--primary)] px-4 py-3 text-[14px] text-[var(--on-primary)]">
-                  <p>PMFBY provides crop insurance for farmers. Key benefits include...</p>
-                  <div className="mt-2 flex gap-2">
-                    <span className="inline-flex items-center rounded-full bg-[var(--on-primary)]/20 px-2 py-0.5 text-[11px] font-medium text-[var(--on-primary)]">
-                      PMFBY Guidelines
-                    </span>
-                    <span className="inline-flex items-center rounded-full bg-[var(--on-primary)]/20 px-2 py-0.5 text-[11px] font-medium text-[var(--on-primary)]">
-                      State Agriculture Dept
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Trust badges */}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {[t("landing.trust1"), t("landing.trust2"), t("landing.trust3"), t("landing.trust4")].map(
+              (badge) => (
+                <span
+                  key={badge}
+                  className="rounded-full border border-[var(--hairline)] bg-[var(--canvas)] px-4 py-1.5 text-[13px] font-medium text-[var(--muted)]"
+                >
+                  {badge}
+                </span>
+              )
+            )}
           </div>
         </Reveal>
       </section>
 
-      {/* Stats — soft surface band */}
-      <Reveal className="rounded-[var(--radius-xl)] bg-[var(--surface-soft)] px-4 py-10 md:px-6 md:py-12">
-        <div className="grid grid-cols-3 gap-6">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-[30px] font-medium leading-tight tracking-tight text-[var(--ink)] md:text-[40px]"
-                 style={{ fontFamily: "var(--font-display)" }}>
-                {s.n}
-              </p>
-              <p className="mt-1 text-[14px] text-[var(--muted)]">{s.label}</p>
+      {/* ── Section 2: Bento Grid ── */}
+      <section className="mt-8">
+        <Reveal>
+          <p className="eyebrow">{t("landing.trustTitle")}</p>
+          <h2
+            className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            {t("landing.bentoTitle")}
+          </h2>
+          <p className="mt-3 max-w-xl text-[var(--body)]">
+            {t("landing.bentoSubtitle")}
+          </p>
+        </Reveal>
+
+        <Stagger
+          className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:auto-rows-[180px]"
+          stagger={0.06}
+        >
+          {BENTO_CARDS.map((card) => (
+            <div
+              key={card.title}
+              className={`rounded-[var(--radius-xl)] p-8 ${card.bgClass} ${card.textClass} ${card.span} flex flex-col justify-between`}
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
+                {card.icon}
+              </div>
+              <div className="mt-auto">
+                <h3 className="text-[18px] font-semibold leading-tight md:text-[20px]">
+                  {t(card.title)}
+                </h3>
+                <p className="mt-1.5 text-[14px] leading-relaxed opacity-90">
+                  {t(card.text)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </Stagger>
+      </section>
+
+      {/* ── Section 3: Stats — Horizontal Ribbon ── */}
+      <Reveal className="mt-24 rounded-[var(--radius-xl)] bg-[var(--surface-soft)]">
+        <div className="flex items-center justify-center gap-12 px-6 py-12 md:gap-20 md:px-12 md:py-14">
+          {stats.map((s, i) => (
+            <div key={s.label} className="flex items-center gap-12 md:gap-20">
+              <div className="text-center">
+                <p
+                  className="text-[40px] font-medium leading-tight tracking-tight text-[var(--ink)] md:text-[56px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {s.n}
+                </p>
+                <p className="mt-1 text-[13px] font-medium text-[var(--muted)]">
+                  {s.label}
+                </p>
+              </div>
+              {i < stats.length - 1 && (
+                <div className="hidden h-12 w-px bg-[var(--hairline)] md:block" />
+              )}
             </div>
           ))}
         </div>
       </Reveal>
 
-      {/* Saturated feature cards */}
+      {/* ── Section 4: How It Works — Numbered Steps with Line ── */}
       <section className="mt-24">
         <Reveal>
-          <p className="eyebrow">Features</p>
-          <h2 className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
-              style={{ fontFamily: "var(--font-display)" }}>
-            Everything you need
-          </h2>
-        </Reveal>
-        <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className={`rounded-[var(--radius-xl)] p-8 ${
-                f.color === "brand-pink" ? "bg-[var(--brand-pink)] text-[var(--brand-pink-text)]" :
-                f.color === "brand-teal" ? "bg-[var(--brand-teal)] text-[var(--brand-teal-text)]" :
-                "bg-[var(--brand-lavender)] text-[var(--brand-lavender-text)]"
-              }`}
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20">
-                {f.icon}
-              </div>
-              <h3 className="mt-4 text-[18px] font-semibold">{t(f.title)}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed opacity-90">{t(f.text)}</p>
-            </div>
-          ))}
-        </Stagger>
-      </section>
-
-      {/* How it works */}
-      <section className="mt-24">
-        <Reveal>
-          <h2 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
-              style={{ fontFamily: "var(--font-display)" }}>
+          <p className="eyebrow">{t("landing.trustTitle")}</p>
+          <h2
+            className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
             {t("landing.howTitle")}
           </h2>
         </Reveal>
-        <Stagger className="mt-10 grid gap-8 md:grid-cols-3 md:gap-12">
-          {HOW.map((h, i) => (
-            <div key={h.title} className="relative">
-              <span className="text-[56px] font-medium text-[var(--hairline)]" style={{ fontFamily: "var(--font-display)" }}
-                    aria-hidden="true">
-                {String(i + 1).padStart(2, "0")}
+
+        <Stagger className="mt-12 flex flex-col gap-10 md:flex-row md:items-start md:gap-0">
+          {HOW_STEPS.map((step, i) => (
+            <div
+              key={step.title}
+              className="relative flex-1 md:px-6"
+            >
+              {/* Connecting line (desktop only, not on last step) */}
+              {i < HOW_STEPS.length - 1 && (
+                <div className="absolute left-[calc(50%+40px)] top-[36px] hidden h-px w-[calc(100%-40px)] bg-[var(--hairline)] md:block" />
+              )}
+
+              <span
+                className="block text-[72px] font-medium leading-none text-[var(--hairline)]"
+                style={{ fontFamily: "var(--font-display)" }}
+                aria-hidden="true"
+              >
+                {step.num}
               </span>
-              <h3 className="mt-3 font-medium text-[var(--ink)]">{t(h.title)}</h3>
-              <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-[var(--body)]">{t(h.text)}</p>
+              <h3 className="mt-4 text-[18px] font-medium text-[var(--ink)]">
+                {t(step.title)}
+              </h3>
+              <p className="mt-2 max-w-sm text-[14px] leading-relaxed text-[var(--body)]">
+                {t(step.text)}
+              </p>
             </div>
           ))}
         </Stagger>
       </section>
 
-      {/* CTA band */}
-      <Reveal className="mt-24 rounded-[var(--radius-xl)] bg-[var(--surface-soft)] px-4 py-16 text-center md:px-6 md:py-20">
+      {/* ── Section 5: CTA Band ── */}
+      <Reveal className="mt-24 rounded-[var(--radius-xl)] bg-[var(--surface-soft)] px-6 py-20 text-center md:px-12 md:py-24">
         <p className="eyebrow">{t("landing.badge")}</p>
-        <h2 className="mx-auto mt-4 max-w-2xl text-[30px] font-medium leading-tight tracking-tight text-[var(--ink)] md:text-[40px]"
-            style={{ fontFamily: "var(--font-display)" }}>
+        <h2
+          className="mx-auto mt-4 max-w-2xl text-[30px] font-medium leading-tight tracking-tight text-[var(--ink)] md:text-[40px]"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
           {t("landing.ctaChat")}
         </h2>
+        <p className="mx-auto mt-4 max-w-lg text-[var(--body)]">
+          {t("landing.bentoSubtitle")}
+        </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link href="/chat">
-            <Button size="lg">{t("landing.ctaChat")}</Button>
+            <Button size="lg" className="h-14 px-8 text-[18px]">
+              {t("landing.ctaChat")}
+            </Button>
           </Link>
           <Link href="/grievance">
-            <Button size="lg" variant="secondary">{t("nav.grievance")}</Button>
+            <Button size="lg" variant="secondary" className="h-14 px-8 text-[18px]">
+              {t("nav.grievance")}
+            </Button>
           </Link>
         </div>
       </Reveal>
