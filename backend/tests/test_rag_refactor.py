@@ -3,7 +3,6 @@
 
 from app.contracts import (
     AbstentionReason,
-    ConfidenceBand,
     RetrievalCandidate,
 )
 from app.services.static_rag import _reciprocal_rank_fusion as reciprocal_rank_fusion
