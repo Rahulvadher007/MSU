@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useSyncExternalStore } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { sendChat, sendChatStream, ChatResponse, type StreamEvent } from "@/lib/api";
@@ -115,12 +115,31 @@ export function ChatWindow() {
   const { t, locale } = useI18n();
   const speech = useMemo(() => createSpeechService(), []);
   const sp = useSearchParams();
-  const [hydrated, setHydrated] = useState(false);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => setHydrated(true), []);
-  const [input, setInput] = useState("");
+  const hydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const [input, setInput] = useState(() => {
+    const q = sp?.get("q");
+    const scheme = sp?.get("scheme");
+    const schemeName = sp?.get("name");
+    if (q) {
+      const tellMeMatch = q.match(/^Tell me about (.+?)(?: scheme)?$/i);
+      const useServiceMatch = q.match(/^How do I use the (.+?) service\?$/i);
+      if (tellMeMatch) return formatSchemeQuestion(tellMeMatch[1], locale);
+      if (useServiceMatch) return formatServiceQuestion(useServiceMatch[1], locale);
+      return q;
+    }
+    if (scheme) {
+      if (scheme === "pmfby") return t("chat.starter1");
+      return formatSchemeQuestion(schemeName || scheme.replace(/-/g, " "), locale);
+    }
+    return "";
+  });
   const [msgs, setMsgs] = useState<Msg[]>(() => {
     if (typeof window === "undefined") return [];
+    if (sp?.get("q") || sp?.get("scheme")) return [];
     const convs = loadConversations();
     const savedId = localStorage.getItem(ACTIVE_CONV_KEY);
     if (savedId) {
@@ -133,13 +152,24 @@ export function ChatWindow() {
   const [listening, setListening] = useState(false);
   const [model, setModel] = useState(MODELS[0]);
   const [showModelPicker, setShowModelPicker] = useState(false);
+  const isDesktopViewport = useSyncExternalStore(
+    (cb) => {
+      window.addEventListener("resize", cb);
+      return () => window.removeEventListener("resize", cb);
+    },
+    () => window.innerWidth >= 1024,
+    () => false,
+  );
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userHasSetSidebar, setUserHasSetSidebar] = useState(false);
+  const effectiveSidebarOpen = userHasSetSidebar ? sidebarOpen : isDesktopViewport;
   const [conversations, setConversations] = useState<Conversation[]>(() => {
     if (typeof window === "undefined") return [];
     return loadConversations();
   });
   const [activeConvId, setActiveConvId] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
+    if (sp?.get("q") || sp?.get("scheme")) return null;
     const savedId = localStorage.getItem(ACTIVE_CONV_KEY);
     const convs = loadConversations();
     if (savedId && convs.find((c) => c.id === savedId)) return savedId;
@@ -147,7 +177,11 @@ export function ChatWindow() {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchInput, setShowSearchInput] = useState(false);
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const sessionIdRef = useRef<string>(crypto.randomUUID());
+  const sessionId = sessionIdRef.current;
+  const resetSessionId = useCallback(() => {
+    sessionIdRef.current = crypto.randomUUID();
+  }, []);
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const [explicitPending, setExplicitPending] = useState(false);
@@ -162,14 +196,6 @@ export function ChatWindow() {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
-
-  // Auto-expand sidebar on large screens
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth >= 1024) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSidebarOpen(true);
-    }
-  }, []);
 
   // Auto-save current conversation when msgs change
   // Flag the next message as an explicit language choice when the UI language
@@ -186,18 +212,25 @@ export function ChatWindow() {
     () => [t("chat.starter1"), t("chat.starter2"), t("chat.starter3"), t("chat.starter4")],
     [t]
   );
+  // Auto-save current conversation when msgs change.
+  // The setConversations call is deferrred via setTimeout so it is not
+  // synchronous inside the effect body (react-hooks/set-state-in-effect).
   useEffect(() => {
     if (msgs.length === 0 || !activeConvId) return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setConversations((prev) => {
-      const next = prev.map((c) =>
-        c.id === activeConvId
-          ? { ...c, messages: msgs, updatedAt: Date.now() }
-          : c
-      );
-      saveConversations(next);
-      return next;
-    });
+    const id = activeConvId;
+    const snapshot = msgs;
+    const timeoutId = setTimeout(() => {
+      setConversations((prev) => {
+        const next = prev.map((c) =>
+          c.id === id
+            ? { ...c, messages: snapshot, updatedAt: Date.now() }
+            : c
+        );
+        saveConversations(next);
+        return next;
+      });
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [msgs, activeConvId]);
 
   // Create a new conversation
@@ -298,35 +331,6 @@ export function ChatWindow() {
     el.style.height = Math.min(el.scrollHeight, 180) + "px";
   }, [input]);
 
-  useEffect(() => {
-    const q = sp?.get("q") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("q") : null);
-    const scheme = sp?.get("scheme") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("scheme") : null);
-    const schemeName = sp?.get("name") || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("name") : null);
-    if (q) {
-      let formattedQ = q;
-      const tellMeMatch = q.match(/^Tell me about (.+?)(?: scheme)?$/i);
-      const useServiceMatch = q.match(/^How do I use the (.+?) service\?$/i);
-      if (tellMeMatch) {
-        formattedQ = formatSchemeQuestion(tellMeMatch[1], lang);
-      } else if (useServiceMatch) {
-        formattedQ = formatServiceQuestion(useServiceMatch[1], lang);
-      }
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setInput(formattedQ);
-      setMsgs([]);
-      setActiveConvId(null);
-    } else if (scheme) {
-      if (scheme === "pmfby") {
-        setInput(t("chat.starter1"));
-      } else {
-        const nameToUse = schemeName || scheme.replace(/-/g, " ");
-        setInput(formatSchemeQuestion(nameToUse, lang));
-      }
-      setMsgs([]);
-      setActiveConvId(null);
-    }
-  }, [sp, t, lang]);
-
   async function ask(q?: string) {
     const question = (q ?? input).trim();
     if (!question || typing) return;
@@ -341,6 +345,7 @@ export function ChatWindow() {
     }
 
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setUserHasSetSidebar(true);
       setSidebarOpen(false);
     }
 
@@ -493,9 +498,9 @@ export function ChatWindow() {
   return (
     <div className="relative flex h-dvh w-full overflow-hidden bg-[var(--canvas)] text-[var(--ink)] font-sans">
       {/* Mobile Backdrop Overlay */}
-      {sidebarOpen && (
+      {effectiveSidebarOpen && (
         <div
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => { setUserHasSetSidebar(true); setSidebarOpen(false); }}
           className="fixed inset-0 z-30 bg-black/50 backdrop-blur-xs lg:hidden"
           aria-hidden="true"
         />
@@ -503,12 +508,12 @@ export function ChatWindow() {
 
       {/* ==================== LEFT SIDEBAR ==================== */}
       {/* Collapsed Rail (desktop icon sidebar like ChatGPT) */}
-      {!sidebarOpen && (
+      {!effectiveSidebarOpen && (
         <aside className="hidden lg:flex inset-y-0 left-0 z-40 w-16 flex-col items-center border-r border-[var(--border-soft)] bg-[var(--cream)] py-3">
           {/* Toggle Sidebar */}
           <button
             type="button"
-            onClick={() => setSidebarOpen(true)}
+            onClick={() => { setUserHasSetSidebar(true); setSidebarOpen(true); }}
             title={t("chat.openSidebar")}
             className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
           >
@@ -564,7 +569,7 @@ export function ChatWindow() {
       {/* Expanded Sidebar (ChatGPT Style) */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--border-soft)] bg-[var(--cream)] transition-all duration-300 lg:relative lg:z-0 ${
-          sidebarOpen
+          effectiveSidebarOpen
             ? "w-72 min-w-[18rem] translate-x-0 shadow-2xl lg:shadow-none"
             : "w-0 min-w-0 -translate-x-full overflow-hidden lg:hidden"
         }`}
@@ -574,7 +579,7 @@ export function ChatWindow() {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              onClick={() => setSidebarOpen(false)}
+              onClick={() => { setUserHasSetSidebar(true); setSidebarOpen(false); }}
               title={t("chat.closeSidebar")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
@@ -806,7 +811,7 @@ export function ChatWindow() {
             {/* Sidebar toggle */}
             <button
               type="button"
-              onClick={() => setSidebarOpen((s) => !s)}
+              onClick={() => { setUserHasSetSidebar(true); setSidebarOpen(!effectiveSidebarOpen); }}
               title={t("chat.toggleSidebar")}
               className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
             >
