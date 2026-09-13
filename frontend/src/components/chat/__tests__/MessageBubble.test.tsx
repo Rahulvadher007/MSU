@@ -78,8 +78,8 @@ describe("MessageBubble read-aloud", () => {
     });
   });
 
-  it("hides read-aloud button when speech_segments is empty", () => {
+  it("read-aloud button always renders even when segments are empty", () => {
     renderBubble(minimalResp({ speech_segments: [] }));
-    expect(screen.queryByRole("button", { name: /read aloud/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /read aloud/i })).toBeTruthy();
   });
 });

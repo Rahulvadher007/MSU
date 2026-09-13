@@ -47,7 +47,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
         aria-expanded={open}
         aria-label={t("common.globe")}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex h-9 items-center justify-between gap-2 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--canvas)] px-3 text-sm font-medium text-[var(--ink)] shadow-2xs transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--cream)] focus:border-[var(--accent-primary)] focus:outline-none"
+        className="inline-flex h-9 items-center justify-between gap-2 rounded-[var(--radius-cta)] border border-[var(--border-default)] bg-[var(--canvas)] px-3 text-sm font-medium text-[var(--ink)] shadow-2xs transition-all duration-200 hover:border-[var(--border-hover)] hover:bg-[var(--cream)] focus:border-[var(--primary)] focus:outline-none"
       >
         <span className="flex items-center gap-1.5">
           <IconGlobe className="h-4 w-4 text-[var(--text-tertiary)]" />
@@ -88,7 +88,7 @@ export function LanguageSwitcher({ className = "" }: { className?: string }) {
                   }`}
                 >
                   <span>{NAMES[l]}</span>
-                  {isSelected && <IconCheck className="h-3.5 w-3.5 text-[var(--accent-primary)]" />}
+                  {isSelected && <IconCheck className="h-3.5 w-3.5 text-[var(--primary)]" />}
                 </button>
               );
             })}
