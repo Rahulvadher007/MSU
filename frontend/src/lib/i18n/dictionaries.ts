@@ -218,6 +218,10 @@ const en: Record<string, string> = {
   "faqCategory.financial": "Financial",
   "faqCategory.grievance": "Grievance",
   "faqCategory.legal": "Legal",
+
+  "footer.schemes": "Schemes & Services",
+  "footer.legal": "Legal & Support",
+  "footer.contact": "Contact",
 };
 
 const hi: Record<string, string> = {
@@ -428,6 +432,10 @@ const hi: Record<string, string> = {
   "faqCategory.financial": "वित्तीय",
   "faqCategory.grievance": "शिकायत",
   "faqCategory.legal": "कानून",
+
+  "footer.schemes": "योजनाएँ और सेवाएँ",
+  "footer.legal": "कानून और सहायता",
+  "footer.contact": "संपर्क",
 };
 
 const mr: Record<string, string> = {
@@ -638,6 +646,10 @@ const mr: Record<string, string> = {
   "faqCategory.financial": "आर्थिक",
   "faqCategory.grievance": "तक्रार",
   "faqCategory.legal": "कायदा",
+
+  "footer.schemes": "योजना आणि सेवा",
+  "footer.legal": "कायदा आणि सहाय्य",
+  "footer.contact": "संपर्क",
 };
 
 const bn: Record<string, string> = {
@@ -848,6 +860,10 @@ const bn: Record<string, string> = {
   "faqCategory.financial": "আর্থিক",
   "faqCategory.grievance": "অভিযোগ",
   "faqCategory.legal": "আইন",
+
+  "footer.schemes": "প্রকল্প ও সেবা",
+  "footer.legal": "আইন ও সহায়",
+  "footer.contact": "যোগাযোগ",
 };
 
 const ta: Record<string, string> = {
@@ -1058,6 +1074,10 @@ const ta: Record<string, string> = {
   "faqCategory.financial": "நிதி",
   "faqCategory.grievance": "புகார்",
   "faqCategory.legal": "சட்டம்",
+
+  "footer.schemes": "திட்டங்கள் மற்றும் சேவைகள்",
+  "footer.legal": "சட்டம் மற்றும் உதவி",
+  "footer.contact": "தொடர்பு",
 };
 
 const te: Record<string, string> = {
@@ -1778,6 +1798,10 @@ const gu: Record<string, string> = {
   "faqCategory.financial": "નાણાકીય",
   "faqCategory.grievance": "ફરિયાદ",
   "faqCategory.legal": "કાયદો",
+
+  "footer.schemes": "યોજનાઓ અને સેવાઓ",
+  "footer.legal": "કાયદો અને સહાય",
+  "footer.contact": "સંપર્ક",
 };
 
 const or: Record<string, string> = {

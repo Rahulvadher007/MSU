@@ -1,20 +1,15 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { TopNav } from "./TopNav";
-import { MobileNav } from "./MobileNav";
 
-const HIDE_NAV_ROUTES = ["/chat"];
-
-export function ConditionalNavs() {
+export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideNav = HIDE_NAV_ROUTES.some((route) => pathname.startsWith(route));
-
-  if (hideNav) return null;
+  const isChat = pathname.startsWith("/chat");
 
   return (
     <>
-      <TopNav />
-      <MobileNav />
+      {!isChat && <TopNav />}
+      <main>{children}</main>
     </>
   );
 }

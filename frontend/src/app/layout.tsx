@@ -16,6 +16,7 @@ import {
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { ConditionalNavs } from "@/components/layout/ConditionalNavs";
+import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const grotesk = Space_Grotesk({ variable: "--font-display-latin", subsets: ["latin"], weight: ["500"] });
@@ -88,12 +89,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <LanguageProvider>
-          <ConditionalNavs />
-          <main id="content" className="flex flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
-            <div className="w-full">
-              {children}
-            </div>
-          </main>
+          <ConditionalNavs>
+            {children}
+          </ConditionalNavs>
+          <Footer />
         </LanguageProvider>
       </body>
     </html>
