@@ -34,7 +34,7 @@ export function Footer() {
               <span className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)]" aria-hidden="true" />
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
-              Government assistance for Indian cooperatives.
+              {t("footer.description")}
             </p>
           </div>
           {COLUMNS.map((col) => (
@@ -61,8 +61,19 @@ export function Footer() {
               {t("footer.contact")}
             </h3>
             <ul className="mt-4 space-y-2">
+              <li>
+                <Link
+                  href="/chat"
+                  className="text-[14px] text-[var(--body)] hover:text-[var(--ink)] transition-colors"
+                >
+                  {t("nav.chat")}
+                </Link>
+              </li>
               <li className="text-[14px] text-[var(--body)]">
-                {t("nav.chat")}
+                {t("footer.contactEmail")}
+              </li>
+              <li className="text-[14px] text-[var(--body)]">
+                {t("footer.contactPhone")}
               </li>
             </ul>
           </div>

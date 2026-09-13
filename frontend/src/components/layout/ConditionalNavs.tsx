@@ -9,7 +9,7 @@ export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isChat && <TopNav />}
-      <main>{children}</main>
+      <main id="content">{children}</main>
     </>
   );
 }

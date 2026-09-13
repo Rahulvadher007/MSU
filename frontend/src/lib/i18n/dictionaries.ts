@@ -222,6 +222,9 @@ const en: Record<string, string> = {
   "footer.schemes": "Schemes & Services",
   "footer.legal": "Legal & Support",
   "footer.contact": "Contact",
+  "footer.description": "Government assistance for Indian cooperatives.",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (Toll free)",
 };
 
 const hi: Record<string, string> = {
@@ -436,6 +439,9 @@ const hi: Record<string, string> = {
   "footer.schemes": "योजनाएँ और सेवाएँ",
   "footer.legal": "कानून और सहायता",
   "footer.contact": "संपर्क",
+  "footer.description": "भारतीय सहकारी समितियों के लिए सरकारी सहायता।",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (टोल फ्री)",
 };
 
 const mr: Record<string, string> = {
@@ -650,6 +656,9 @@ const mr: Record<string, string> = {
   "footer.schemes": "योजना आणि सेवा",
   "footer.legal": "कायदा आणि सहाय्य",
   "footer.contact": "संपर्क",
+  "footer.description": "भारतीय सहकारी संस्थांसाठी सरकारी सहाय्य.",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (टोल फ्री)",
 };
 
 const bn: Record<string, string> = {
@@ -864,6 +873,9 @@ const bn: Record<string, string> = {
   "footer.schemes": "প্রকল্প ও সেবা",
   "footer.legal": "আইন ও সহায়",
   "footer.contact": "যোগাযোগ",
+  "footer.description": "ভারতীয় সমবায় সমিতির জন্য সরকারি সহায়।",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (টোল ফ্রি)",
 };
 
 const ta: Record<string, string> = {
@@ -1078,6 +1090,9 @@ const ta: Record<string, string> = {
   "footer.schemes": "திட்டங்கள் மற்றும் சேவைகள்",
   "footer.legal": "சட்டம் மற்றும் உதவி",
   "footer.contact": "தொடர்பு",
+  "footer.description": "இந்திய கூட்டுறவு சங்கங்களுக்கான அரசு உதவி.",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (இலவச தொலைபேசி)",
 };
 
 const te: Record<string, string> = {
@@ -1802,6 +1817,9 @@ const gu: Record<string, string> = {
   "footer.schemes": "યોજનાઓ અને સેવાઓ",
   "footer.legal": "કાયદો અને સહાય",
   "footer.contact": "સંપર્ક",
+  "footer.description": "ભારતીય સહકારી મંડળીઓ માટે સરકારી સહાય.",
+  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactPhone": "1800-XXX-XXXX (ટોલ ફ્રી)",
 };
 
 const or: Record<string, string> = {
