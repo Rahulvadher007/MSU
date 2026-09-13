@@ -30,16 +30,16 @@ export function ThinkingBubble({ thinkingText, lang = "en" }: { thinkingText: st
   return (
     <div className="flex gap-3">
       <div className="flex flex-col gap-1">
-        <div className="rounded-2xl bg-[var(--cream-2)] px-4 py-3">
+        <div className="rounded-2xl bg-[var(--surface-card)] px-4 py-3">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-[var(--text-body)]">
+            <span className="text-sm font-medium text-[var(--body)]">
               {thinkingText || words[wordIndex]}
             </span>
             <span className="flex gap-0.5">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}
-                  className={`inline-block h-1.5 w-1.5 rounded-full bg-[var(--text-faint)] transition-opacity duration-300 ${
+                  className={`inline-block h-1.5 w-1.5 rounded-full bg-[var(--muted-soft)] transition-opacity duration-300 ${
                     i <= dotCount - 1 ? "opacity-100" : "opacity-30"
                   }`}
                   style={{

@@ -145,11 +145,11 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             )}
             <EvidenceBand confidence={resp.confidence} label={t(`evidence.${evidenceBand(resp.confidence)}`)} />
           </div>
-          <span className="text-[11px] sm:text-xs text-[var(--text-faint)]">{(resp.confidence * 100).toFixed(0)}% match</span>
+          <span className="text-[11px] sm:text-xs text-[var(--muted-soft)]">{(resp.confidence * 100).toFixed(0)}% match</span>
         </div>
 
         {/* Answer Content */}
-        <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2.5 prose-ul:list-disc prose-ul:pl-5 prose-ol:my-2.5 prose-ol:list-decimal prose-ol:pl-5 prose-li:my-1 prose-strong:font-semibold prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--dark)] prose-pre:text-[var(--on-dark-strong)] prose-code:text-[var(--accent-primary)] ${isStreaming ? "streaming-text" : ""}`}>
+        <div className={`font-answer text-sm sm:text-base leading-relaxed text-[var(--ink)] prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-[var(--ink)] prose-p:my-2 prose-p:leading-relaxed prose-ul:my-2.5 prose-ul:list-disc prose-ul:pl-5 prose-ol:my-2.5 prose-ol:list-decimal prose-ol:pl-5 prose-li:my-1 prose-strong:font-semibold prose-strong:text-[var(--ink)] prose-table:text-xs prose-th:font-semibold prose-td:py-1 prose-th:py-1 prose-pre:bg-[var(--primary)] prose-pre:text-[var(--on-primary)] prose-code:text-[var(--ink)] ${isStreaming ? "streaming-text" : ""}`}>
           <Markdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -171,7 +171,7 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             .streaming-text :global(p:last-child)::after {
               content: "▊";
               animation: blink 0.8s step-end infinite;
-              color: var(--accent-primary);
+              color: var(--ink);
               font-weight: normal;
             }
             @keyframes blink {
@@ -186,23 +186,23 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             <Link href="/schemes">
               <button
                 type="button"
-                className="inline-flex items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--accent-primary)]/40 bg-[var(--cream)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--accent-primary)] hover:bg-[var(--cream-2)]"
+                className="inline-flex items-center gap-1.5 rounded-[var(--radius-cta)] border border-[var(--ink)]/40 bg-[var(--surface-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:border-[var(--ink)] hover:bg-[var(--surface-card)]"
               >
                 {t("chat.exploreSchemes")}
-                <IconChevronRight className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+                <IconChevronRight className="h-3.5 w-3.5 text-[var(--ink)]" />
               </button>
             </Link>
           </div>
         )}
 
         {/* Actions Footer */}
-        <div className="pt-2 flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-faint)]">
+        <div className="pt-2 flex flex-wrap items-center gap-1.5 text-xs text-[var(--muted-soft)]">
           {/* Copy Button */}
           <button
             type="button"
             onClick={handleCopy}
             title={copied ? t("chat.copied") : t("chat.copyResponse")}
-            className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-tertiary)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] text-[var(--muted)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
           >
             {copied ? <IconCheck className="h-3.5 w-3.5 text-[var(--state-success)]" /> : <IconCopy className="h-3.5 w-3.5" />}
           </button>
@@ -212,8 +212,8 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             type="button"
             onClick={handleSpeak}
             title={speaking ? t("common.stopReadAloud") : t("common.readAloud")}
-            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-              speaking ? "text-[var(--accent-primary)] bg-[var(--accent-tint-soft)]" : "text-[var(--text-tertiary)]"
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)] ${
+              speaking ? "text-[var(--ink)] bg-[var(--accent-tint-soft)]" : "text-[var(--muted)]"
             }`}
           >
             <IconSpeaker className={`h-3.5 w-3.5 ${speaking ? "animate-pulse" : ""}`} />
@@ -224,8 +224,8 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             type="button"
             onClick={() => setRating((r) => (r === "up" ? null : "up"))}
             title={t("chat.goodResponse")}
-            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-              rating === "up" ? "text-[var(--state-success)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)] ${
+              rating === "up" ? "text-[var(--state-success)] bg-[var(--surface-card)]" : "text-[var(--muted)]"
             }`}
           >
             <IconThumbsUp className="h-3.5 w-3.5" />
@@ -236,8 +236,8 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
             type="button"
             onClick={() => setRating((r) => (r === "down" ? null : "down"))}
             title={t("chat.badResponse")}
-            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)] ${
-              rating === "down" ? "text-[var(--state-error)] bg-[var(--cream-2)]" : "text-[var(--text-tertiary)]"
+            className={`flex h-7 w-7 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)] ${
+              rating === "down" ? "text-[var(--state-error)] bg-[var(--surface-card)]" : "text-[var(--muted)]"
             }`}
           >
             <IconThumbsDown className="h-3.5 w-3.5" />
@@ -249,9 +249,9 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
               type="button"
               onClick={() => setOpenCitations((o) => !o)}
               aria-expanded={openCitations}
-              className="ml-auto inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--cream-2)] px-2 py-1 text-xs text-[var(--text-body)] transition-colors hover:bg-[var(--border-soft)] hover:text-[var(--ink)]"
+              className="ml-auto inline-flex items-center gap-1 rounded-[var(--radius-md)] bg-[var(--surface-card)] px-2 py-1 text-xs text-[var(--body)] transition-colors hover:bg-[var(--hairline)] hover:text-[var(--ink)]"
             >
-              <IconDoc className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+              <IconDoc className="h-3.5 w-3.5 text-[var(--ink)]" />
               <span>{resp.citations.length} {t("common.source")}</span>
               <IconChevronRight className={`h-3 w-3 transition-transform ${openCitations ? "rotate-90" : ""}`} />
             </button>
@@ -260,8 +260,8 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
 
         {/* Citations Expandable Content */}
         {openCitations && resp.citations.length > 0 && (
-          <div className="mt-2 rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--cream)] p-3">
-            <p className="mb-1.5 text-xs font-semibold text-[var(--text-tertiary)]">{t("chat.sourcesReferences")}</p>
+          <div className="mt-2 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--surface-soft)] p-3">
+            <p className="mb-1.5 text-xs font-semibold text-[var(--muted)]">{t("chat.sourcesReferences")}</p>
             <ul className="space-y-1">
               {resp.citations.map((c, j) => (
                 <li key={j} className="flex items-start gap-2">

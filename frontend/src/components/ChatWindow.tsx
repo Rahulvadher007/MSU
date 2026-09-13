@@ -508,13 +508,13 @@ export function ChatWindow() {
       {/* ==================== LEFT SIDEBAR ==================== */}
       {/* Collapsed Rail (desktop icon sidebar like ChatGPT) */}
       {!sidebarOpen && (
-        <aside className="hidden lg:flex inset-y-0 left-0 z-40 w-16 flex-col items-center border-r border-[var(--border-soft)] bg-[var(--cream)] py-3">
+        <aside className="hidden lg:flex inset-y-0 left-0 z-40 w-16 flex-col items-center border-r border-[var(--hairline)] bg-[var(--surface-soft)] py-3">
           {/* Toggle Sidebar */}
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
             title={t("chat.openSidebar")}
-            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
           >
             <IconSidebar className="h-5 w-5" />
           </button>
@@ -524,12 +524,12 @@ export function ChatWindow() {
             type="button"
             onClick={handleNewChat}
             title={t("chat.newChat")}
-            className="mt-2 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+            className="mt-2 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
           >
             <IconEdit className="h-5 w-5" />
           </button>
 
-          <div className="my-2 h-[1px] w-8 bg-[var(--border-soft)]" />
+          <div className="my-2 h-[1px] w-8 bg-[var(--hairline)]" />
 
           {/* Icon List of Conversations */}
           <div suppressHydrationWarning className="flex-1 w-full overflow-y-auto space-y-1.5 px-2">
@@ -539,12 +539,12 @@ export function ChatWindow() {
                 type="button"
                 onClick={() => loadConversation(conv)}
                 title={conv.title}
-                className={`group flex h-9 w-full items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
-                  activeConvId === conv.id ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-faint)]"
+                className={`group flex h-9 w-full items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--surface-card)] ${
+                  activeConvId === conv.id ? "bg-[var(--surface-card)] text-[var(--ink)]" : "text-[var(--muted-soft)]"
                 }`}
               >
                 {conv.pinned ? (
-                  <IconPin className="h-4 w-4 shrink-0 text-[var(--accent-primary)]" />
+                  <IconPin className="h-4 w-4 shrink-0 text-[var(--ink)]" />
                 ) : (
                   <IconClock className="h-4 w-4 shrink-0 group-hover:text-[var(--ink)]" />
                 )}
@@ -556,7 +556,7 @@ export function ChatWindow() {
           <div className="mt-auto pt-2">
             <Link
               href="/"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-xs transition-transform hover:scale-105"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-xs transition-transform hover:scale-105"
               title={t("chat.home")}
             >
               <IconBot className="h-5 w-5" />
@@ -567,20 +567,20 @@ export function ChatWindow() {
 
       {/* Expanded Sidebar (ChatGPT Style) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--border-soft)] bg-[var(--cream)] transition-all duration-300 lg:relative lg:z-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex flex-col border-r border-[var(--hairline)] bg-[var(--surface-soft)] transition-all duration-300 lg:relative lg:z-0 ${
           sidebarOpen
             ? "w-72 min-w-[18rem] translate-x-0 shadow-2xl lg:shadow-none"
             : "w-0 min-w-0 -translate-x-full overflow-hidden lg:hidden"
         }`}
       >
         {/* Sidebar Header with ChatGPT-like Icons */}
-        <div className="flex items-center justify-between p-3 border-b border-[var(--border-soft)]/60">
+        <div className="flex items-center justify-between p-3 border-b border-[var(--hairline)]/60">
           <div className="flex items-center gap-1">
             <button
               type="button"
               onClick={() => setSidebarOpen(false)}
               title={t("chat.closeSidebar")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
             >
               <IconSidebar className="h-4.5 w-4.5" />
             </button>
@@ -592,8 +592,8 @@ export function ChatWindow() {
               type="button"
               onClick={() => setShowSearchInput((s) => !s)}
               title={t("chat.searchHistory")}
-              className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--cream-2)] ${
-                showSearchInput ? "bg-[var(--cream-2)] text-[var(--accent-primary)]" : "text-[var(--text-body)]"
+              className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] transition-colors hover:bg-[var(--surface-card)] ${
+                showSearchInput ? "bg-[var(--surface-card)] text-[var(--ink)]" : "text-[var(--body)]"
               }`}
             >
               <IconSearch className="h-4 w-4" />
@@ -604,7 +604,7 @@ export function ChatWindow() {
               type="button"
               onClick={handleNewChat}
               title={t("chat.newChat")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
             >
               <IconEdit className="h-4 w-4" />
             </button>
@@ -614,20 +614,20 @@ export function ChatWindow() {
         {/* Search Input Bar (if open) */}
         {showSearchInput && (
           <div className="px-3 pt-2.5 pb-1">
-            <div className="relative flex items-center rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--canvas)] px-2.5 py-1.5 shadow-2xs">
-              <IconSearch className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)]" />
+            <div className="relative flex items-center rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--canvas)] px-2.5 py-1.5 shadow-2xs">
+              <IconSearch className="h-3.5 w-3.5 shrink-0 text-[var(--muted-soft)]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("chat.searchPlaceholder")}
-                className="w-full bg-transparent px-2 text-xs text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none"
+                className="w-full bg-transparent px-2 text-xs text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="text-[var(--text-faint)] hover:text-[var(--ink)]"
+                  className="text-[var(--muted-soft)] hover:text-[var(--ink)]"
                 >
                   <IconX className="h-3.5 w-3.5" />
                 </button>
@@ -643,9 +643,9 @@ export function ChatWindow() {
             <button
               type="button"
               onClick={handleNewChat}
-              className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--cream-2)] text-[var(--ink)]"
+              className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--surface-card)] text-[var(--ink)]"
             >
-              <IconPlus className="h-4 w-4 text-[var(--accent-primary)] shrink-0" />
+              <IconPlus className="h-4 w-4 text-[var(--ink)] shrink-0" />
               <span>{t("common.newSession")}</span>
             </button>
           </div>
@@ -653,12 +653,12 @@ export function ChatWindow() {
           {/* PINNED SECTION */}
           {hydrated && pinnedConversations.length > 0 && (
             <div>
-              <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+              <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
                 <span className="flex items-center gap-1.5">
-                  <IconPin className="h-3.5 w-3.5 text-[var(--accent-primary)]" />
+                  <IconPin className="h-3.5 w-3.5 text-[var(--ink)]" />
                   {t("chat.pinned")}
                 </span>
-                <span className="text-[10px] text-[var(--text-faint)] font-mono">{pinnedConversations.length}</span>
+                <span className="text-[10px] text-[var(--muted-soft)] font-mono">{pinnedConversations.length}</span>
               </div>
               <div className="space-y-0.5">
                 {pinnedConversations.map((conv) => (
@@ -673,13 +673,13 @@ export function ChatWindow() {
                         loadConversation(conv);
                       }
                     }}
-                    className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                    className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--surface-card)] ${
                       activeConvId === conv.id
-                        ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                        ? "bg-[var(--surface-card)] font-semibold text-[var(--ink)] border-l-2 border-[var(--ink)]"
                         : "text-[var(--ink)]"
                     }`}
                   >
-                    <IconPin className="h-3.5 w-3.5 shrink-0 text-[var(--accent-primary)]" />
+                    <IconPin className="h-3.5 w-3.5 shrink-0 text-[var(--ink)]" />
                     <div className="min-w-0 flex-1">
                       <span className="block truncate">{conv.title}</span>
                     </div>
@@ -687,7 +687,7 @@ export function ChatWindow() {
                       type="button"
                       onClick={(e) => togglePinConversation(conv.id, e)}
                       title={t("chat.unpin")}
-                      className="shrink-0 p-1 text-[var(--accent-primary)] hover:opacity-75"
+                      className="shrink-0 p-1 text-[var(--ink)] hover:opacity-75"
                     >
                       <IconPin className="h-3 w-3" />
                     </button>
@@ -699,9 +699,9 @@ export function ChatWindow() {
 
           {/* RECENT HISTORY SECTION */}
           <div>
-            <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
+            <div className="mb-1.5 flex items-center justify-between px-2 text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
               <span className="flex items-center gap-1.5">
-                <IconClock className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+                <IconClock className="h-3.5 w-3.5 text-[var(--muted)]" />
                 {t("chat.recentHistory")}
               </span>
               {hydrated && conversations.length > 0 && (
@@ -714,7 +714,7 @@ export function ChatWindow() {
                     setActiveConvId(null);
                   }}
                   title={t("chat.clearHistory")}
-                  className="text-[var(--text-faint)] hover:text-[var(--state-error)] transition-colors"
+                  className="text-[var(--muted-soft)] hover:text-[var(--state-error)] transition-colors"
                 >
                   <IconTrash className="h-3.5 w-3.5" />
                 </button>
@@ -723,7 +723,7 @@ export function ChatWindow() {
 
             <div className="space-y-0.5">
               {hydrated && recentConversations.length === 0 && pinnedConversations.length === 0 && (
-                <p className="px-2 py-6 text-center text-xs text-[var(--text-faint)] italic">
+                <p className="px-2 py-6 text-center text-xs text-[var(--muted-soft)] italic">
                   {t("chat.noHistory")}
                 </p>
               )}
@@ -740,16 +740,16 @@ export function ChatWindow() {
                       loadConversation(conv);
                     }
                   }}
-                  className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--cream-2)] ${
+                  className={`group flex w-full cursor-pointer items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-medium transition-colors hover:bg-[var(--surface-card)] ${
                     activeConvId === conv.id
-                      ? "bg-[var(--cream-2)] font-semibold text-[var(--ink)] border-l-2 border-[var(--accent-primary)]"
+                      ? "bg-[var(--surface-card)] font-semibold text-[var(--ink)] border-l-2 border-[var(--ink)]"
                       : "text-[var(--ink)]"
                   }`}
                 >
-                  <IconClock className="h-3.5 w-3.5 shrink-0 text-[var(--text-faint)] group-hover:text-[var(--accent-primary)]" />
+                  <IconClock className="h-3.5 w-3.5 shrink-0 text-[var(--muted-soft)] group-hover:text-[var(--ink)]" />
                   <div className="min-w-0 flex-1">
                     <span className="block truncate">{conv.title}</span>
-                    <span className="text-[10px] text-[var(--text-faint)] block truncate">
+                    <span className="text-[10px] text-[var(--muted-soft)] block truncate">
                       {formatTime(conv.updatedAt || conv.createdAt)}
                     </span>
                   </div>
@@ -758,7 +758,7 @@ export function ChatWindow() {
                       type="button"
                       onClick={(e) => togglePinConversation(conv.id, e)}
                       title={t("chat.pinChat")}
-                      className="p-1 text-[var(--text-faint)] hover:text-[var(--accent-primary)]"
+                      className="p-1 text-[var(--muted-soft)] hover:text-[var(--ink)]"
                     >
                       <IconPin className="h-3 w-3" />
                     </button>
@@ -766,7 +766,7 @@ export function ChatWindow() {
                       type="button"
                       onClick={(e) => deleteConversation(conv.id, e)}
                       title={t("chat.delete")}
-                      className="p-1 text-[var(--text-faint)] hover:text-[var(--state-error)]"
+                      className="p-1 text-[var(--muted-soft)] hover:text-[var(--state-error)]"
                     >
                       <IconTrash className="h-3 w-3" />
                     </button>
@@ -778,14 +778,14 @@ export function ChatWindow() {
         </div>
 
         {/* Sidebar Footer with User Account */}
-        <div className="border-t border-[var(--border-soft)] p-3">
+        <div className="border-t border-[var(--hairline)] p-3">
           <div className="flex items-center gap-3 rounded-[var(--radius-md)] bg-[var(--canvas)] p-2 shadow-2xs">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)]">
               <IconUser className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-[var(--ink)]">{t("chat.user")}</p>
-              <p className="truncate text-[10px] text-[var(--text-faint)] font-mono">{t("chat.freePlan")}</p>
+              <p className="truncate text-[10px] text-[var(--muted-soft)] font-mono">{t("chat.freePlan")}</p>
             </div>
           </div>
         </div>
@@ -794,14 +794,14 @@ export function ChatWindow() {
       {/* ==================== MAIN CENTERED CHAT AREA ==================== */}
       <main className="flex flex-1 flex-col overflow-hidden bg-[var(--canvas)] min-w-0">
         {/* Top Header Bar */}
-        <header className="flex h-13 shrink-0 items-center justify-between border-b border-[var(--border-soft)] bg-[var(--canvas)] px-3 sm:px-4">
+        <header className="flex h-13 shrink-0 items-center justify-between border-b border-[var(--hairline)] bg-[var(--canvas)] px-3 sm:px-4">
           <div className="flex items-center gap-2">
             {/* BACK BUTTON TO LEAVE CHAT ROUTE */}
             <button
               type="button"
               onClick={handleBack}
               title={t("chat.back")}
-              className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--border-soft)] px-2.5 py-1.5 text-xs font-semibold text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--hairline)] px-2.5 py-1.5 text-xs font-semibold text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
             >
               <IconArrowLeft className="h-4 w-4" />
               <span className="hidden sm:inline">Back</span>
@@ -812,7 +812,7 @@ export function ChatWindow() {
               type="button"
               onClick={() => setSidebarOpen((s) => !s)}
               title={t("chat.toggleSidebar")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--hairline)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
             >
               <IconSidebar className="h-4 w-4" />
             </button>
@@ -821,7 +821,7 @@ export function ChatWindow() {
             <div className="relative ml-1">
               <span className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2.5 py-1 text-sm font-semibold text-[var(--ink)]">
                 <span>{model}</span>
-                <span className="text-[10px] text-[var(--text-faint)]">▼</span>
+                <span className="text-[10px] text-[var(--muted-soft)]">▼</span>
               </span>
             </div>
           </div>
@@ -832,7 +832,7 @@ export function ChatWindow() {
               type="button"
               onClick={handleNewChat}
               title={t("chat.newChat")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-soft)] text-[var(--text-body)] transition-colors hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--hairline)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
             >
               <IconPlus className="h-4 w-4" />
             </button>
@@ -846,13 +846,13 @@ export function ChatWindow() {
             {hydrated && msgs.length === 0 && (
               <Reveal trigger="load">
                 <div className="py-12 sm:py-20 text-center space-y-4">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)] shadow-md">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-md">
                     <IconBot className="h-7 w-7" />
                   </div>
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--ink)]">
                     {t("chat.emptyTitle")}
                   </h1>
-                  <p className="text-sm text-[var(--text-body)] max-w-md mx-auto">
+                  <p className="text-sm text-[var(--body)] max-w-md mx-auto">
                     {t("chat.emptySubtitle")}
                   </p>
 
@@ -866,13 +866,13 @@ export function ChatWindow() {
                           setInput(action.prompt);
                           taRef.current?.focus();
                         }}
-                        className="group flex flex-col justify-between rounded-xl border border-[var(--border-soft)] bg-[var(--cream)] p-3.5 transition-all hover:border-[var(--accent-primary)]/40 hover:bg-[var(--cream-2)] hover:shadow-sm"
+                        className="group flex flex-col justify-between rounded-xl border border-[var(--hairline)] bg-[var(--surface-soft)] p-3.5 transition-all hover:border-[var(--ink)]/40 hover:bg-[var(--surface-card)] hover:shadow-sm"
                       >
                         <div className="flex items-center gap-2 font-medium text-xs text-[var(--ink)]">
                           <span className="text-base">{action.icon}</span>
                           <span>{action.label}</span>
                         </div>
-                        <p className="mt-1.5 text-xs text-[var(--text-tertiary)] line-clamp-2">
+                        <p className="mt-1.5 text-xs text-[var(--muted)] line-clamp-2">
                           {action.prompt}
                         </p>
                       </button>
@@ -886,7 +886,7 @@ export function ChatWindow() {
             {hydrated && msgs.map((m, i) =>
               m.role === "user" ? (
                 <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] sm:max-w-[75%] rounded-2xl bg-[var(--dark)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-dark-strong)] shadow-2xs">
+                  <div className="max-w-[85%] sm:max-w-[75%] rounded-[var(--radius-lg)] bg-[var(--primary)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-primary)] shadow-2xs">
                     {m.text}
                   </div>
                 </div>
@@ -897,7 +897,7 @@ export function ChatWindow() {
 
             {typing && !isStreaming && (
               <div className="flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--dark)] text-[var(--on-dark-strong)]">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)]">
                   <IconBot className="h-4 w-4 animate-pulse" />
                 </div>
                 <Skeleton className="h-16 w-3/4 max-w-[28rem] rounded-xl" />
@@ -932,7 +932,7 @@ export function ChatWindow() {
         {/* Floating Input Composer */}
         <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
-            <div className="ask-input-wrap relative flex flex-col rounded-3xl border border-[var(--border-default)] bg-[var(--cream)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--accent-primary)] focus-within:ring-1 focus-within:ring-[var(--accent-primary)]">
+            <div className="ask-input-wrap relative flex flex-col rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--surface-soft)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--ink)] focus-within:ring-1 focus-within:ring-[var(--ink)]">
               <textarea
                 ref={taRef}
                 value={input}
@@ -941,7 +941,7 @@ export function ChatWindow() {
                 rows={1}
                 placeholder={t("chat.placeholder")}
                 aria-label={t("chat.placeholder")}
-                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--text-faint)] focus:outline-none min-h-[40px]"
+                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none min-h-[40px]"
               />
 
               {/* Input Toolbar */}
@@ -954,8 +954,8 @@ export function ChatWindow() {
                     onClick={toggleMic}
                     className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
                       listening
-                        ? "bg-[var(--accent-primary)] text-[var(--accent-contrast)] animate-pulse"
-                        : "text-[var(--text-body)] hover:bg-[var(--cream-2)] hover:text-[var(--ink)]"
+                        ? "bg-[var(--ink)] text-[var(--on-primary)] animate-pulse"
+                        : "text-[var(--body)] hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
                     }`}
                   >
                     <IconMic className="h-4 w-4" />
@@ -968,7 +968,7 @@ export function ChatWindow() {
                   aria-label={t("common.send")}
                   disabled={!input.trim() || typing}
                   onClick={() => ask()}
-                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[var(--accent-primary)] text-[var(--accent-contrast)] shadow-sm transition-all hover:bg-[var(--accent-hover)] hover:scale-105 active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--on-primary)] shadow-sm transition-all hover:bg-[var(--ink)] hover:scale-105 active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
                   <IconSend className="h-4 w-4" />
                 </button>
@@ -976,7 +976,7 @@ export function ChatWindow() {
             </div>
 
             {/* Sub-caption Disclaimer Centered */}
-            <p className="mt-2 text-center text-[10px] sm:text-xs text-[var(--text-faint)]">
+            <p className="mt-2 text-center text-[10px] sm:text-xs text-[var(--muted-soft)]">
               {t("chat.disclaimer")}
             </p>
           </div>
