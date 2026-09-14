@@ -29,18 +29,19 @@ export default function ServiceDetailPage() {
   const sc = translated[0] ?? service;
   if (!sc) {
     return (
-      <div className="rail-frame page-container">
-        <EmptyState title={t("services.notFound")} action={<Link href="/services" className="text-sm text-[var(--accent-primary)] underline">{t("nav.services")}</Link>} />
+      <div className="page-container">
+        <EmptyState title={t("services.notFound")} action={<Link href="/services" className="text-sm text-[var(--ink)] underline">{t("nav.services")}</Link>} />
       </div>
     );
   }
   return (
-    <div className="rail-frame page-container">
+    <div className="page-container">
       <Reveal trigger="load">
-        <div className="rounded-[var(--radius-md)] border border-[var(--border-soft)] border-l-[3px] border-l-[var(--accent-primary)] bg-[var(--cream)] p-6 shadow-[var(--shadow-sm)] md:p-8">
+        <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] border-l-[3px] border-l-[var(--ink)] bg-[var(--cream)] p-6 md:p-8">
           <Badge deco={deco(sc.category)}>{t(`serviceCategory.${sc.category}`)}</Badge>
-          <h1 className="mt-3 display text-3xl tracking-tight text-[var(--ink)]">{sc.name}</h1>
-          <p className="mt-1 text-[var(--text-body)]">{sc.summary}</p>
+          <h1 className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+              style={{ fontFamily: "var(--font-display)" }}>{sc.name}</h1>
+          <p className="mt-1 text-[var(--body)]">{sc.summary}</p>
           <Link href={`/chat?q=${encodeURIComponent(formatServiceQuestion(sc.name, locale))}`}>
             <Button className="mt-4">
               {t("services.askThisService")}
@@ -49,26 +50,26 @@ export default function ServiceDetailPage() {
           </Link>
         </div>
       </Reveal>
-      <Stagger className="mt-6 space-y-4">
-        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
-          <h2 className="font-semibold text-[var(--text-primary)]">{t("services.overview")}</h2>
-          <p className="mt-2 font-answer text-base leading-relaxed text-[var(--text-secondary)]">{sc.description}</p>
+      <Stagger className="mt-6 space-y-6">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("services.overview")}</h2>
+          <p className="mt-2 font-[var(--font-answer)] text-[var(--text-base)] leading-relaxed text-[var(--body)]">{sc.description}</p>
         </section>
-        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
-          <h2 className="font-semibold text-[var(--text-primary)]">{t("services.whoCanUse")}</h2>
-          <ul className="mt-2 font-answer list-disc space-y-1 pl-5 text-base leading-relaxed text-[var(--text-secondary)]">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("services.whoCanUse")}</h2>
+          <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--body)]">
             {sc.whoCanUse.map((item, i) => (<li key={i}>{item}</li>))}
           </ul>
         </section>
-        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
-          <h2 className="font-semibold text-[var(--text-primary)]">{t("services.howToAccess")}</h2>
-          <ul className="mt-2 font-answer list-disc space-y-1 pl-5 text-base leading-relaxed text-[var(--text-secondary)]">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("services.howToAccess")}</h2>
+          <ul className="mt-2 font-[var(--font-answer)] list-disc space-y-1 pl-5 text-[var(--text-base)] leading-relaxed text-[var(--body)]">
             {sc.howToAccess.map((item, i) => (<li key={i}>{item}</li>))}
           </ul>
         </section>
-        <section className="rounded-[var(--radius-md)] border border-[var(--border-soft)] bg-[var(--surface-elevated)] p-5 shadow-[var(--shadow-sm)] md:p-6">
-          <h2 className="font-semibold text-[var(--text-primary)]">{t("services.source")}</h2>
-          <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--accent-primary)] underline">
+        <section className="rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-[var(--space-6)]">
+          <h2 className="font-semibold text-[var(--ink)]">{t("services.source")}</h2>
+          <a href={sc.source.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm text-[var(--ink)] underline">
             {sc.source.label}
           </a>
         </section>
