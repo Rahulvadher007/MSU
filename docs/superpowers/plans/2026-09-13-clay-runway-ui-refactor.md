@@ -408,7 +408,7 @@ export function TopNav() {
     <header className="sticky top-0 z-20 border-b border-[var(--hairline)] bg-[var(--canvas)]">
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 md:px-6">
         <Link href="/" className="group flex shrink-0 flex-col leading-none">
-          <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
+          <span className="display text-xl text-[var(--ink)]">JanSayah</span>
           <span
             className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)] transition-all duration-[250ms] ease-[var(--ease-out-cubic)] group-hover:w-9"
             aria-hidden="true"
@@ -612,7 +612,7 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="group inline-flex flex-col leading-none">
-              <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
+              <span className="display text-xl text-[var(--ink)]">JanSayah</span>
               <span className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)]" aria-hidden="true" />
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
@@ -650,7 +650,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t border-[var(--hairline)] pt-6 text-center text-[13px] text-[var(--muted-soft)]">
-          &copy; 2026 Sahakarita. Built for Indian cooperatives.
+          &copy; 2026 JanSayah. Built for Indian cooperatives.
         </div>
       </div>
     </footer>

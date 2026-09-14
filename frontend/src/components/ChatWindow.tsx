@@ -43,9 +43,9 @@ interface Conversation {
   pinned?: boolean;
 }
 
-const STORAGE_KEY = "sahakarita_conversations";
-const ACTIVE_CONV_KEY = "sahakarita_active_conv";
-const MODELS = ["Sahakarita-v2.5"];
+const STORAGE_KEY = "jansayah_conversations";
+const ACTIVE_CONV_KEY = "jansayah_active_conv";
+const MODELS = ["JanSayah-v2.5"];
 
 function loadConversations(): Conversation[] {
   if (typeof window === "undefined") return [];

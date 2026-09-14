@@ -171,7 +171,7 @@ Surface-soft background (#faf5e8). 4-column link grid. Logo + copyright at botto
 ### 3.1 Top Nav (Desktop)
 
 - 64px tall, canvas background, sticky
-- Logo left (सहकारिता + orange accent underline — kept from current)
+- Logo left (JanSayah + orange accent underline — kept from current)
 - Nav links center: Inter 14px/500, active = ink text + 2px bottom border
 - Right cluster: Language switcher + "Chat" pill button (near-black bg, white text, full pill radius)
 - Links: Schemes, Services, Library, Legal, FAQ

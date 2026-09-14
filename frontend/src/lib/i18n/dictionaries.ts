@@ -60,7 +60,7 @@ const en: Record<string, string> = {
   "domain.unknown": "General",
 
   "landing.badge": "Ministry of Cooperation & PACS guidance",
-  "landing.tagline": "सहकारिता — your multilingual cooperative governance assistant",
+  "landing.tagline": "JanSayah — your multilingual cooperative governance assistant",
   "landing.ctaChat": "Chat now",
   "landing.ctaSchemes": "Browse schemes",
   "landing.f1title": "Multilingual",
@@ -163,12 +163,12 @@ const en: Record<string, string> = {
   "chat.clearHistory": "Clear History",
   "chat.back": "Back",
   "chat.toggleSidebar": "Toggle Sidebar",
-  "chat.home": "Sahakarita Home",
-  "chat.user": "Sahakarita User",
+  "chat.home": "JanSayah Home",
+  "chat.user": "JanSayah User",
   "chat.freePlan": "Free Plan",
   "chat.emptyTitle": "What can I help with today?",
   "chat.emptySubtitle": "Ask any question about PACS cooperative schemes, crop insurance (PMFBY), services, or legal frameworks.",
-  "chat.disclaimer": "Sahakarita AI can make mistakes. Verify important info.",
+  "chat.disclaimer": "JanSayah AI can make mistakes. Verify important info.",
   "chat.serviceUnavailable": "Service unavailable right now.",
   "chat.mode.webSearch": "Web Search",
   "chat.mode.grievance": "Grievance",
@@ -229,7 +229,7 @@ const en: Record<string, string> = {
   "footer.legal": "Legal & Support",
   "footer.contact": "Contact",
   "footer.description": "Government assistance for Indian cooperatives.",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (Toll free)",
 };
 
@@ -283,7 +283,7 @@ const hi: Record<string, string> = {
   "domain.unknown": "सामान्य",
 
   "landing.badge": "सहकार मंत्रालय एवं PACS मार्गदर्शन",
-  "landing.tagline": "सहकारिता — आपका बहुभाषी सहकारी शासन सहायक",
+  "landing.tagline": "JanSayah — आपका बहुभाषी सहकारी शासन सहायक",
   "landing.ctaChat": "अभी चैट करें",
   "landing.ctaSchemes": "योजनाएँ देखें",
   "landing.f1title": "बहुभाषी",
@@ -386,12 +386,12 @@ const hi: Record<string, string> = {
   "chat.clearHistory": "इतिहास साफ़ करें",
   "chat.back": "वापस",
   "chat.toggleSidebar": "साइडबार टॉगल करें",
-  "chat.home": "सहकारिता होम",
-  "chat.user": "सहकारिता उपयोगकर्ता",
+  "chat.home": "JanSayah होम",
+  "chat.user": "JanSayah उपयोगकर्ता",
   "chat.freePlan": "मुफ़्त योजना",
   "chat.emptyTitle": "आज मैं किस मदद कर सकता हूँ?",
   "chat.emptySubtitle": "PACS सहकारी योजनाओं, फ़सल बीमा (PMFBY), सेवाओं, या कानूनी ढाँचे के बारे में कोई भी प्रश्न पूछें।",
-  "chat.disclaimer": "सहकारिता AI से गलतियाँ हो सकती हैं। महत्वपूर्ण जानकारी सत्यापित करें।",
+  "chat.disclaimer": "JanSayah AI से गलतियाँ हो सकती हैं। महत्वपूर्ण जानकारी सत्यापित करें।",
   "chat.serviceUnavailable": "सेवा अभी उपलब्ध नहीं है।",
   "chat.mode.webSearch": "वेब खोज",
   "chat.mode.grievance": "शिकायत",
@@ -452,7 +452,7 @@ const hi: Record<string, string> = {
   "footer.legal": "कानून और सहायता",
   "footer.contact": "संपर्क",
   "footer.description": "भारतीय सहकारी समितियों के लिए सरकारी सहायता।",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (टोल फ्री)",
 };
 
@@ -506,7 +506,7 @@ const mr: Record<string, string> = {
   "domain.unknown": "सामान्य",
 
   "landing.badge": "सहकार मंत्रालय आणि PACS मार्गदर्शन",
-  "landing.tagline": "सहकारिता — तुमचा बहुभाषी सहकारी शासन सहाय्यक",
+  "landing.tagline": "JanSayah — तुमचा बहुभाषी सहकारी शासन सहाय्यक",
   "landing.ctaChat": "आता चॅट करा",
   "landing.ctaSchemes": "योजना पहा",
   "landing.f1title": "बहुभाषिक",
@@ -609,12 +609,12 @@ const mr: Record<string, string> = {
   "chat.clearHistory": "इतिहास साफ करा",
   "chat.back": "मागे",
   "chat.toggleSidebar": "साइडबार टॉगल करा",
-  "chat.home": "सहकारिता होम",
-  "chat.user": "सहकारिता वापरकर्ता",
+  "chat.home": "JanSayah होम",
+  "chat.user": "JanSayah वापरकर्ता",
   "chat.freePlan": "मोफत योजना",
   "chat.emptyTitle": "आज मी कशी मदत करू शकतो?",
   "chat.emptySubtitle": "PACS सहकारी योजना, पीक विमा (PMFBY), सेवा किंवा कायदेशीर फ्रेमवर्कबद्दल कोणताही प्रश्न विचारा.",
-  "chat.disclaimer": "सहकारिता AI मध्ये चूक होऊ शकतात. महत्त्वाची माहिती तपासा.",
+  "chat.disclaimer": "JanSayah AI मध्ये चूक होऊ शकतात. महत्त्वाची माहिती तपासा.",
   "chat.serviceUnavailable": "सेवा सध्या उपलब्ध नाही.",
   "chat.mode.webSearch": "वेब शोध",
   "chat.mode.grievance": "तक्रार",
@@ -675,7 +675,7 @@ const mr: Record<string, string> = {
   "footer.legal": "कायदा आणि सहाय्य",
   "footer.contact": "संपर्क",
   "footer.description": "भारतीय सहकारी संस्थांसाठी सरकारी सहाय्य.",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (टोल फ्री)",
 };
 
@@ -898,7 +898,7 @@ const bn: Record<string, string> = {
   "footer.legal": "আইন ও সহায়",
   "footer.contact": "যোগাযোগ",
   "footer.description": "ভারতীয় সমবায় সমিতির জন্য সরকারি সহায়।",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (টোল ফ্রি)",
 };
 
@@ -1121,7 +1121,7 @@ const ta: Record<string, string> = {
   "footer.legal": "சட்டம் மற்றும் உதவி",
   "footer.contact": "தொடர்பு",
   "footer.description": "இந்திய கூட்டுறவு சங்கங்களுக்கான அரசு உதவி.",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (இலவச தொலைபேசி)",
 };
 
@@ -1903,7 +1903,7 @@ const gu: Record<string, string> = {
   "footer.legal": "કાયદો અને સહાય",
   "footer.contact": "સંપર્ક",
   "footer.description": "ભારતીય સહકારી મંડળીઓ માટે સરકારી સહાય.",
-  "footer.contactEmail": "support@sahakarita.gov.in",
+  "footer.contactEmail": "support@jansayah.gov.in",
   "footer.contactPhone": "1800-XXX-XXXX (ટોલ ફ્રી)",
 };
 

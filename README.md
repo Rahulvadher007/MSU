@@ -1,4 +1,4 @@
-# Sahakarita — Multilingual Cooperative Governance & Legal Assistance Chatbot
+# JanSayah — Multilingual Cooperative Governance & Legal Assistance Chatbot
 
 Evidence-grounded, multilingual (English + Hindi + Gujarati + Marathi + Bengali + Tamil)
 citizen-assistance PWA for cooperative governance, legal guidance, schemes, PMFBY,
