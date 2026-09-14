@@ -32,7 +32,7 @@ export function TopNav() {
             href="/"
             className="flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--accent-tint-soft)]"
           >
-            <img src="/bond.png" alt="JanSayah logo" className="h-6 w-6 rounded-full object-cover" />
+            <img src="/goverment.png" alt="JanSayah logo" className="h-6 w-6 rounded-full object-cover" />
             <span className="hidden text-[14px] font-semibold text-[var(--ink)] sm:inline">JanSayah</span>
           </Link>
 

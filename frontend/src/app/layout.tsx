@@ -71,6 +71,9 @@ export const metadata: Metadata = {
   title: "JanSayah — Cooperative Governance Assistant",
   description:
     "Multilingual AI assistant for cooperative governance, PMFBY, PACS, financial literacy and grievance redressal.",
+  icons: {
+    icon: "/goverment.png",
+  },
 };
 
 export const viewport: Viewport = {

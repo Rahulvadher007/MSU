@@ -30,7 +30,7 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="group inline-flex items-center gap-2">
-              <img src="/bond.png" alt="JanSayah logo" className="h-8 w-8 rounded-full object-cover" />
+              <img src="/goverment.png" alt="JanSayah logo" className="h-8 w-8 rounded-full object-cover" />
               <span className="display text-xl text-[var(--ink)]">JanSayah</span>
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
