@@ -9,7 +9,7 @@ export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isChat && <TopNav />}
-      <main id="content">{children}</main>
+      <main id="content" className={!isChat ? "pt-20" : undefined}>{children}</main>
     </>
   );
 }

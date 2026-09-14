@@ -68,9 +68,12 @@ const malayalam = Noto_Serif_Malayalam({
 });
 
 export const metadata: Metadata = {
-  title: "सहकारिता — Cooperative Governance Assistant",
+  title: "JanSayah — Cooperative Governance Assistant",
   description:
     "Multilingual AI assistant for cooperative governance, PMFBY, PACS, financial literacy and grievance redressal.",
+  icons: {
+    icon: "/goverment.png",
+  },
 };
 
 export const viewport: Viewport = {

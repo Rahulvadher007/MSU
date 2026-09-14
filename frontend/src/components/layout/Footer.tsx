@@ -29,9 +29,9 @@ export function Footer() {
       <div className="mx-auto max-w-[1280px] px-4 py-16 md:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="group inline-flex flex-col leading-none">
-              <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
-              <span className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)]" aria-hidden="true" />
+            <Link href="/" className="group inline-flex items-center gap-2">
+              <img src="/goverment.png" alt="JanSayah logo" className="h-8 w-8 rounded-full object-cover" />
+              <span className="display text-xl text-[var(--ink)]">JanSayah</span>
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
               {t("footer.description")}
@@ -79,7 +79,7 @@ export function Footer() {
           </div>
         </div>
         <div className="mt-12 border-t border-[var(--hairline)] pt-6 text-center text-[13px] text-[var(--muted-soft)]">
-          &copy; 2026 Sahakarita. Built for Indian cooperatives.
+          &copy; 2026 JanSayah. Built for Indian cooperatives.
         </div>
       </div>
     </footer>

@@ -5,61 +5,90 @@ import { useI18n } from "@/lib/i18n/provider";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
 
-const LINKS = [
+const LEFT_LINKS = [
   { href: "/schemes", key: "nav.schemes" },
   { href: "/services", key: "nav.services" },
   { href: "/library", key: "nav.library" },
   { href: "/legal", key: "nav.legal" },
+] as const;
+
+const RIGHT_LINKS = [
   { href: "/faq", key: "nav.faq" },
 ] as const;
 
 export function TopNav() {
   const { t } = useI18n();
   const pathname = usePathname();
-  const active = (href: string) => pathname.startsWith(href);
+  const active = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--hairline)] bg-[var(--canvas)]">
-      <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 md:px-6">
-        <Link href="/" className="group flex shrink-0 flex-col leading-none">
-          <span className="display text-xl text-[var(--ink)]">सहकारिता</span>
-          <span
-            className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)] transition-all duration-[250ms] ease-[var(--ease-out-cubic)] group-hover:w-9"
-            aria-hidden="true"
-          />
-        </Link>
+    <div className="fixed inset-x-0 top-4 z-30 flex justify-center px-4 md:px-6">
+      {/* ── Floating pill navbar ── */}
+      <header className="flex h-12 w-full max-w-[1200px] items-center justify-between rounded-full border border-[var(--hairline)] bg-white/80 px-2 shadow-[0_2px_12px_rgba(0,0,0,0.06)] backdrop-blur-md">
+        {/* Left: Logo + primary links */}
+        <div className="flex items-center gap-0.5">
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--accent-tint-soft)]"
+          >
+            <img src="/goverment.png" alt="JanSayah logo" className="h-6 w-6 rounded-full object-cover" />
+            <span className="hidden text-[14px] font-semibold text-[var(--ink)] sm:inline">JanSayah</span>
+          </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {LINKS.map((l) => {
+          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
+            {LEFT_LINKS.map((l) => {
+              const isActive = active(l.href);
+              return (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-[150ms] ${
+                    isActive
+                      ? "bg-[var(--primary)] text-[var(--on-primary)]"
+                      : "text-[var(--body)] hover:bg-[var(--accent-tint-soft)] hover:text-[var(--ink)]"
+                  }`}
+                >
+                  {t(l.key)}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Right: Secondary links + Language + CTA */}
+        <div className="flex items-center gap-0.5">
+          {RIGHT_LINKS.map((l) => {
             const isActive = active(l.href);
             return (
               <Link
                 key={l.href}
                 href={l.href}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex h-16 items-center border-b-2 px-3 text-[14px] font-medium transition-colors duration-[200ms] ${
+                className={`hidden items-center rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-[150ms] md:flex ${
                   isActive
-                    ? "border-[var(--ink)] text-[var(--ink)]"
-                    : "border-transparent text-[var(--muted)] hover:text-[var(--ink)]"
+                    ? "bg-[var(--primary)] text-[var(--on-primary)]"
+                    : "text-[var(--body)] hover:bg-[var(--accent-tint-soft)] hover:text-[var(--ink)]"
                 }`}
               >
                 {t(l.key)}
               </Link>
             );
           })}
-        </nav>
 
-        <div className="flex items-center gap-3">
           <LanguageSwitcher />
+
           <Link
             href="/chat"
-            className="hidden items-center rounded-[var(--radius-pill)] bg-[var(--primary)] px-5 py-2 text-[14px] font-semibold text-[var(--on-primary)] transition-colors duration-[200ms] hover:bg-[#1a1a1a] md:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 py-1.5 text-[13px] font-semibold text-[var(--on-primary)] transition-colors duration-[150ms] hover:bg-[#1a1a1a] md:inline-flex"
           >
             {t("nav.chat")}
           </Link>
+
           <HamburgerMenu />
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 }

@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n/provider";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 const LINKS = [
+  { href: "/", key: "nav.home" },
   { href: "/schemes", key: "nav.schemes" },
   { href: "/services", key: "nav.services" },
   { href: "/library", key: "nav.library" },
@@ -35,10 +36,10 @@ export function HamburgerMenu() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-[var(--ink)] lg:hidden"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-[var(--body)] transition-colors hover:bg-[var(--accent-tint-soft)] md:hidden"
         aria-label="Open menu"
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M3 5h14M3 10h14M3 15h14" />
         </svg>
       </button>
@@ -46,7 +47,7 @@ export function HamburgerMenu() {
       {open && (
         <>
           <div
-            className="fixed inset-0 z-30 bg-[var(--ink)]/40"
+            className="fixed inset-0 z-40 bg-[var(--ink)]/30 backdrop-blur-sm"
             aria-hidden="true"
             onClick={() => setOpen(false)}
           />
@@ -54,44 +55,32 @@ export function HamburgerMenu() {
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-[var(--canvas)] shadow-xl"
+            className="fixed inset-x-4 top-20 z-50 mx-auto w-full max-w-sm overflow-hidden rounded-[24px] border border-[var(--hairline)] bg-white/95 shadow-[0_8px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between border-b border-[var(--hairline)] px-6 py-4">
-              <span className="display text-lg text-[var(--ink)]">Menu</span>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-[var(--ink)]"
-                aria-label="Close menu"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M5 5l10 10M15 5L5 15" />
-                </svg>
-              </button>
-            </div>
-            <nav className="px-6 py-4" aria-label="Mobile navigation">
+            <nav className="flex flex-col p-3" aria-label="Mobile navigation">
               {LINKS.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="block border-b border-[var(--hairline)] py-3 text-[16px] font-medium text-[var(--ink)] hover:text-[var(--muted)]"
+                  className="rounded-[14px] px-4 py-2.5 text-[14px] font-medium text-[var(--body)] transition-colors hover:bg-[var(--accent-tint-soft)] hover:text-[var(--ink)]"
                 >
                   {t(l.key)}
                 </Link>
               ))}
             </nav>
-            <div className="px-6 py-4">
-              <LanguageSwitcher />
-            </div>
-            <div className="px-6 py-4">
-              <Link
-                href="/chat"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center rounded-[var(--radius-pill)] bg-[var(--primary)] px-5 py-3 text-[14px] font-semibold text-[var(--on-primary)]"
-              >
-                {t("nav.chat")}
-              </Link>
+
+            <div className="border-t border-[var(--hairline)] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <LanguageSwitcher />
+                <Link
+                  href="/chat"
+                  onClick={() => setOpen(false)}
+                  className="flex flex-1 items-center justify-center rounded-full bg-[var(--primary)] px-5 py-2.5 text-[13px] font-semibold text-[var(--on-primary)]"
+                >
+                  {t("nav.chat")}
+                </Link>
+              </div>
             </div>
           </div>
         </>

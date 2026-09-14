@@ -363,6 +363,7 @@ html[data-locale="ml"] { --font-script: var(--font-malayalam); }
   color: var(--ink);
   border: none;
   border-bottom: 2px solid var(--border-default);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   outline: none;
   background-color: transparent;
   transition: border-color 0.3s ease;
