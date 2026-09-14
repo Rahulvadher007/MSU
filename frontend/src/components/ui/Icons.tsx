@@ -302,5 +302,53 @@ export function IconCompass({ className = "w-5 h-5" }: IconProps) {
   );
 }
 
+export function IconRupee({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <path d="M6 3h12M6 8h8a4 4 0 0 1 0 8H6M12 16v5" />
+    </svg>
+  );
+}
+
+export function IconWarehouse({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <path d="M3 21V8l9-5 9 5v13M9 21v-6h6v6" />
+      <path d="M9 12h.01M15 12h.01M9 16h.01M15 16h.01" />
+    </svg>
+  );
+}
+
+export function IconGift({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <rect x="3" y="8" width="18" height="13" rx="1" />
+      <path d="M12 8v13M3 12h18M7.5 8C6 8 5 7 5 6s1.5-2 2.5-2c1.5 0 2 1 4.5 1s3-1 4.5-1c1 0 2.5 1 2.5 2s-1 2-2.5 2" />
+    </svg>
+  );
+}
+
+export function IconUsers({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <circle cx="9" cy="7" r="3" />
+      <path d="M9 13c-4 0-6 2-6 4v1h12v-1c0-2-2-4-6-4z" />
+      <circle cx="17" cy="7" r="2.5" />
+      <path d="M17 12.5c2.5.5 4 2 4 3.5v1h-5" />
+    </svg>
+  );
+}
+
+export function IconShieldLeaf({ className = "w-5 h-5" }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M9 12c0-2 1-4 3-5M12 7c1 1 2 3 2 5" />
+      <path d="M10 15c1-1 2-1 3 0" />
+    </svg>
+  );
+}
+
+
 
 

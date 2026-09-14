@@ -20,7 +20,8 @@ financial literacy, and grievance redressal.
 - Applies jurisdiction filtering (central + selected state — currently Gujarat)
 - **Hybrid retrieval**: dense vector search (pgvector) + lexical search (RRF fusion)
 - Abstains when evidence is insufficient — never guesses
-- Prototype grievance workflow with follow-up questions and status lookup
+- Prototype grievance workflow with follow-up questions, status lookup, and
+  full multilingual localization (system text translated; user values preserved)
   (`is_official_submission: false` — no real government integration)
 - Voice input/output via Sarvam AI (Indic language support)
 - Responsive PWA (desktop + mobile)
@@ -55,8 +56,8 @@ low-confidence or uncited result into an answer.
 | Backend | FastAPI (Python 3.11+) |
 | Database | Supabase Postgres + pgvector (HNSW cosine index) |
 | Embeddings | Jina Embeddings v3 (`jina-embeddings-v3`), 768d |
-| LLM | Groq (Llama 3.3 70B) primary, Gemini 2.5 Flash fallback |
-| Reranker | Gemini 2.5 Flash Lite (wired, disabled by default) |
+| LLM | Groq (`openai/gpt-oss-120b` primary, `qwen/qwen3.8-27b` fallback), Gemini 2.5 Flash ultimate fallback |
+| Reranker | Jina reranker (wired, disabled — `RERANKER_ENABLED=false`) |
 | Voice | Sarvam AI (STT + TTS) primary, Azure fallback, text-only final |
 | Document parsing | MinerU `content_list_v2.json` |
 | Eval | Supabase-backed retrieval eval, pytest |
@@ -68,7 +69,7 @@ low-confidence or uncited result into an answer.
 ```
 backend/
   app/
-    main.py                FastAPI entrypoint (5 routers: chat, voice, conversations, evidence, grievance)
+    main.py                FastAPI entrypoint (6 routers: chat, voice, conversations, evidence, grievance, documents)
     routes/
       chat.py              /chat + /chat/stream — language detect → domain classify → RAGOrchestrator or GrievanceWorkflow
       voice.py             /voice, /voice/transcribe, /voice/speak
@@ -203,7 +204,7 @@ python backend/seed_parser.py     # content_list_v2.json → chunks_jsonl/*.json
 python backend/ingest_seed.py     # embed (Jina v3) + insert into Supabase
 ```
 
-Current frozen corpus: **5 documents, 2,188 embedded chunks (768d Jina v3)**.
+Current frozen corpus: **11 documents, 4,778 embedded chunks (768d Jina v3)**.
 
 ---
 
@@ -234,7 +235,7 @@ All UI strings translated. Backend responds in the same language as the question
 ### Dynamic RAG (Web-Grounded)
 - Tavily web search for current information
 - Gemini reranker for semantic scoring
-- Answer generation with `llama-3.3-70b-versatile`
+- Answer generation with Groq primary (`openai/gpt-oss-120b`), Gemini fallback
 - Language-matching: responds in same language as question
 
 ---

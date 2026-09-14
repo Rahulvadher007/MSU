@@ -13,7 +13,7 @@ import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 export function Reveal({
   children,
   className = "",
-  y = 12,
+  y = 16,
   delay = 0,
   trigger = "view",
 }: {

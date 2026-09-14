@@ -35,10 +35,10 @@ BACKEND = Path(__file__).resolve().parent
 sys.path.insert(0, str(BACKEND))
 load_dotenv(BACKEND / ".env", override=True)
 
-from supabase import Client, create_client  # noqa: E402
+from supabase import Client, create_client
 
-from app.config import get_settings  # noqa: E402
-from app.providers.embeddings import get_embedding_provider  # noqa: E402
+from app.config import get_settings
+from app.providers.embeddings import get_embedding_provider
 
 SEED_JSONL_DIR = BACKEND.parent / "corpus" / "seeds" / "chunks_jsonl"
 IMAGE_PLACEHOLDER = re.compile(r"\[Image asset:\s*[^]]*\]", re.IGNORECASE)
@@ -117,6 +117,45 @@ DOC_META: dict[str, dict] = {
         "authority_tier": "primary",
         "status": "active",
     },
+    "RBI_FAME_Financial_Awareness_Messages": {
+        "domain": "financial_inclusion",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "Financial Awareness Messages (FAME) - Fourth Edition",
+        "organization": "Reserve Bank of India, Financial Inclusion and Development Department",
+        "document_type": "financial_literacy_booklet",
+        "source_url": "https://www.rbi.org.in/commonman/images/FAME202426022024.pdf",
+        "effective_date": "2024-02-26",
+        "document_date": "2024-02-26",
+        "authority_tier": "primary",
+        "status": "active",
+    },
+    "RBI_BEAWARE_Financial_Fraud_Awareness": {
+        "domain": "financial_inclusion",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "BE(A)WARE - A Booklet on Modus Operandi of Financial Frauds",
+        "organization": "Reserve Bank of India, Consumer Education and Protection Department",
+        "document_type": "fraud_awareness_booklet",
+        "source_url": "https://www.rbi.org.in/commonperson/Upload/english/Content/PDFs/English%20BEAWARE.pdf",
+        "effective_date": "2022-03-07",
+        "document_date": "2022-03-07",
+        "authority_tier": "primary",
+        "status": "active",
+    },
+    "Introduction_To_Insurance_IRDAI": {
+        "domain": "financial_inclusion",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "Introduction to Insurance - Insurance Education Series",
+        "organization": "Insurance Regulatory and Development Authority of India (IRDAI)",
+        "document_type": "insurance_education",
+        "source_url": "https://irdai.gov.in/documents/37343/621990/IntroductionToInsurance.pdf",
+        "effective_date": None,
+        "document_date": None,
+        "authority_tier": "primary",
+        "status": "active",
+    },
     "IntroductionToInsurance": {
         "domain": "financial_inclusion",
         "jurisdiction": "central",
@@ -182,6 +221,19 @@ DOC_META: dict[str, dict] = {
         "authority_tier": "primary",
         "status": "active",
     },
+    "Model_HR_Policy_V21": {
+        "domain": "pacs_governance",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "Model HR Policy for Transformation of Primary Agricultural Credit Societies (PACS)",
+        "organization": "Ministry of Cooperation, Government of India",
+        "document_type": "hr_policy",
+        "source_url": "https://cooperation.gov.in/en/node/3210",
+        "effective_date": "2026-04-08",
+        "document_date": "2026-04-08",
+        "authority_tier": "primary",
+        "status": "active",
+    },
     "PACS_HR_Policy": {
         "domain": "pacs_governance",
         "jurisdiction": "central",
@@ -192,6 +244,19 @@ DOC_META: dict[str, dict] = {
         "source_url": "",
         "effective_date": "2024-01-01",
         "document_date": "2024-01-01",
+        "authority_tier": "primary",
+        "status": "active",
+    },
+    "Cooperative_Sugar_Mills_CSM_Scheme": {
+        "domain": "pacs_governance",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "Grant-in-aid to NCDC for Strengthening of Cooperative Sugar Mills (CSMs)",
+        "organization": "Ministry of Cooperation, Government of India",
+        "document_type": "scheme_brief",
+        "source_url": "https://cooperation.gov.in/en/node/3007",
+        "effective_date": "2023-07-01",
+        "document_date": "2023-07-01",
         "authority_tier": "primary",
         "status": "active",
     },
@@ -206,6 +271,19 @@ DOC_META: dict[str, dict] = {
         "effective_date": "2024-01-01",
         "document_date": "2024-01-01",
         "authority_tier": "primary",
+        "status": "active",
+    },
+    "MoC_Young_Professionals_YPs": {
+        "domain": "pacs_governance",
+        "jurisdiction": "central",
+        "state": None,
+        "title": "Inviting Applications for Engagement of Young Professionals in Ministry of Cooperation",
+        "organization": "Ministry of Cooperation, Government of India",
+        "document_type": "recruitment_notice",
+        "source_url": "https://cooperation.gov.in/en/node/2964",
+        "effective_date": "2026-04-16",
+        "document_date": "2026-04-16",
+        "authority_tier": "secondary",
         "status": "active",
     },
     "MoC_Advertisement_Faculty_2026": {
@@ -652,6 +730,28 @@ def _clear(supabase: Client) -> None:
     print(f"[clear] removed {len(old_docs)} document(s) and their chunks.")
 
 
+def _document_source_file(chunks: list[dict]) -> str | None:
+    """Return the corpus PDF filename only when the manifest provides one.
+
+    The filename is provenance data, not something to derive from a document
+    title or source_id.  If the canonical JSONL manifest does not contain a
+    source_file, keep it null so the UI cannot construct a misleading PDF link.
+    """
+    values = {
+        str(c.get("source_file")).strip()
+        for c in chunks
+        if c.get("source_file") and str(c.get("source_file")).strip()
+    }
+    if not values:
+        return None
+    if len(values) > 1:
+        raise ValueError(
+            "Multiple source_file values found for one document: "
+            + ", ".join(sorted(values))
+        )
+    return next(iter(values))
+
+
 def _ingest_document(supabase: Client, provider, doc_id: str, chunks: list[dict]) -> tuple[int, int]:
     meta = DOC_META.get(doc_id)
     if meta is None:
@@ -668,6 +768,7 @@ def _ingest_document(supabase: Client, provider, doc_id: str, chunks: list[dict]
         "domain": meta["domain"],
         "document_type": meta["document_type"],
         "source_url": meta["source_url"],
+        "source_file": _document_source_file(chunks),
         "effective_date": meta["effective_date"],
         "document_date": meta["document_date"],
         "verified_date": "2026-08-29",
@@ -714,6 +815,7 @@ def _ingest_document(supabase: Client, provider, doc_id: str, chunks: list[dict]
             "chunker_version": "mineru-content_list_v2",
             "ordinal": len(rows_to_embed),
             "content": text,
+            "source_file": c.get("source_file") or None,
             "metadata": {
                 "heading_path": heading_path,
                 "section": c.get("section", ""),

@@ -35,17 +35,26 @@ Evidence-grounded, multilingual citizen-assistance platform for cooperative gove
              |  /conversations           |
              |  /evidence  /grievance    |
              |  /health /health/providers|
-             +------+------+------+------+
-                    |      |      |
-          +---------+      |      +----------+
-          v                v                 v
+              +------+------+------+------+
+                     |      |      |
+           +---------+      |      +----------+
+           v                v                 v
  +-----------------+ +----------+  +------------------+
  | Language Layer  | | Domain   |  | Grievance        |
  | detect_query_   | | AnchorSt.|  | Workflow         |
  | languages()     | | keyword  |  | 9-stage state    |
  | Sarvam transl.  | | + cosine |  | machine          |
  | Azure fallback  | | classify |  | (Supabase-backed)|
- +-----------------+ +----------+  +------------------+
+ +-----------------+ +----------+  +--------+---------+
+                                          |
+                                   Output boundary
+                                   translation layer
+                                   (user values kept
+                                    verbatim)
+                                          |
+                                          v
+                                  Translated grievance
+                                  response + metadata
                           |
                           v
              +---------------------------+
@@ -115,7 +124,15 @@ POST /chat (or /chat/stream for SSE)
   │   MISSING_FIELDS→FOLLOWUP→DRAFT_READY→SUBMISSION_GUIDE→                  │
   │   STATUS_LOOKUP→COMPLETE                                                  │
   │   Persists to Supabase `grievance_states` table                           │
-  │   Returns WorkflowResult.response                                         │
+  │   Returns WorkflowResult (English-only internal state)                    │
+  │                                                                           │
+  │   Output translation boundary:                                            │
+  │     draft_summary values → translated                                     │
+  │     canonical dict top-level → translated                                 │
+  │     submission data (portal, steps, docs, timeline) → translated          │
+  │     field labels → translated via FIELD_LABELS lookup                     │
+  │     user-entered values → preserved verbatim                              │
+  │     URLs → preserved unchanged                                            │
   │                                                                           │
   ├─[if domain == "out_of_scope"]──────────────────────────────────────────── │
   │   Return scope message, abstained=True                                    │
@@ -283,7 +300,32 @@ Translation: Sarvam → Azure → return original
 
 ---
 
-## 12. Grievance workflow stages
+## 12. Evidence/context and generation controls
+
+Multiple independent layers bound the amount of evidence and tokens processed:
+
+**Evidence controller** (`evidence_controller.py`) — caps what enters the generation prompt:
+- Static evidence: top 3 highest-quality chunks only
+- Dynamic (web) evidence: top 3 highest-quality chunks only
+- Per-chunk text: truncated at `MAX_CHARS_PER_CHUNK = 3000`
+
+**Context builder** (`rag/context_builder.py`) — caps the overall context window:
+- Default `max_chunks = 8` (total across all sources)
+
+**Web RAG** (`web_rag/service.py`) — caps chunks per web source:
+- `WEB_MAX_CHUNKS_PER_SOURCE = 12`
+
+**Generation token limits** (`config.py`, `groq_llm.py`, `rag/answer_generator.py`):
+- Normal generation: `GENERATION_MAX_TOKENS = 1800`
+- Repair generation (citation repair): `REPAIR_MAX_TOKENS = 2200`
+
+These are separate layers (retrieval → evidence selection → prompt assembly → generation) and are not contradictory. Each bounds a different stage of the pipeline.
+
+The limits are intentional engineering controls to bound context size and generation latency/cost while retaining sufficient evidence for grounded answers.
+
+---
+
+## 13. Grievance workflow stages
 
 | Stage | What happens |
 |---|---|
@@ -301,7 +343,40 @@ State persisted to Supabase `grievance_states` (upsert on `conversation_id`).
 
 ---
 
-## 13. Non-functional constraints
+## 14. Grievance localization architecture
+
+All grievance workflow processing happens in **English only**. Translation is applied at the output boundary, ensuring user-entered values are preserved verbatim while system-generated text is translated.
+
+**Backend translation points:**
+
+```
+_grievance_message()
+  ├─ draft_summary values        → title, description translated
+  ├─ top-level canonical dict    → category, sub_category, department, jurisdiction, title
+  ├─ submission data             → portal_name, department, level, steps, documents, timeline, disclaimer
+  └─ field labels                → field_label from FIELD_LABELS dict (150+ entries)
+
+/grievances/finalize endpoint    → same submission + canonical dict translation
+/grievances/clarify endpoint     → draft_summary + field_label translation
+```
+
+**User value preservation rules:**
+- User-entered text (title, description, answers) → copied verbatim, never translated by LLM
+- URLs → preserved unchanged
+- Submission metadata (portal names, department names, steps) → translated via provider chain
+- Field labels → translated via `field_detector.FIELD_LABELS` lookup (not LLM)
+
+**Frontend translation points:**
+- `GrievanceClassificationPanel`: tab labels use `t()` from dictionaries
+- `GrievanceFieldPanel`: tab labels use `f.field_label || f.field.replace(/_/g, " ")`
+- `GrievanceCard`: disclaimer, buttons use `t()`
+- `GrievanceFlow`: wizard submit uses `t("grievanceWizard.submitting")`
+
+**Supported languages:** `en | hi | gu | mr | bn | ta` — same as chat.
+
+---
+
+## 15. Non-functional constraints
 
 - No personal GPU; free-tier / cloud-only
 - Every external provider call has a strict timeout

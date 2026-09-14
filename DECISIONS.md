@@ -110,3 +110,32 @@ Each entry: what changed, why, what it replaced, when.
 **Date:** 2026-09-04  
 **What:** Voice route passes `rag_result.get("speech_text")` to TTS, never the raw `answer`.  
 **Why:** The raw answer contains `[chunk:id]` citation markers. `speech_text` is the citation-stripped version produced post-verification. TTS of citation markers is nonsense audio.
+
+---
+
+### Bounded evidence/context layers
+**Date:** 2026-09-05
+**What:** EvidenceController caps the generation prompt to top 3 static + top 3 dynamic chunks (3000 chars each). ContextBuilder defaults to max 8 chunks total. Web RAG caps at 12 chunks per source. These are independent layers — retrieval returns more, but each downstream stage further bounds what it processes.
+**Why:** Intentional engineering control to bound context size and generation latency/cost while retaining sufficient evidence for grounded answers. Transplanted from eGovAssistant proven defaults.
+
+---
+
+### Bounded generation output
+**Date:** 2026-09-05
+**What:** `GENERATION_MAX_TOKENS = 1800` for normal generation, `REPAIR_MAX_TOKENS = 2200` for citation repair. These values are sent to Groq as `max_tokens` in the API request.
+**Why:** Intentional engineering control to bound generation output size and latency/cost. Value transplanted from eGovAssistant proven defaults.
+
+---
+
+### Grievance localization: output-boundary translation, not LLM translation
+**Date:** 2026-09-10
+**What:** All grievance workflow processing happens in English only. Translation is applied at the output boundary in `_process_grievance_message()` and `/grievances/*` endpoints. User-entered values are preserved verbatim; only system-generated metadata (submission data, field labels, draft summary values, canonical dict top-level) is translated via the provider chain. Field labels use a static `FIELD_LABELS` lookup dict (150+ entries) rather than LLM translation.
+**Why:** LLM translation of user values risks hallucination or content drift. Static lookup for field labels avoids latency and cost of per-request LLM calls. Output-boundary translation ensures English-only internal state while delivering fully localized responses.
+**Current state:** `chat.py` and `grievance.py` both apply translation before returning responses. Frontend uses `field_label` from backend for tab rendering.
+
+---
+
+### Session isolation via useRef in ChatWindow
+**Date:** 2026-09-10
+**What:** `sessionId` in `ChatWindow.tsx` changed from `useState` to `useRef` + `resetSessionId()`. Reset on new-chat, load-conversation, delete-conversation, clear-all-history, and URL query param handlers.
+**Why:** `useState` created `sessionId` once and never reset it, causing grievance state to leak across "New Chat" actions. Backend fresh-state defense in `GrievanceWorkflow.process_message()` complements this by detecting new complaints after completed grievances.
