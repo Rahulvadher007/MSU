@@ -29,9 +29,9 @@ export function Footer() {
       <div className="mx-auto max-w-[1280px] px-4 py-16 md:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <Link href="/" className="group inline-flex flex-col leading-none">
+            <Link href="/" className="group inline-flex items-center gap-2">
+              <img src="/bond.png" alt="JanSayah logo" className="h-8 w-8 rounded-full object-cover" />
               <span className="display text-xl text-[var(--ink)]">JanSayah</span>
-              <span className="mt-0.5 h-[2px] w-[22px] bg-[var(--brand-coral)]" aria-hidden="true" />
             </Link>
             <p className="mt-4 text-[14px] leading-relaxed text-[var(--muted)]">
               {t("footer.description")}

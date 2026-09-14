@@ -30,12 +30,10 @@ export function TopNav() {
         <div className="flex items-center gap-0.5">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-[14px] font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--accent-tint-soft)]"
+            className="flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--accent-tint-soft)]"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-            <span className="hidden sm:inline">JanSayah</span>
+            <img src="/bond.png" alt="JanSayah logo" className="h-6 w-6 rounded-full object-cover" />
+            <span className="hidden text-[14px] font-semibold text-[var(--ink)] sm:inline">JanSayah</span>
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
