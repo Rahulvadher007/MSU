@@ -11,7 +11,7 @@ worse than none — the next session will trust it.
 
 ## Last updated
 
-`2026-09-12` — Implemented Hindi grievance localization: (1) Added `FIELD_PROMPTS` translation map (30 prompts × 6 langs) + fixed `translate_field_prompt()` stub, (2) Added 8 missing PMFBY submission step/document translations to `SUBMISSION_STEPS`, (3) Added `FOLLOWUP_PREFIX` map (3 prefixes × 6 langs) + wired into `followup_generator.py`, (4) Added `WORKFLOW_PREFIX` map + wired into `chat.py` back-translation, (5) Added field label translations in `dictionaries.ts` (45 keys × 6 langs) + updated `GrievanceCard.tsx` to look up i18n labels, (6) Removed 9 diagnostic `EGA_PMFBY_*` console.logs. 34 new localization tests, 5 updated GrievanceCard tests, all passing.
+`2026-09-15` — Added thinking process animation: (1) `on_step` callback in `RAGOrchestrator.run()` emits structured step events at each pipeline stage, (2) `_STEP_LABELS` localized labels (6 languages × 6 step IDs) + `_make_step_emitter()` in `chat.py`, (3) New `StepEvent` type + `"step"` SSE event in `api.ts`, (4) `ThinkingProcess` component replaces `ThinkingBubble` — step list with spinner/checkmark, auto-collapse on token arrival, dropdown chevron to re-expand, (5) Wired into `ChatWindow` and `FloatingChatWidget` with `thinkingSteps` state + `step` event handler, (6) 7 new ThinkingProcess tests, 4 updated ChatWindow tests, all passing.
 
 ## Current state
 
@@ -33,7 +33,7 @@ implemented and wired together.
 |---|---|---|---|
 | FastAPI app + `/health`, `/health/providers` | `app/main.py` | working | 6 routers registered (including documents) |
 | `/chat` (sync) | `app/routes/chat.py` | working | Language detect → domain classify → RAGOrchestrator or GrievanceWorkflow; clean language boundary for grievance (input translate → English workflow → output translate); multilingual routing with Tier 2 grievance-keyword override + Tier 3 non-English guard |
-| `/chat/stream` (SSE) | `app/routes/chat.py` | working | Same pipeline, Server-Sent Events with `thinking/token/metadata/done` events; same multilingual routing fixes |
+| `/chat/stream` (SSE) | `app/routes/chat.py` | working | Same pipeline, Server-Sent Events with `thinking/step/token/metadata/done` events; step events show pipeline progress; same multilingual routing fixes |
 | `/voice`, `/voice/transcribe`, `/voice/speak` | `app/routes/voice.py` | working | Full audio→STT→RAG→TTS pipeline |
 | `/conversations` | `app/routes/conversations.py` | working | Session history retrieval |
 | `/evidence` | `app/routes/evidence.py` | working | Evidence endpoint |
@@ -77,7 +77,8 @@ implemented and wired together.
 | Next.js frontend (PWA) | `frontend/` | working | Next.js 16, React 19, Tailwind v4, GSAP |
 | Frontend pages | `frontend/src/app/` | working | `/` (home), `/chat`, `/grievance`, `/schemes`, `/services`, `/library`, `/faq`, `/legal` |
 | Frontend i18n (6 languages) | `frontend/src/lib/i18n/` | working | EN, HI, GU, MR, BN, TA; includes field label translations (45 keys per locale) for grievance card rendering |
-| ChatWindow (streaming SSE) | `frontend/src/components/ChatWindow.tsx` | working | Handles `thinking/token/metadata/done` SSE events, voice recording, citation display |
+| ChatWindow (streaming SSE) | `frontend/src/components/ChatWindow.tsx` | working | Handles `thinking/step/token/metadata/done` SSE events, voice recording, citation display |
+| Thinking Process UI | `frontend/src/components/chat/ThinkingProcess.tsx` | working | Step-by-step reasoning display with auto-collapse and dropdown re-expand; replaces ThinkingBubble |
 | Evidence Panel | `frontend/src/components/chat/MessageBubble.tsx` | working | Unified `EvidencePanel` + `EvidenceCard` components; `data-evidence="true"` attribute; citation tags with `aria-expanded`/`aria-label`; keyboard-focusable; scroll-into-view on expand |
 | Document ingestion pipeline | `backend/seed_parser.py`, `backend/ingest_seed.py` | working | Parses MinerU `content_list_v2.json` → JSONL → embeds → Supabase |
 | Database schema | `backend/schema.sql` | working | `documents`, `chunks` (vector 768d, HNSW), `sessions`, `grievance_states` |
