@@ -21,7 +21,7 @@ import asyncio
 import logging
 import re
 import time
-from typing import Any
+from typing import Any, Callable
 
 from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
@@ -95,6 +95,7 @@ class RAGOrchestrator:
         session_id: str,
         language_mix: dict[str, float] | None = None,
         model_override: str | None = None,
+        on_step: Callable[[dict], None] | None = None,
     ) -> RAGResponse:
         """Execute the full async dual-pipeline RAG flow.
 
@@ -136,6 +137,14 @@ class RAGOrchestrator:
             classification=classification,
         )
 
+        if on_step:
+            static_count = len(static_result.chunks) if not static_result.abstained else 0
+            web_count = len(web_result.chunks) if not web_result.abstained else 0
+            if static_count > 0:
+                on_step({"id": "static_done", "detail": f"Found {static_count} chunks from official documents", "status": "completed"})
+            if web_count > 0:
+                on_step({"id": "web_done", "detail": f"Found {web_count} results from web sources", "status": "completed"})
+
         has_static = not static_result.abstained and len(static_result.chunks) > 0
         has_web = not web_result.abstained and len(web_result.chunks) > 0
 
@@ -155,6 +164,8 @@ class RAGOrchestrator:
             )
 
         # Step 4: Build evidence bundle
+        if on_step:
+            on_step({"id": "evidence_merge", "detail": "Merging and ranking evidence from both sources", "status": "active"})
         bundle = self._evidence_controller.build_bundle(
             static_result, web_result, query_requirements, query,
         )
@@ -177,6 +188,8 @@ class RAGOrchestrator:
         # Step 7: Generate answer via LLM (Groq primary → Gemini fallback → Sarvam tertiary)
         # Always use the primary model; the provider's own fallback iteration
         # handles model list traversal (GPT-OSS → Qwen → Gemini → Sarvam).
+        if on_step:
+            on_step({"id": "llm_generate", "detail": "Generating grounded response from retrieved evidence", "status": "active"})
         model_name = model_override or self._settings.groq_model
 
         mode = "groq"
@@ -238,6 +251,8 @@ class RAGOrchestrator:
                     session_id=session_id,
                 )
 
+        if on_step:
+            on_step({"id": "citation_verify", "detail": f"Verified {len(all_chunks)} citations against source documents", "status": "completed"})
         _t_citation_done = time.monotonic()
 
         # Step 10: Strip internal citation markers from visible answer
