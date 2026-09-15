@@ -13,6 +13,8 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import queue
+import threading
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Literal
@@ -1090,16 +1092,28 @@ _STEP_LABELS = {
 
 
 def _make_step_emitter():
-    """Return a collector function and a getter for collected step dicts."""
-    _collected: list[dict] = []
+    """Return a sync callback and an async generator for real-time step events.
+
+    The callback is thread-safe (uses queue.Queue) so it can be called from
+    inside orchestrator.run(). The async generator yields step dicts as they
+    arrive, with a short timeout to avoid blocking.
+    """
+    q: queue.Queue[dict | None] = queue.Queue()
 
     def _collect(step_data: dict) -> None:
-        _collected.append(step_data)
+        q.put(step_data)
 
-    def _get_collected() -> list[dict]:
-        return list(_collected)
+    async def _drain():
+        while True:
+            try:
+                item = q.get(timeout=0.1)
+                if item is None:
+                    break
+                yield item
+            except queue.Empty:
+                continue
 
-    return _collect, _get_collected
+    return _collect, _drain()
 
 
 def _sse_event(event: str, data: dict | str) -> str:
@@ -1291,33 +1305,60 @@ async def chat_stream(req: ChatRequest):
             labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
             yield _sse_event("step", {"id": "retrieval_start", "label": labels["retrieval_start"], "detail": "Querying document store and web sources", "status": "active"})
 
-            step_collector, get_collected_steps = _make_step_emitter()
+            step_collector, step_drain = _make_step_emitter()
 
             orchestrator = _get_rag_orchestrator(ctx.settings)
-            rag_response = await orchestrator.run(
-                query=req.question,
-                english_query=ctx.english_query,
-                embedding=ctx.embedding,
-                domain=ctx.domain,
-                state=ctx.resolved_state,
-                classification=ctx.classification,
-                history=ctx.history,
-                lang=ctx.lang,
-                session_id=req.session_id,
-                language_mix=ctx.language_mix,
-                on_step=step_collector,
-            )
+            labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
 
-            # Emit completed steps from orchestrator
-            for step in get_collected_steps():
-                step_id = step.get("id", "")
-                if step_id in labels:
-                    yield _sse_event("step", {
-                        "id": step_id,
-                        "label": labels[step_id],
-                        "detail": step.get("detail", ""),
-                        "status": step.get("status", "completed"),
-                    })
+            async def _run_orchestrator():
+                return await orchestrator.run(
+                    query=req.question,
+                    english_query=ctx.english_query,
+                    embedding=ctx.embedding,
+                    domain=ctx.domain,
+                    state=ctx.resolved_state,
+                    classification=ctx.classification,
+                    history=ctx.history,
+                    lang=ctx.lang,
+                    session_id=req.session_id,
+                    language_mix=ctx.language_mix,
+                    on_step=step_collector,
+                )
+
+            async def _emit_steps():
+                """Drain step queue and yield SSE events until sentinel."""
+                async for step in step_drain():
+                    step_id = step.get("id", "")
+                    if step_id in labels:
+                        yield _sse_event("step", {
+                            "id": step_id,
+                            "label": labels[step_id],
+                            "detail": step.get("detail", ""),
+                            "status": step.get("status", "completed"),
+                        })
+
+            # Run orchestrator as a task, drain steps concurrently
+            orchestrator_task = asyncio.create_task(_run_orchestrator())
+            step_events = []
+            step_generator = _emit_steps()
+
+            # Interleave: yield step events as they arrive, wait for orchestrator
+            while not orchestrator_task.done():
+                try:
+                    event = await asyncio.wait_for(step_generator.__anext__(), timeout=0.2)
+                    yield event
+                except (StopAsyncIteration, asyncio.TimeoutError):
+                    pass
+
+            # Drain remaining step events after orchestrator completes
+            step_collector(None)  # Send sentinel to stop drain generator
+            try:
+                async for event in step_generator:
+                    yield event
+            except StopAsyncIteration:
+                pass
+
+            rag_response = orchestrator_task.result()
 
             # Sarvam generates directly in user's language; only translate for Groq fallback
             if rag_response.mode == "groq_fallback" and ctx.lang != "en":
