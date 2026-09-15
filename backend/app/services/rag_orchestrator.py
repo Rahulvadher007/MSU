@@ -109,6 +109,12 @@ class RAGOrchestrator:
             history: Conversation history turns.
             lang: Response language code.
             session_id: Session identifier.
+            language_mix: Optional dict mapping language codes to their
+                proportion in the mixed-language query.
+            model_override: Optional LLM model name to override the default.
+            on_step: Optional callback invoked with progress dicts
+                (``{"id": ..., "detail": ..., "status": ...}``) at each major
+                pipeline stage so callers can stream step-by-step updates.
 
         Returns:
             RAGResponse with answer, citations, confidence, and speech data.
