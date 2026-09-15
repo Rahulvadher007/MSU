@@ -8,7 +8,8 @@ import type { Locale } from "@/lib/i18n/i18n";
 import { formatSchemeQuestion, formatServiceQuestion, formatLegalQuestion } from "@/lib/i18n/formatQuery";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
-import { ThinkingBubble } from "./chat/ThinkingBubble";
+import { ThinkingProcess } from "./chat/ThinkingProcess";
+import type { StepEvent } from "@/lib/api";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -18,7 +19,6 @@ import {
   IconTrash,
   IconSparkles,
   IconSend,
-  IconPlus,
   IconSidebar,
   IconClock,
   IconBot,
@@ -45,7 +45,11 @@ interface Conversation {
 
 const STORAGE_KEY = "jansayah_conversations";
 const ACTIVE_CONV_KEY = "jansayah_active_conv";
-const MODELS = ["JanSayah-v2.5"];
+const MODELS = [
+  { id: "static", label: "JanSahay v1", desc: "Static RAG" },
+  { id: "web", label: "JanSahay v2", desc: "Web Search" },
+  { id: "rag_web", label: "JanSahay v3", desc: "RAG + Web" },
+] as const;
 
 function loadConversations(): Conversation[] {
   if (typeof window === "undefined") return [];
@@ -133,7 +137,7 @@ export function ChatWindow() {
   });
   const [typing, setTyping] = useState(false);
   const [listening, setListening] = useState(false);
-  const [model, setModel] = useState(MODELS[0]);
+  const [model, setModel] = useState<typeof MODELS[number]["id"]>("rag_web");
   const [showModelPicker, setShowModelPicker] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conversations, setConversations] = useState<Conversation[]>(() => {
@@ -152,6 +156,7 @@ export function ChatWindow() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const cancelListen = useRef<(() => void) | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const modelPickerRef = useRef<HTMLDivElement>(null);
   const [explicitPending, setExplicitPending] = useState(false);
   const prevLocaleRef = useRef<Locale>(locale);
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -164,11 +169,25 @@ export function ChatWindow() {
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
+  const [thinkingSteps, setThinkingSteps] = useState<StepEvent[]>([]);
+  const [thinkingExpanded, setThinkingExpanded] = useState(true);
 
   // Client-only speech readiness
   useEffect(() => {
     setSpeechReady(true);
   }, []);
+
+  // Close model picker on outside click
+  useEffect(() => {
+    if (!showModelPicker) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (modelPickerRef.current && !modelPickerRef.current.contains(e.target as Node)) {
+        setShowModelPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showModelPicker]);
 
   // Auto-expand sidebar on large screens
   useEffect(() => {
@@ -373,12 +392,24 @@ export function ChatWindow() {
 
     try {
       await sendChatStream(
-        { question, session_id: sessionId, language: lang, state: null, history, ui_language_explicit: uiLanguageExplicit },
+        { question, session_id: sessionId, language: lang, state: null, history, ui_language_explicit: uiLanguageExplicit, mode: model },
         (event: StreamEvent) => {
-          if (event.event === "thinking") {
+          if (event.event === "step") {
+            const step = event.data as StepEvent;
+            setThinkingSteps((prev) => {
+              const idx = prev.findIndex((s) => s.id === step.id);
+              if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = step;
+                return next;
+              }
+              return [...prev, step];
+            });
+          } else if (event.event === "thinking") {
             setThinkingText(event.data.text as string);
           } else if (event.event === "token") {
             setThinkingText("");
+            setThinkingExpanded(false);
             const text = (event.data.text as string).replace(/INSUFFICIENT_EVIDENCE/g, "");
             if (text) {
               tokenBufferRef.current += text;
@@ -407,6 +438,14 @@ export function ChatWindow() {
         citations: (metaSnapshot.citations as ChatResponse["citations"]) || [],
         abstained: (metaSnapshot.abstained as boolean) || false,
         follow_up_question: null,
+        mode: (metaSnapshot.mode as string) || undefined,
+        grievance_stage: (metaSnapshot.grievance_stage as ChatResponse["grievance_stage"]) || undefined,
+        grievance_finalized: (metaSnapshot.grievance_finalized as boolean) || undefined,
+        grievance: (metaSnapshot.grievance as ChatResponse["grievance"]) || undefined,
+        grievance_draft_summary: (metaSnapshot.grievance_draft_summary as ChatResponse["grievance_draft_summary"]) || undefined,
+        grievance_fields_schema: (metaSnapshot.grievance_fields_schema as ChatResponse["grievance_fields_schema"]) || undefined,
+        conversation_id: (metaSnapshot.conversation_id as string) || undefined,
+        speech_segments: (metaSnapshot.speech_segments as ChatResponse["speech_segments"]) || undefined,
       };
       setMsgs((m) => [...m, { role: "assistant", resp: finalResp }]);
     } catch (err) {
@@ -421,6 +460,8 @@ export function ChatWindow() {
       setStreamingMeta(null);
       tokenBufferRef.current = "";
       abortRef.current = null;
+      setThinkingSteps([]);
+      setThinkingExpanded(true);
     }
   }
 
@@ -637,18 +678,16 @@ export function ChatWindow() {
         )}
 
         {/* Main Sidebar Navigation & History List */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
-          {/* ChatGPT Style Top Links */}
-          <div className="space-y-0.5">
-            <button
-              type="button"
-              onClick={handleNewChat}
-              className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--surface-card)] text-[var(--ink)]"
-            >
-              <IconPlus className="h-4 w-4 text-[var(--ink)] shrink-0" />
-              <span>{t("common.newSession")}</span>
-            </button>
-          </div>
+        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          {/* New Session Button */}
+          <button
+            type="button"
+            onClick={handleNewChat}
+            className="flex w-full items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-2 text-left text-xs font-semibold transition-colors hover:bg-[var(--surface-card)] text-[var(--ink)]"
+          >
+            <IconEdit className="h-4 w-4 text-[var(--ink)] shrink-0" />
+            <span>{t("common.newSession")}</span>
+          </button>
 
           {/* PINNED SECTION */}
           {hydrated && pinnedConversations.length > 0 && (
@@ -816,84 +855,151 @@ export function ChatWindow() {
             >
               <IconSidebar className="h-4 w-4" />
             </button>
-
-            {/* Model Badge */}
-            <div className="relative ml-1">
-              <span className="flex items-center gap-1.5 rounded-[var(--radius-md)] px-2.5 py-1 text-sm font-semibold text-[var(--ink)]">
-                <span>{model}</span>
-                <span className="text-[10px] text-[var(--muted-soft)]">▼</span>
-              </span>
-            </div>
           </div>
 
           <div className="flex items-center gap-2">
             <LanguageSwitcher />
-            <button
-              type="button"
-              onClick={handleNewChat}
-              title={t("chat.newChat")}
-              className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] border border-[var(--hairline)] text-[var(--body)] transition-colors hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
-            >
-              <IconPlus className="h-4 w-4" />
-            </button>
           </div>
         </header>
 
         {/* Center Aligned Message Stream Area */}
-        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto w-full">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto w-full [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6 py-6 space-y-6">
-            {/* ChatGPT Style Empty State Hero */}
+            {/* Empty State - Welcome + Input Centered */}
             {hydrated && msgs.length === 0 && (
               <Reveal trigger="load">
-                <div className="py-12 sm:py-20 text-center space-y-4">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-md">
-                    <IconBot className="h-7 w-7" />
-                  </div>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
                   <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--ink)]">
                     {t("chat.emptyTitle")}
                   </h1>
-                  <p className="text-sm text-[var(--body)] max-w-md mx-auto">
+                  <p className="mt-2 text-sm text-[var(--body)] max-w-md">
                     {t("chat.emptySubtitle")}
                   </p>
 
-                  {/* 2x2 Suggested Actions Grid Centered */}
-                  <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-left max-w-2xl mx-auto">
-                    {suggestedActions.map((action) => (
-                      <button
-                        key={action.label}
-                        type="button"
-                        onClick={() => {
-                          setInput(action.prompt);
-                          taRef.current?.focus();
-                        }}
-                        className="group flex flex-col justify-between rounded-xl border border-[var(--hairline)] bg-[var(--surface-soft)] p-3.5 transition-all hover:border-[var(--ink)]/40 hover:bg-[var(--surface-card)] hover:shadow-sm"
-                      >
-                        <div className="flex items-center gap-2 font-medium text-xs text-[var(--ink)]">
-                          <span className="text-base">{action.icon}</span>
-                          <span>{action.label}</span>
+                  {/* Suggested questions above input */}
+                  <div className="mt-8 w-full max-w-xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                      {suggestedActions.map((action) => (
+                        <button
+                          key={action.label}
+                          type="button"
+                          onClick={() => {
+                            setInput(action.prompt);
+                            taRef.current?.focus();
+                          }}
+                          className="text-left rounded-[var(--radius-md)] border border-[var(--hairline)] bg-white px-4 py-3 text-sm text-[var(--ink)] transition-all hover:border-[var(--ink)]/40 hover:shadow-sm"
+                        >
+                          <span className="font-medium">{action.label}</span>
+                          <span className="block mt-0.5 text-xs text-[var(--muted)] line-clamp-1">{action.prompt}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Centered Input */}
+                    <div ref={modelPickerRef} className="ask-input-wrap relative flex flex-col rounded-[var(--radius-lg)] border border-[var(--hairline)] bg-white p-2 shadow-md transition-all focus-within:border-[var(--ink)] focus-within:ring-1 focus-within:ring-[var(--ink)]">
+                      <div className="flex items-start gap-2">
+                        {/* Model Selector */}
+                        <div className="relative shrink-0 pt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => setShowModelPicker((s) => !s)}
+                            className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--hairline)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--surface-card)]"
+                          >
+                            <span>{MODELS.find((m) => m.id === model)?.label}</span>
+                            <span className="text-[10px] text-[var(--muted-soft)]">▼</span>
+                          </button>
+                          {showModelPicker && (
+                            <div className="absolute bottom-full left-0 z-50 mb-2 w-56 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-white shadow-lg">
+                              {MODELS.map((m) => (
+                                <button
+                                  key={m.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setModel(m.id);
+                                    setShowModelPicker(false);
+                                  }}
+                                  className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-[var(--surface-card)] ${
+                                    model === m.id ? "bg-[var(--surface-soft)] font-semibold" : ""
+                                  }`}
+                                >
+                                  <span className="flex-1">
+                                    <span className="block text-[var(--ink)]">{m.label}</span>
+                                    <span className="block text-[10px] text-[var(--muted-soft)]">{m.desc}</span>
+                                  </span>
+                                  {model === m.id && (
+                                    <span className="text-[var(--ink)]">✓</span>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <p className="mt-1.5 text-xs text-[var(--muted)] line-clamp-2">
-                          {action.prompt}
-                        </p>
-                      </button>
-                    ))}
+                        <textarea
+                          ref={taRef}
+                          value={input}
+                          onChange={(e) => setInput(e.target.value)}
+                          onKeyDown={onKeyDown}
+                          rows={1}
+                          placeholder={t("chat.placeholder")}
+                          aria-label={t("chat.placeholder")}
+                          className="w-full resize-none bg-transparent px-2 py-1 text-sm leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none max-h-[180px]"
+                        />
+                      </div>
+                      <div className="mt-1.5 flex items-center justify-end pt-1 gap-2">
+                        {speechReady && speech.supported && (
+                          <button
+                            type="button"
+                            aria-label={listening ? t("common.stopMic") : t("common.mic")}
+                            onClick={toggleMic}
+                            className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors ${
+                              listening
+                                ? "bg-[var(--ink)] text-[var(--on-primary)] animate-pulse"
+                                : "text-[var(--body)] hover:bg-[var(--surface-card)] hover:text-[var(--ink)]"
+                            }`}
+                          >
+                            <IconMic className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          aria-label={t("common.send")}
+                          disabled={!input.trim() || typing}
+                          onClick={() => ask()}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--ink)] text-[var(--on-primary)] shadow-sm transition-all hover:scale-105 active:scale-95 disabled:opacity-35 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        >
+                          <IconSend className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Reveal>
             )}
 
             {/* Conversation Messages */}
-            {hydrated && msgs.map((m, i) =>
-              m.role === "user" ? (
-                <div key={i} className="flex justify-end">
-                  <div className="max-w-[85%] sm:max-w-[75%] rounded-[var(--radius-lg)] bg-[var(--primary)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-primary)] shadow-2xs">
-                    {m.text}
+            {hydrated && (() => {
+              let lastAssistantIdx = -1;
+              for (let i = msgs.length - 1; i >= 0; i--) {
+                if (msgs[i].role === "assistant") {
+                  lastAssistantIdx = i;
+                  break;
+                }
+              }
+              return msgs.map((m, i) =>
+                m.role === "user" ? (
+                  <div key={i} className="flex justify-end">
+                    <div className="max-w-[85%] sm:max-w-[75%] rounded-[var(--radius-lg)] bg-[var(--primary)] px-4 py-3 text-xs sm:text-sm leading-relaxed text-[var(--on-primary)] shadow-2xs">
+                      {m.text}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <MessageBubble key={i} resp={m.resp!} />
-              )
-            )}
+                ) : (
+                  <MessageBubble
+                    key={i}
+                    resp={m.resp!}
+                  />
+                )
+              );
+            })()}
 
             {typing && !isStreaming && (
               <div className="flex gap-3">
@@ -905,8 +1011,12 @@ export function ChatWindow() {
             )}
 
             {/* Streaming thinking + answer */}
-            {isStreaming && thinkingText && !streamingAnswer && (
-              <ThinkingBubble thinkingText={thinkingText} lang={lang} />
+            {isStreaming && thinkingSteps.length > 0 && !streamingAnswer && (
+              <ThinkingProcess
+                steps={thinkingSteps}
+                lang={lang}
+                isStreaming={!!streamingAnswer}
+              />
             )}
             {isStreaming && streamingAnswer.trim() && (
               <MessageBubble
@@ -929,23 +1039,62 @@ export function ChatWindow() {
           </div>
         </div>
 
-        {/* Floating Input Composer */}
+        {/* Floating Input Composer - only show when there are messages */}
+        {hydrated && msgs.length > 0 && (
         <div className="w-full bg-[var(--canvas)] pb-3 pt-2">
           <div className="mx-auto w-full max-w-3xl px-4 sm:px-6">
-            <div className="ask-input-wrap relative flex flex-col rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--surface-soft)] p-2.5 sm:p-3 shadow-md transition-all focus-within:border-[var(--ink)] focus-within:ring-1 focus-within:ring-[var(--ink)]">
-              <textarea
-                ref={taRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={onKeyDown}
-                rows={1}
-                placeholder={t("chat.placeholder")}
-                aria-label={t("chat.placeholder")}
-                className="w-full resize-none bg-transparent px-2 py-1 font-answer text-xs sm:text-base leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none min-h-[40px]"
-              />
+            <div ref={modelPickerRef} className="ask-input-wrap relative flex flex-col rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--surface-soft)] p-2 sm:p-2.5 shadow-md transition-all focus-within:border-[var(--ink)] focus-within:ring-1 focus-within:ring-[var(--ink)]">
+              <div className="flex items-start gap-2">
+                {/* Model Selector */}
+                <div className="relative shrink-0 pt-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowModelPicker((s) => !s)}
+                    className="flex items-center gap-1.5 rounded-[var(--radius-md)] border border-[var(--hairline)] px-2.5 py-1.5 text-xs font-semibold text-[var(--ink)] transition-colors hover:bg-[var(--surface-card)]"
+                  >
+                    <span>{MODELS.find((m) => m.id === model)?.label}</span>
+                    <span className="text-[10px] text-[var(--muted-soft)]">▼</span>
+                  </button>
+                  {showModelPicker && (
+                    <div className="absolute bottom-full left-0 z-50 mb-2 w-56 rounded-[var(--radius-md)] border border-[var(--hairline)] bg-white shadow-lg">
+                      {MODELS.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setModel(m.id);
+                            setShowModelPicker(false);
+                          }}
+                          className={`flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm transition-colors hover:bg-[var(--surface-card)] ${
+                            model === m.id ? "bg-[var(--surface-soft)] font-semibold" : ""
+                          }`}
+                        >
+                          <span className="flex-1">
+                            <span className="block text-[var(--ink)]">{m.label}</span>
+                            <span className="block text-[10px] text-[var(--muted-soft)]">{m.desc}</span>
+                          </span>
+                          {model === m.id && (
+                            <span className="text-[var(--ink)]">✓</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <textarea
+                  ref={taRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={onKeyDown}
+                  rows={1}
+                  placeholder={t("chat.placeholder")}
+                  aria-label={t("chat.placeholder")}
+                  className="w-full resize-none bg-transparent px-2 py-1 text-sm leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none max-h-[180px]"
+                />
+              </div>
 
               {/* Input Toolbar */}
-              <div className="mt-2 flex items-center justify-end pt-1 gap-2">
+              <div className="mt-1.5 flex items-center justify-end pt-1 gap-2">
                 {/* Speech Mic */}
                 {speechReady && speech.supported && (
                   <button
@@ -981,6 +1130,7 @@ export function ChatWindow() {
             </p>
           </div>
         </div>
+        )}
       </main>
     </div>
   );
