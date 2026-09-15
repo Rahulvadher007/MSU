@@ -572,6 +572,7 @@ class ChatRequest(BaseModel):
     state: str | None = None
     as_of_date: str | None = None
     history: list[dict] | None = None
+    mode: Literal["static", "web", "rag_web"] | None = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1089,13 +1090,13 @@ _STEP_LABELS = {
 
 
 def _make_step_emitter():
-    """Return a collector function and a getter for collected step IDs."""
-    _collected: list[str] = []
+    """Return a collector function and a getter for collected step dicts."""
+    _collected: list[dict] = []
 
     def _collect(step_data: dict) -> None:
-        _collected.append(step_data.get("id", ""))
+        _collected.append(step_data)
 
-    def _get_collected() -> list[str]:
+    def _get_collected() -> list[dict]:
         return list(_collected)
 
     return _collect, _get_collected
@@ -1308,9 +1309,15 @@ async def chat_stream(req: ChatRequest):
             )
 
             # Emit completed steps from orchestrator
-            for step_id in get_collected_steps():
+            for step in get_collected_steps():
+                step_id = step.get("id", "")
                 if step_id in labels:
-                    yield _sse_event("step", {"id": step_id, "label": labels[step_id], "detail": "", "status": "completed"})
+                    yield _sse_event("step", {
+                        "id": step_id,
+                        "label": labels[step_id],
+                        "detail": step.get("detail", ""),
+                        "status": step.get("status", "completed"),
+                    })
 
             # Sarvam generates directly in user's language; only translate for Groq fallback
             if rag_response.mode == "groq_fallback" and ctx.lang != "en":
