@@ -44,7 +44,9 @@ vi.mock("@/lib/api", () => ({
       _payload: unknown,
       onEvent: (event: { event: string; data: Record<string, unknown> }) => void,
     ) => {
-      onEvent({ event: "token", data: { text: "ok" } });
+      onEvent({ event: "step", data: { id: "retrieval_start", label: "Searching", detail: "Querying", status: "active" } });
+      onEvent({ event: "step", data: { id: "retrieval_start", label: "Searching", detail: "Querying", status: "completed" } });
+      onEvent({ event: "token", data: { text: "ok " } });
       onEvent({ event: "metadata", data: { domain: "unknown", confidence: 0 } });
     },
   ),
