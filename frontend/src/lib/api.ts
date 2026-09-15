@@ -230,10 +230,20 @@ export async function sendChat(payload: {
   return r.json();
 }
 
-export interface StreamEvent {
-  event: "thinking" | "token" | "metadata" | "done" | "error";
-  data: Record<string, unknown>;
+export interface StepEvent {
+  id: string;
+  label: string;
+  detail: string;
+  status: "active" | "completed" | "pending";
 }
+
+export type StreamEvent =
+  | { event: "thinking"; data: { text: string } }
+  | { event: "step"; data: StepEvent }
+  | { event: "token"; data: { text: string } }
+  | { event: "metadata"; data: Record<string, unknown> }
+  | { event: "done"; data: Record<string, unknown> }
+  | { event: "error"; data: { message: string } };
 
 export async function sendChatStream(
   payload: {
@@ -274,9 +284,9 @@ export async function sendChatStream(
         const raw = line.slice(6);
         try {
           const data = JSON.parse(raw);
-          onEvent({ event: currentEvent as StreamEvent["event"], data });
+          onEvent({ event: currentEvent as StreamEvent["event"], data } as StreamEvent);
         } catch {
-          onEvent({ event: currentEvent as StreamEvent["event"], data: { text: raw } });
+          onEvent({ event: currentEvent as StreamEvent["event"], data: { text: raw } } as StreamEvent);
         }
         currentEvent = "";
       }
