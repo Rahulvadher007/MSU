@@ -1036,6 +1036,70 @@ _THINKING_MESSAGES = {
     "ta": ["அதிகாரப்பூர்வ ஆவணங்கள் மற்றும் வலைத்தளத்தை தேடுகிறோம்...", "இரண்டு மூலங்களிலிருந்தும் சான்றுகளை பகுப்பாய்வு செய்கிறோம்...", "பதிலை தயாரிக்கிறோம்..."],
 }
 
+_STEP_LABELS = {
+    "en": {
+        "retrieval_start": "Searching sources",
+        "static_done": "Document search complete",
+        "web_done": "Web search complete",
+        "evidence_merge": "Merging evidence",
+        "llm_generate": "Generating response",
+        "citation_verify": "Verifying citations",
+    },
+    "hi": {
+        "retrieval_start": "स्रोत खोज रहे हैं",
+        "static_done": "दस्तावेज़ खोज पूर्ण",
+        "web_done": "वेब खोज पूर्ण",
+        "evidence_merge": "साक्ष्य मर्ज कर रहे हैं",
+        "llm_generate": "उत्तर तैयार कर रहे हैं",
+        "citation_verify": "उद्धरण सत्यापित कर रहे हैं",
+    },
+    "gu": {
+        "retrieval_start": "સ્ત્રોતો શોધી રહ્યા છીએ",
+        "static_done": "દસ્તાવેજ શોધ પૂર્ણ",
+        "web_done": "વેબ શોધ પૂર્ણ",
+        "evidence_merge": "પુરાવા મર્જ કરી રહ્યા છીએ",
+        "llm_generate": "જવાબ તૈયાર કરી રહ્યા છીએ",
+        "citation_verify": "સંદર્ભો ચકાસી રહ્યા છીએ",
+    },
+    "mr": {
+        "retrieval_start": "स्रोत शोधत आहोत",
+        "static_done": "दस्तावेज शोध पूर्ण",
+        "web_done": "वेब शोध पूर्ण",
+        "evidence_merge": "पुरावे मर्ज करत आहोत",
+        "llm_generate": "उत्तर तयार करत आहोत",
+        "citation_verify": "संदर्भ तपासत आहोत",
+    },
+    "bn": {
+        "retrieval_start": "উৎস খুঁজছি",
+        "static_done": "নথি অনুসন্ধান সম্পূর্ণ",
+        "web_done": "ওয়েব অনুসন্ধান সম্পূর্ণ",
+        "evidence_merge": "প্রমাণ মার্জ করছি",
+        "llm_generate": "উত্তর তৈরি করছি",
+        "citation_verify": "উদ্ধৃতি যাচাই করছি",
+    },
+    "ta": {
+        "retrieval_start": "ஆதாரங்களை தேடுகிறோம்",
+        "static_done": "ஆவண தேடல் நிறைவடைந்தது",
+        "web_done": "வலை தேடல் நிறைவடைந்தது",
+        "evidence_merge": "சான்றுகளை இணைக்கிறோம்",
+        "llm_generate": "பதிலை உருவாக்குகிறோம்",
+        "citation_verify": "மேற்கோள்களை சரிபார்க்கிறோம்",
+    },
+}
+
+
+def _make_step_emitter(lang: str):
+    """Return a collector function and a getter for collected step IDs."""
+    _collected: list[str] = []
+
+    def _collect(step_data: dict) -> None:
+        _collected.append(step_data.get("id", ""))
+
+    def _get_collected() -> list[str]:
+        return list(_collected)
+
+    return _collect, _get_collected
+
 
 def _sse_event(event: str, data: dict | str) -> str:
     payload = json.dumps(data, default=str) if isinstance(data, dict) else data
@@ -1223,6 +1287,11 @@ async def chat_stream(req: ChatRequest):
             # ── Core RAG via orchestrator ────────────────────────────────
             yield _sse_event("thinking", {"text": thinking_msgs[1]})
 
+            labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
+            yield _sse_event("step", {"id": "retrieval_start", "label": labels["retrieval_start"], "detail": "Querying document store and web sources", "status": "active"})
+
+            step_collector, get_collected_steps = _make_step_emitter(ctx.lang)
+
             orchestrator = _get_rag_orchestrator(ctx.settings)
             rag_response = await orchestrator.run(
                 query=req.question,
@@ -1235,7 +1304,13 @@ async def chat_stream(req: ChatRequest):
                 lang=ctx.lang,
                 session_id=req.session_id,
                 language_mix=ctx.language_mix,
+                on_step=step_collector,
             )
+
+            # Emit completed steps from orchestrator
+            for step_id in get_collected_steps():
+                if step_id in labels:
+                    yield _sse_event("step", {"id": step_id, "label": labels[step_id], "detail": "", "status": "completed"})
 
             # Sarvam generates directly in user's language; only translate for Groq fallback
             if rag_response.mode == "groq_fallback" and ctx.lang != "en":
