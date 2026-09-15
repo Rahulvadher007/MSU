@@ -372,6 +372,7 @@ export function ChatWindow() {
 
     setTyping(true);
     setThinkingText("");
+    setThinkingSteps([]);
     setStreamingAnswer("");
     setStreamingMeta(null);
     setIsStreaming(true);
@@ -460,14 +461,14 @@ export function ChatWindow() {
       setStreamingMeta(null);
       tokenBufferRef.current = "";
       abortRef.current = null;
-      setThinkingSteps([]);
-      setThinkingExpanded(true);
+      // thinkingSteps persist after streaming — user can review reasoning
     }
   }
 
   function handleNewChat() {
     setMsgs([]);
     setInput("");
+    setThinkingSteps([]);
     setActiveConvId(null);
     localStorage.removeItem(ACTIVE_CONV_KEY);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -1007,8 +1008,8 @@ export function ChatWindow() {
               </div>
             )}
 
-            {/* Streaming thinking + answer */}
-            {isStreaming && thinkingSteps.length > 0 && (
+            {/* Thinking process — stays visible after streaming as collapsible summary */}
+            {thinkingSteps.length > 0 && (
               <ThinkingProcess
                 steps={thinkingSteps}
                 lang={lang}
