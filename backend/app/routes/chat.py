@@ -1088,7 +1088,7 @@ _STEP_LABELS = {
 }
 
 
-def _make_step_emitter(lang: str):
+def _make_step_emitter():
     """Return a collector function and a getter for collected step IDs."""
     _collected: list[str] = []
 
@@ -1290,7 +1290,7 @@ async def chat_stream(req: ChatRequest):
             labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
             yield _sse_event("step", {"id": "retrieval_start", "label": labels["retrieval_start"], "detail": "Querying document store and web sources", "status": "active"})
 
-            step_collector, get_collected_steps = _make_step_emitter(ctx.lang)
+            step_collector, get_collected_steps = _make_step_emitter()
 
             orchestrator = _get_rag_orchestrator(ctx.settings)
             rag_response = await orchestrator.run(
