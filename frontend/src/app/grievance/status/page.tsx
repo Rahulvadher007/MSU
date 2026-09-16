@@ -26,16 +26,16 @@ export default function GrievanceStatusPage() {
   const currentIdx = record ? ORDER.indexOf(record.status as (typeof ORDER)[number]) : -1;
 
   return (
-    <div className="page-container">
+    <div className="px-4 pt-8 pb-24 sm:px-6 md:px-12 md:pt-12">
       <Reveal trigger="load">
-        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+        <h1 className="text-[24px] font-medium tracking-tight text-[var(--ink)] sm:text-[30px] md:text-[40px]"
             style={{ fontFamily: "var(--font-display)" }}>{t("grievance.statusTitle")}</h1>
         <p className="mt-1 text-[var(--body)]">{t("grievance.statusSubtitle")}</p>
       </Reveal>
 
-      <div className="mx-auto mt-8 max-w-2xl">
-        <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--canvas)] p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:p-8">
-          <div className="flex gap-2">
+      <div className="mx-auto mt-6 sm:mt-8 max-w-2xl">
+        <div className="rounded-[var(--radius-md)] border border-[var(--hairline)] bg-[var(--canvas)] p-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] sm:p-6 md:p-8">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <Input
               value={id}
               onChange={(e) => setId(e.target.value)}

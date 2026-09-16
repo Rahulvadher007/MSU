@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { useI18n } from "@/lib/i18n/provider";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { HamburgerMenu } from "./HamburgerMenu";
@@ -8,8 +9,8 @@ import { HamburgerMenu } from "./HamburgerMenu";
 const LEFT_LINKS = [
   { href: "/schemes", key: "nav.schemes" },
   { href: "/services", key: "nav.services" },
-  { href: "/library", key: "nav.library" },
   { href: "/legal", key: "nav.legal" },
+  { href: "/grievance", key: "nav.grievance" },
 ] as const;
 
 const RIGHT_LINKS = [
@@ -19,76 +20,122 @@ const RIGHT_LINKS = [
 export function TopNav() {
   const { t } = useI18n();
   const pathname = usePathname();
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          if (barRef.current) {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? scrollTop / docHeight : 0;
+            barRef.current.style.transform = `scaleX(${progress})`;
+          }
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const active = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
-    <div className="fixed inset-x-0 top-4 z-30 flex justify-center px-4 md:px-6">
-      {/* ── Floating pill navbar ── */}
-      <header className="flex h-12 w-full max-w-[1200px] items-center justify-between rounded-full border border-[var(--hairline)] bg-white/80 px-2 shadow-[0_2px_12px_rgba(0,0,0,0.06)] backdrop-blur-md">
-        {/* Left: Logo + primary links */}
-        <div className="flex items-center gap-0.5">
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 transition-colors hover:bg-[var(--accent-tint-soft)]"
-          >
-            <img src="/goverment.png" alt="JanSayah logo" className="h-6 w-6 rounded-full object-cover" />
-            <span className="hidden text-[14px] font-semibold text-[var(--ink)] sm:inline">JanSayah</span>
-          </Link>
+    <>
+      <div className="h-[72px]" aria-hidden="true" />
 
-          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
-            {LEFT_LINKS.map((l) => {
+      <header className="fixed inset-x-0 top-0 z-30 flex h-[72px] items-center border-b border-[var(--hairline)] bg-[var(--canvas)] px-4 md:px-6 lg:px-8">
+        <div
+          ref={barRef}
+          className="absolute left-0 top-0 h-[2px] w-full origin-left rounded-r-full bg-gradient-to-r from-[var(--ink)] via-[var(--text-primary)] to-[var(--text-secondary)] shadow-[0_0_10px_rgba(10,10,10,0.25)]"
+          style={{ transform: "scaleX(0)", willChange: "transform" }}
+        />
+        <div className="flex w-full items-center justify-between">
+          {/* Left: Logo + primary links */}
+          <div className="flex items-center gap-1">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 px-3 py-2"
+            >
+              <img
+                src="/goverment.png"
+                alt="JanSahay logo"
+                className="h-9 w-9 rounded-full object-cover"
+              />
+              <span className="text-[18px] font-semibold text-[var(--ink)]">
+                JanSahay
+              </span>
+            </Link>
+
+            <nav className="hidden items-center gap-0.5 pl-2 md:flex" aria-label="Primary">
+              {LEFT_LINKS.map((l) => {
+                const isActive = active(l.href);
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`nav-link group relative rounded-full px-3 py-1.5 text-[14px] font-medium transition-colors duration-150 ${
+                      isActive
+                        ? "text-[var(--ink)]"
+                        : "text-[var(--body)] hover:text-[var(--ink)]"
+                    }`}
+                  >
+                    {t(l.key)}
+                    <span
+                      className={`absolute -bottom-1 left-3 right-3 h-[1px] origin-left scale-x-0 bg-[var(--ink)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 ${
+                        isActive ? "scale-x-100" : ""
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* Right: Secondary links + Language + CTA */}
+          <div className="flex items-center gap-1">
+            {RIGHT_LINKS.map((l) => {
               const isActive = active(l.href);
               return (
                 <Link
                   key={l.href}
                   href={l.href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-[150ms] ${
+                  className={`nav-link group relative hidden items-center rounded-full px-3 py-1.5 text-[14px] font-medium transition-colors duration-150 md:flex ${
                     isActive
-                      ? "bg-[var(--primary)] text-[var(--on-primary)]"
-                      : "text-[var(--body)] hover:bg-[var(--accent-tint-soft)] hover:text-[var(--ink)]"
+                      ? "text-[var(--ink)]"
+                      : "text-[var(--body)] hover:text-[var(--ink)]"
                   }`}
                 >
                   {t(l.key)}
+                  <span
+                    className={`absolute -bottom-1 left-3 right-3 h-[1px] origin-left scale-x-0 bg-[var(--ink)] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100 ${
+                      isActive ? "scale-x-100" : ""
+                    }`}
+                  />
                 </Link>
               );
             })}
-          </nav>
-        </div>
 
-        {/* Right: Secondary links + Language + CTA */}
-        <div className="flex items-center gap-0.5">
-          {RIGHT_LINKS.map((l) => {
-            const isActive = active(l.href);
-            return (
-              <Link
-                key={l.href}
-                href={l.href}
-                aria-current={isActive ? "page" : undefined}
-                className={`hidden items-center rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors duration-[150ms] md:flex ${
-                  isActive
-                    ? "bg-[var(--primary)] text-[var(--on-primary)]"
-                    : "text-[var(--body)] hover:bg-[var(--accent-tint-soft)] hover:text-[var(--ink)]"
-                }`}
-              >
-                {t(l.key)}
-              </Link>
-            );
-          })}
+            <LanguageSwitcher />
 
-          <LanguageSwitcher />
+            <Link
+              href="/chat"
+              className="hidden h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--on-primary)] transition-colors duration-150 hover:bg-[#1a1a1a] md:inline-flex"
+            >
+              {t("nav.chat")}
+            </Link>
 
-          <Link
-            href="/chat"
-            className="hidden items-center gap-1.5 rounded-full bg-[var(--primary)] px-4 py-1.5 text-[13px] font-semibold text-[var(--on-primary)] transition-colors duration-[150ms] hover:bg-[#1a1a1a] md:inline-flex"
-          >
-            {t("nav.chat")}
-          </Link>
-
-          <HamburgerMenu />
+            <HamburgerMenu />
+          </div>
         </div>
       </header>
-    </div>
+    </>
   );
 }

@@ -1300,65 +1300,19 @@ async def chat_stream(req: ChatRequest):
                 return
 
             # ── Core RAG via orchestrator ────────────────────────────────
-            yield _sse_event("thinking", {"text": thinking_msgs[1]})
-
-            labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
-            yield _sse_event("step", {"id": "retrieval_start", "label": labels["retrieval_start"], "detail": "Querying document store and web sources", "status": "active"})
-
-            step_collector, step_drain = _make_step_emitter()
-
             orchestrator = _get_rag_orchestrator(ctx.settings)
-            labels = _STEP_LABELS.get(ctx.lang, _STEP_LABELS["en"])
-
-            async def _run_orchestrator():
-                return await orchestrator.run(
-                    query=req.question,
-                    english_query=ctx.english_query,
-                    embedding=ctx.embedding,
-                    domain=ctx.domain,
-                    state=ctx.resolved_state,
-                    classification=ctx.classification,
-                    history=ctx.history,
-                    lang=ctx.lang,
-                    session_id=req.session_id,
-                    language_mix=ctx.language_mix,
-                    on_step=step_collector,
-                )
-
-            async def _emit_steps():
-                """Drain step queue and yield SSE events until sentinel."""
-                async for step in step_drain():
-                    step_id = step.get("id", "")
-                    if step_id in labels:
-                        yield _sse_event("step", {
-                            "id": step_id,
-                            "label": labels[step_id],
-                            "detail": step.get("detail", ""),
-                            "status": step.get("status", "completed"),
-                        })
-
-            # Run orchestrator as a task, drain steps concurrently
-            orchestrator_task = asyncio.create_task(_run_orchestrator())
-            step_events = []
-            step_generator = _emit_steps()
-
-            # Interleave: yield step events as they arrive, wait for orchestrator
-            while not orchestrator_task.done():
-                try:
-                    event = await asyncio.wait_for(step_generator.__anext__(), timeout=0.2)
-                    yield event
-                except (StopAsyncIteration, asyncio.TimeoutError):
-                    pass
-
-            # Drain remaining step events after orchestrator completes
-            step_collector(None)  # Send sentinel to stop drain generator
-            try:
-                async for event in step_generator:
-                    yield event
-            except StopAsyncIteration:
-                pass
-
-            rag_response = orchestrator_task.result()
+            rag_response = await orchestrator.run(
+                query=req.question,
+                english_query=ctx.english_query,
+                embedding=ctx.embedding,
+                domain=ctx.domain,
+                state=ctx.resolved_state,
+                classification=ctx.classification,
+                history=ctx.history,
+                lang=ctx.lang,
+                session_id=req.session_id,
+                language_mix=ctx.language_mix,
+            )
 
             # Sarvam generates directly in user's language; only translate for Groq fallback
             if rag_response.mode == "groq_fallback" and ctx.lang != "en":
@@ -1366,8 +1320,7 @@ async def chat_stream(req: ChatRequest):
                 rag_response.speech_text = prepare_speech_text(rag_response.answer)
                 rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)
 
-            # Emit thinking + tokens
-            yield _sse_event("thinking", {"text": thinking_msgs[2]})
+            # Emit tokens
             for token in rag_response.answer.split(" "):
                 yield _sse_event("token", {"text": token + " "})
 

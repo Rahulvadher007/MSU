@@ -12,9 +12,9 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const STYLES: Record<Variant, string> = {
   primary:
-    "bg-[var(--primary)] text-[var(--on-primary)] border border-[var(--primary)] hover:bg-[#1a1a1a] hover:border-[#1a1a1a] active:bg-[#0a0a0a]",
+    "bg-[var(--primary)] text-[var(--on-primary)] border border-[var(--primary)] hover:bg-[#1a1a1a] hover:border-[#1a1a1a] active:bg-[var(--primary)] active:ring-2 active:ring-[var(--primary)] active:ring-offset-2",
   secondary:
-    "bg-[var(--canvas)] text-[var(--ink)] border border-[var(--hairline)] hover:bg-[var(--cream)] hover:border-[var(--border-hover)] active:bg-[var(--cream-2)]",
+    "bg-[var(--canvas)] text-[var(--ink)] border border-[var(--hairline)] hover:bg-[var(--cream)] hover:border-[var(--border-hover)] active:bg-[var(--primary)] active:text-[var(--on-primary)] active:border-[var(--primary)]",
   dark:
     "bg-[var(--surface-dark)] text-[var(--on-primary)] border border-[var(--surface-dark)] hover:bg-[var(--surface-dark-elevated)]",
   ghost:

@@ -11,6 +11,8 @@ worse than none — the next session will trust it.
 
 ## Last updated
 
+`2026-09-15` — Full responsive overhaul: (1) Homepage hero removed hardcoded `ml-36`, added responsive padding/text/CTA/trust badge sizing, (2) Library page added missing `px-*` padding, (3) ArcCarousel rewritten with mobile-first stacked card layout (220px) + desktop 3D carousel (320px), (4) Stepper hidden labels on small screens with smaller circles, (5) Grievance classification replaced table with stacked flex layout for mobile, (6) Grievance Status page added padding + stacked search input/button, (7) Grievance Draft View added responsive padding, (8) FloatingChatWidget responsive width `w-[calc(100vw-2rem)] max-w-[380px]`, (9) All detail pages (schemes, services, legal) updated to `px-4 sm:px-6 md:px-12` pattern, (10) FAQ page responsive padding.
+
 `2026-09-15` — Added thinking process animation: (1) `on_step` callback in `RAGOrchestrator.run()` emits structured step events at each pipeline stage, (2) `_STEP_LABELS` localized labels (6 languages × 6 step IDs) + `_make_step_emitter()` in `chat.py`, (3) New `StepEvent` type + `"step"` SSE event in `api.ts`, (4) `ThinkingProcess` component replaces `ThinkingBubble` — step list with spinner/checkmark, auto-collapse on token arrival, dropdown chevron to re-expand, (5) Wired into `ChatWindow` and `FloatingChatWidget` with `thinkingSteps` state + `step` event handler, (6) 7 new ThinkingProcess tests, 4 updated ChatWindow tests, all passing.
 
 ## Current state
@@ -74,8 +76,8 @@ implemented and wired together.
 | Web discovery (Tavily / Firecrawl) | `app/web_rag/service.py` | working | |
 | Query classifier (web RAG) | `app/web_rag/query_classifier.py` | working | Domain, jurisdiction, state classification for web queries |
 | Source verifier | `app/security/source_verifier.py` | working | Trust-score based filtering in web RAG |
-| Next.js frontend (PWA) | `frontend/` | working | Next.js 16, React 19, Tailwind v4, GSAP |
-| Frontend pages | `frontend/src/app/` | working | `/` (home), `/chat`, `/grievance`, `/schemes`, `/services`, `/library`, `/faq`, `/legal` |
+| Next.js frontend (PWA) | `frontend/` | working | Next.js 16, React 19, Tailwind v4, GSAP; fully responsive (320px–desktop) |
+| Frontend pages | `frontend/src/app/` | working | `/` (home), `/chat`, `/grievance`, `/schemes`, `/services`, `/library`, `/faq`, `/legal` — all with responsive padding and mobile-first layouts |
 | Frontend i18n (6 languages) | `frontend/src/lib/i18n/` | working | EN, HI, GU, MR, BN, TA; includes field label translations (45 keys per locale) for grievance card rendering |
 | ChatWindow (streaming SSE) | `frontend/src/components/ChatWindow.tsx` | working | Handles `thinking/step/token/metadata/done` SSE events, voice recording, citation display |
 | Thinking Process UI | `frontend/src/components/chat/ThinkingProcess.tsx` | working | Step-by-step reasoning display with auto-collapse and dropdown re-expand; replaces ThinkingBubble |

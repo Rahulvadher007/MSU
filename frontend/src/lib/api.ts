@@ -220,6 +220,7 @@ export async function sendChat(payload: {
   state: string | null;
   history?: Array<{ role: "user" | "assistant"; content: string }>;
   ui_language_explicit?: boolean;
+  mode?: "static" | "web" | "rag_web";
 }): Promise<ChatResponse> {
   const r = await fetch("/api/chat", {
     method: "POST",
@@ -253,6 +254,7 @@ export async function sendChatStream(
     state: string | null;
     history?: Array<{ role: "user" | "assistant"; content: string }>;
     ui_language_explicit?: boolean;
+    mode?: "static" | "web" | "rag_web";
   },
   onEvent: (event: StreamEvent) => void,
   signal?: AbortSignal,

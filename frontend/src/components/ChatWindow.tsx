@@ -8,8 +8,6 @@ import type { Locale } from "@/lib/i18n/i18n";
 import { formatSchemeQuestion, formatServiceQuestion, formatLegalQuestion } from "@/lib/i18n/formatQuery";
 import { createSpeechService } from "@/lib/speech";
 import { MessageBubble } from "./chat/MessageBubble";
-import { ThinkingProcess } from "./chat/ThinkingProcess";
-import type { StepEvent } from "@/lib/api";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -163,14 +161,11 @@ export function ChatWindow() {
   const lang: Locale = locale;
 
   // Streaming state
-  const [thinkingText, setThinkingText] = useState("");
   const [streamingAnswer, setStreamingAnswer] = useState("");
   const [streamingMeta, setStreamingMeta] = useState<Record<string, unknown> | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
-  const [thinkingSteps, setThinkingSteps] = useState<StepEvent[]>([]);
-  const [thinkingExpanded, setThinkingExpanded] = useState(true);
 
   // Client-only speech readiness
   useEffect(() => {
@@ -371,8 +366,6 @@ export function ChatWindow() {
     setExplicitPending(false);
 
     setTyping(true);
-    setThinkingText("");
-    setThinkingSteps([]);
     setStreamingAnswer("");
     setStreamingMeta(null);
     setIsStreaming(true);
@@ -395,22 +388,7 @@ export function ChatWindow() {
       await sendChatStream(
         { question, session_id: sessionId, language: lang, state: null, history, ui_language_explicit: uiLanguageExplicit, mode: model },
         (event: StreamEvent) => {
-          if (event.event === "step") {
-            const step = event.data as StepEvent;
-            setThinkingSteps((prev) => {
-              const idx = prev.findIndex((s) => s.id === step.id);
-              if (idx >= 0) {
-                const next = [...prev];
-                next[idx] = step;
-                return next;
-              }
-              return [...prev, step];
-            });
-          } else if (event.event === "thinking") {
-            setThinkingText(event.data.text as string);
-          } else if (event.event === "token") {
-            setThinkingText("");
-            setThinkingExpanded(false);
+          if (event.event === "token") {
             const text = (event.data.text as string).replace(/INSUFFICIENT_EVIDENCE/g, "");
             if (text) {
               tokenBufferRef.current += text;
@@ -456,19 +434,16 @@ export function ChatWindow() {
     } finally {
       setTyping(false);
       setIsStreaming(false);
-      setThinkingText("");
       setStreamingAnswer("");
       setStreamingMeta(null);
       tokenBufferRef.current = "";
       abortRef.current = null;
-      // thinkingSteps persist after streaming — user can review reasoning
     }
   }
 
   function handleNewChat() {
     setMsgs([]);
     setInput("");
-    setThinkingSteps([]);
     setActiveConvId(null);
     localStorage.removeItem(ACTIVE_CONV_KEY);
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -999,23 +974,20 @@ export function ChatWindow() {
               );
             })()}
 
-            {typing && !isStreaming && (
-              <div className="flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)]">
-                  <IconBot className="h-4 w-4 animate-pulse" />
+            {typing && !streamingAnswer.trim() && (
+              <div className="flex gap-3 animate-in fade-in duration-200">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-xs">
+                  <IconBot className="h-4 w-4" />
                 </div>
-                <Skeleton className="h-16 w-3/4 max-w-[28rem] rounded-xl" />
+                <div className="flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--surface-soft)] px-4 py-3.5 shadow-2xs">
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--ink)] [animation-delay:-0.3s]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--ink)] [animation-delay:-0.15s]" />
+                  <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--ink)]" />
+                </div>
               </div>
             )}
 
-            {/* Thinking process — stays visible after streaming as collapsible summary */}
-            {thinkingSteps.length > 0 && (
-              <ThinkingProcess
-                steps={thinkingSteps}
-                lang={lang}
-                isStreaming={!!streamingAnswer}
-              />
-            )}
+
             {isStreaming && streamingAnswer.trim() && (
               <MessageBubble
                 isStreaming={true}

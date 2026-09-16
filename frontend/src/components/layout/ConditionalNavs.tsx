@@ -1,6 +1,8 @@
 "use client";
 import { usePathname } from "next/navigation";
 import { TopNav } from "./TopNav";
+import { Footer } from "./Footer";
+import { FloatingChatWidget } from "@/components/FloatingChatWidget";
 
 export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -9,7 +11,9 @@ export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isChat && <TopNav />}
-      <main id="content" className={!isChat ? "pt-20" : undefined}>{children}</main>
+      <main id="content">{children}</main>
+      {!isChat && <Footer />}
+      {!isChat && <FloatingChatWidget />}
     </>
   );
 }

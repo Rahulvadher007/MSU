@@ -171,6 +171,7 @@ class RAGOrchestrator:
 
         # Step 4: Build evidence bundle
         if on_step:
+            on_step({"id": "retrieval_start", "detail": "Retrieval complete", "status": "completed"})
             on_step({"id": "evidence_merge", "detail": "Merging and ranking evidence from both sources", "status": "active"})
         bundle = self._evidence_controller.build_bundle(
             static_result, web_result, query_requirements, query,
@@ -195,6 +196,7 @@ class RAGOrchestrator:
         # Always use the primary model; the provider's own fallback iteration
         # handles model list traversal (GPT-OSS → Qwen → Gemini → Sarvam).
         if on_step:
+            on_step({"id": "evidence_merge", "detail": "Evidence merged", "status": "completed"})
             on_step({"id": "llm_generate", "detail": "Generating grounded response from retrieved evidence", "status": "active"})
         model_name = model_override or self._settings.groq_model
 
@@ -258,6 +260,7 @@ class RAGOrchestrator:
                 )
 
         if on_step:
+            on_step({"id": "llm_generate", "detail": "Response generated", "status": "completed"})
             on_step({"id": "citation_verify", "detail": f"Verified {len(all_chunks)} citations against source documents", "status": "completed"})
         _t_citation_done = time.monotonic()
 

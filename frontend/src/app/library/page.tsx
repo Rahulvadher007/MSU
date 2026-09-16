@@ -34,9 +34,9 @@ export default function LibraryPage() {
   });
 
   return (
-    <div className="page-container">
+    <div className="px-4 pt-8 pb-24 sm:px-6 md:px-12 md:pt-12">
       <Reveal trigger="load">
-        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
+        <h1 className="text-[24px] font-medium tracking-tight text-[var(--ink)] sm:text-[30px] md:text-[40px]"
             style={{ fontFamily: "var(--font-display)" }}>{t("library.title")}</h1>
         <p className="mt-1 text-[var(--body)]">{t("library.subtitle")}</p>
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("library.searchPlaceholder")} className="mt-4 max-w-sm" />
@@ -47,7 +47,7 @@ export default function LibraryPage() {
             type="button"
             aria-pressed={d === domain}
             onClick={() => setDomain(d)}
-            className={`inline-flex h-10 items-center rounded-[var(--radius-md)] border px-4 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] ${
+            className={`inline-flex h-9 items-center rounded-[var(--radius-md)] border px-3 text-sm font-medium transition-all duration-200 ease-[var(--ease-out-cubic)] sm:h-10 sm:px-4 ${
               d === domain
                 ? "border-[var(--surface-dark)] bg-[var(--surface-dark)] text-[var(--on-primary)]"
                 : "border-[var(--hairline)] bg-[var(--cream-2)] text-[var(--body)] hover:border-[var(--ink)] hover:text-[var(--ink)]"

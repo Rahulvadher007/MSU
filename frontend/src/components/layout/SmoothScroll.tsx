@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { gsap, ScrollTrigger } from "@/components/motion/gsap";
 
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -10,14 +11,18 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       touchMultiplier: 2,
     });
 
+    lenis.on("scroll", ScrollTrigger.update);
+
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
+    const rafId = requestAnimationFrame(raf);
 
-    requestAnimationFrame(raf);
+    gsap.ticker.lagSmoothing(0);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
     };
   }, []);

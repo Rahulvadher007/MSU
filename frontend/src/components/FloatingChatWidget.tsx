@@ -9,8 +9,6 @@ import type { Locale } from "@/lib/i18n/i18n";
 import { createSpeechService } from "@/lib/speech";
 import { IconMic, IconSend, IconX, IconBot } from "@/components/ui/Icons";
 import { cleanMarkdownForDisplay } from "@/components/chat/MessageBubble";
-import { ThinkingProcess } from "./chat/ThinkingProcess";
-import type { StepEvent } from "@/lib/api";
 
 type Msg = { role: "user" | "assistant"; text?: string };
 
@@ -32,7 +30,6 @@ export function FloatingChatWidget() {
   const abortRef = useRef<AbortController | null>(null);
   const tokenBufferRef = useRef("");
   const isNearBottomRef = useRef(true);
-  const [thinkingSteps, setThinkingSteps] = useState<StepEvent[]>([]);
 
   const checkIfNearBottom = useCallback(() => {
     const container = scrollContainerRef.current;
@@ -96,18 +93,7 @@ export function FloatingChatWidget() {
           ui_language_explicit: false,
         },
         (event: StreamEvent) => {
-          if (event.event === "step") {
-            const step = event.data as StepEvent;
-            setThinkingSteps((prev) => {
-              const idx = prev.findIndex((s) => s.id === step.id);
-              if (idx >= 0) {
-                const next = [...prev];
-                next[idx] = step;
-                return next;
-              }
-              return [...prev, step];
-            });
-          } else if (event.event === "token") {
+          if (event.event === "token") {
             const text = (event.data.text as string).replace(/INSUFFICIENT_EVIDENCE/g, "");
             if (text) {
               tokenBufferRef.current += text;
@@ -131,7 +117,6 @@ export function FloatingChatWidget() {
       setTyping(false);
       tokenBufferRef.current = "";
       abortRef.current = null;
-      setThinkingSteps([]);
     }
   }, [input, typing, lang, sessionId, scrollToBottom]);
 
@@ -182,7 +167,7 @@ export function FloatingChatWidget() {
 
       {open && (
         <div
-          className="fixed bottom-4 right-4 z-50 flex w-[calc(100vw-2rem)] max-w-[380px] flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--canvas)] shadow-[0_16px_64px_rgba(0,0,0,0.18)] sm:bottom-6 sm:right-6"
+          className="fixed bottom-3 inset-x-3 sm:inset-auto sm:bottom-6 sm:right-6 z-50 flex max-w-[380px] sm:w-[380px] mx-auto flex-col overflow-hidden rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--canvas)] shadow-[0_16px_64px_rgba(0,0,0,0.18)]"
           style={{ height: "min(580px, calc(100vh - 80px))" }}
           onWheel={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
@@ -271,19 +256,17 @@ export function FloatingChatWidget() {
               )
             )}
 
-            {typing && thinkingSteps.length > 0 && (
-              <ThinkingProcess steps={thinkingSteps} lang={lang} isStreaming={false} />
-            )}
+
 
             {typing && !displayedAnswer && (
-              <div className="flex gap-3">
-                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)]">
-                  <IconBot className="h-3.5 w-3.5 animate-pulse" />
+              <div className="flex gap-3 animate-in fade-in duration-200">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--primary)] text-[var(--on-primary)] shadow-xs">
+                  <IconBot className="h-3.5 w-3.5" />
                 </div>
-                <div className="flex items-center gap-1 rounded-[var(--radius-lg)] bg-[var(--surface-soft)] px-4 py-3">
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted)] [animation-delay:-0.3s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted)] [animation-delay:-0.15s]" />
-                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--muted)]" />
+                <div className="flex items-center gap-1.5 rounded-[var(--radius-lg)] bg-[var(--surface-soft)] px-4 py-3 shadow-2xs">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--ink)] [animation-delay:-0.3s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--ink)] [animation-delay:-0.15s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-[var(--ink)]" />
                 </div>
               </div>
             )}

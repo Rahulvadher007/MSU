@@ -346,66 +346,12 @@ class TestChatStreamEndpoint:
         assert resp.status_code == 200
         assert "text/event-stream" in resp.headers["content-type"]
         text = resp.text
-        assert "event: thinking" in text
-        assert "event: step" in text
-        assert "retrieval_start" in text
         assert "event: token" in text
         assert "event: metadata" in text
         assert "event: done" in text
         assert "PMFBY" in text
 
-    @patch("app.routes.chat._get_rag_orchestrator")
-    @patch("app.routes.chat._get_query_classifier")
-    @patch("app.routes.chat.get_anchor_store")
-    @patch("app.routes.chat.get_embedding_provider")
-    @patch("app.routes.chat.get_history")
-    @patch("app.routes.chat.save_message")
-    @patch("app.routes.chat.trim_messages")
-    @patch("app.routes.chat.touch_session")
-    @patch("app.routes.chat.resolve_and_remember")
-    @patch("app.routes.chat.detect_query_languages")
-    def test_stream_emits_step_events(
-        self, mock_detect, mock_resolve, mock_touch, mock_trim,
-        mock_save, mock_history, mock_embed_provider, mock_anchor,
-        mock_classifier, mock_orchestrator,
-    ):
-        mock_detect.return_value = {"dominant": "en"}
-        mock_resolve.return_value = "en"
-        mock_history.return_value = []
-        mock_embed_provider.return_value.embed_texts.return_value = [_make_embedding()]
-        mock_anchor.return_value.classify.return_value = ("pmfby", 0.9)
-        mock_anchor.return_value.rules = {}
-        mock_classifier.return_value.classify.return_value = _make_classification()
 
-        def _fake_run(**kwargs):
-            on_step = kwargs.get("on_step")
-            if on_step:
-                on_step({"id": "static_done", "detail": "Found 5 chunks", "status": "completed"})
-                on_step({"id": "web_done", "detail": "Found 3 results", "status": "completed"})
-                on_step({"id": "evidence_merge", "detail": "Merging", "status": "active"})
-                on_step({"id": "llm_generate", "detail": "Generating", "status": "active"})
-                on_step({"id": "citation_verify", "detail": "Verified", "status": "completed"})
-            import asyncio
-            resp = _make_rag_response()
-            return asyncio.coroutine(lambda: resp)() if False else resp
-
-        async def _async_run(**kwargs):
-            return _fake_run(**kwargs)
-
-        mock_orchestrator.return_value.run = _async_run
-
-        resp = client.post("/chat/stream", json={
-            "question": "What is PMFBY?",
-            "session_id": "test-session",
-            "language": "en",
-        })
-
-        assert resp.status_code == 200
-        text = resp.text
-        assert "event: step" in text
-        assert "retrieval_start" in text
-        assert "evidence_merge" in text or "llm_generate" in text
-        assert "static_done" in text
 
     @patch("app.routes.chat._get_query_classifier")
     @patch("app.routes.chat.get_anchor_store")

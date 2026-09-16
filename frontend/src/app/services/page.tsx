@@ -5,17 +5,75 @@ import { useI18n } from "@/lib/i18n/provider";
 import { getServices, services as rawServices } from "@/lib/data";
 import { useTranslatedFields } from "@/lib/useTranslatedFields";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
 import { Input } from "@/components/ui/Input";
 import { Chips } from "@/components/ui/Chips";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger } from "@/components/motion/Stagger";
-import { deco } from "@/lib/data/deco";
+import {
+  IconRupee,
+  IconWarehouse,
+  IconShield,
+  IconLeaf,
+  IconGift,
+  IconUsers,
+  IconGrid,
+  IconChevronRight,
+  IconCheck,
+} from "@/components/ui/Icons";
+
+const SERVICE_HOOKS: Record<string, { question: string; benefits: string[] }> = {
+  "pacs-membership": {
+    question: "Want access to credit and services?",
+    benefits: ["Affordable credit", "Storage & inputs", "Grievance support"],
+  },
+  "short-term-crop-credit": {
+    question: "Need credit for your crop?",
+    benefits: ["Covers seasonal farming needs", "Subsidised interest"],
+  },
+  "godown-storage": {
+    question: "Looking for safe storage?",
+    benefits: ["Avoid distress sales", "Pledge loans against stock"],
+  },
+  "agro-input-supply": {
+    question: "Need quality seeds and fertiliser?",
+    benefits: ["Certified inputs", "Fair cooperative prices"],
+  },
+  "pmfby-enrolment": {
+    question: "Want crop insurance coverage?",
+    benefits: ["Natural calamity protection", "Low premium rates"],
+  },
+  "cooperative-subsidy": {
+    question: "Need funding for cooperative infra?",
+    benefits: ["Capital subsidies", "Interest subvention"],
+  },
+  "pm-fb-enrollment": {
+    question: "Need help with crop insurance?",
+    benefits: ["Free enrolment assistance", "Claim filing support"],
+  },
+  "cooperative-training": {
+    question: "Want to build cooperative skills?",
+    benefits: ["Management courses", "Legal compliance training"],
+  },
+  "digital-banking": {
+    question: "Need digital banking access?",
+    benefits: ["UPI & net banking", "Mobile banking apps"],
+  },
+};
 
 const CATEGORY_ALL = "all";
 const categories = ["all", "credit", "storage", "insurance", "agro-inputs", "subsidy", "membership"] as const;
 type Filter = (typeof categories)[number];
+
+const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; decoKey: string; label: string }> = {
+  all: { icon: <IconGrid className="w-5 h-5" />, color: "var(--ink)", decoKey: "teal", label: "All" },
+  credit: { icon: <IconRupee className="w-5 h-5" />, color: "#5691c7", decoKey: "blue", label: "Credit" },
+  storage: { icon: <IconWarehouse className="w-5 h-5" />, color: "#4e99a3", decoKey: "teal", label: "Storage" },
+  insurance: { icon: <IconShield className="w-5 h-5" />, color: "#bc811e", decoKey: "gold", label: "Insurance" },
+  "agro-inputs": { icon: <IconLeaf className="w-5 h-5" />, color: "#539e55", decoKey: "green", label: "Agro services" },
+  subsidy: { icon: <IconGift className="w-5 h-5" />, color: "#9b59b6", decoKey: "purple", label: "Subsidy" },
+  membership: { icon: <IconUsers className="w-5 h-5" />, color: "#e74c3c", decoKey: "red", label: "Membership" },
+};
 
 export default function ServicesPage() {
   const { t, locale } = useI18n();
@@ -27,8 +85,8 @@ export default function ServicesPage() {
     textFields: ["name", "summary"],
     listFields: [],
   });
-  const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Filter>(CATEGORY_ALL);
+  const [query, setQuery] = useState("");
 
   const filtered = translated.filter((s) => {
     const okCat = cat === CATEGORY_ALL || s.category === cat;
@@ -37,38 +95,168 @@ export default function ServicesPage() {
     return okCat && okQuery;
   });
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: translated.length };
+    for (const s of translated) {
+      counts[s.category] = (counts[s.category] ?? 0) + 1;
+    }
+    return counts;
+  }, [translated]);
+
   return (
-    <div className="page-container">
+    <div className="px-4 pt-6 pb-24 sm:px-6 sm:pt-8 md:px-12 md:pt-12">
+      {/* ── Hero Section — Two Column with Icon Grid ── */}
       <Reveal trigger="load">
-        <h1 className="text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
-            style={{ fontFamily: "var(--font-display)" }}>{t("services.title")}</h1>
-        <p className="mt-1 text-[var(--body)]">{t("services.subtitle")}</p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t("services.searchPlaceholder")} className="max-w-sm" />
-          <p className="text-sm text-[var(--body)]">{t("services.count", { n: filtered.length })}</p>
-        </div>
-        <div className="mt-4">
+        <section className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--brand-teal)] px-6 py-10 md:px-12 md:py-14">
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center md:gap-12">
+            {/* Left — Text */}
+            <div className="flex-1">
+              <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-[var(--brand-teal-text)]/70">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--brand-ochre)]" />
+                {t("nav.services")}
+              </span>
+              <h1
+                className="mt-4 text-[32px] font-medium leading-[1.1] tracking-[-0.02em] text-[var(--brand-teal-text)] md:text-[44px]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {t("services.title")}
+              </h1>
+              <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-[var(--brand-teal-text)]/80 md:text-[17px]">
+                {t("services.subtitle")}
+              </p>
+
+              {/* Total count */}
+              <div className="mt-6 inline-flex items-center gap-2 rounded-[var(--radius-full)] bg-white/15 px-4 py-2 backdrop-blur-sm">
+                <span className="text-[22px] font-semibold text-white" style={{ fontFamily: "var(--font-display)" }}>
+                  {translated.length}
+                </span>
+                <span className="text-[13px] text-white/80">{t("services.count", { n: "" }).replace(/\d+\s*/, "").trim() || "services"}</span>
+              </div>
+            </div>
+
+            {/* Right — Category Icon Grid */}
+            <div className="mt-8 md:mt-0 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-3 lg:grid-cols-4">
+              {categories.filter((c) => c !== "all").map((c) => {
+                const meta = CATEGORY_META[c];
+                return (
+                  <button
+                    key={c}
+                    onClick={() => setCat(c)}
+                    className="group flex flex-col items-center gap-2 rounded-[var(--radius-lg)] bg-white/10 p-4 backdrop-blur-sm transition-all duration-200 hover:bg-white/20 hover:scale-105 cursor-pointer"
+                  >
+                    <span
+                      className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] transition-colors duration-200"
+                      style={{ backgroundColor: `${meta.color}30`, color: meta.color }}
+                    >
+                      {meta.icon}
+                    </span>
+                    <span className="text-[11px] font-medium text-white/90 text-center leading-tight">
+                      {meta.label}
+                    </span>
+                    <span className="text-[10px] text-white/60">
+                      {categoryCounts[c] ?? 0}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Decorative shapes */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-80 w-80 rounded-full border border-white/10" />
+          <div className="pointer-events-none absolute right-1/4 bottom-8 h-3 w-3 rounded-full bg-[var(--brand-ochre)]/40" />
+          <div className="pointer-events-none absolute left-1/3 top-12 h-2 w-2 rounded-full bg-white/20" />
+        </section>
+      </Reveal>
+
+      {/* ── Filters ── */}
+      <Reveal trigger="load">
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Chips<Filter>
             options={categories}
             value={cat}
             onChange={setCat}
-            render={(c) => (c === "all" ? t("common.all") : t(`serviceCategory.${c}`))}
+            render={(c) => (
+              <span className="flex items-center gap-1.5">
+                <span className="w-4 h-4" style={{ color: CATEGORY_META[c].color }}>{CATEGORY_META[c].icon}</span>
+                {c === "all" ? t("common.all") : t(`serviceCategory.${c}`)}
+              </span>
+            )}
           />
+          <div className="w-full max-w-xs">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t("services.searchPlaceholder")}
+            />
+          </div>
         </div>
       </Reveal>
+
+      {/* ── Service Grid ── */}
       {filtered.length === 0 ? (
-        <div className="mt-6"><EmptyState title={t("services.empty")} /></div>
+        <div className="mt-10">
+          <EmptyState title={t("services.empty")} />
+        </div>
       ) : (
-        <Stagger className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((s) => (
-            <Link key={s.slug} href={`/services/${s.slug}`} className="block">
-              <Card interactive>
-                <Badge deco={deco(s.category)}>{t(`serviceCategory.${s.category}`)}</Badge>
-                <h2 className="mt-[var(--space-2)] font-semibold text-[var(--ink)]">{s.name}</h2>
-                <p className="mt-[var(--space-1)] text-[var(--text-sm)] text-[var(--body)]">{s.summary}</p>
-              </Card>
-            </Link>
-          ))}
+        <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((s) => {
+            const meta = CATEGORY_META[s.category];
+            const hook = SERVICE_HOOKS[s.slug] || { question: `Explore ${s.name}?`, benefits: [s.summary.slice(0, 40)] };
+            return (
+              <Link key={s.slug} href={`/services/${s.slug}`} className="block group">
+                <Card interactive className="relative overflow-hidden h-full">
+                  {/* Category color accent bar */}
+                  <div
+                    className="absolute left-0 top-0 h-full w-[3px] rounded-l-[var(--radius-lg)]"
+                    style={{ backgroundColor: meta.color }}
+                  />
+
+                  <div className="pl-5 pr-5 py-5">
+                    {/* Hook question */}
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)]"
+                        style={{ backgroundColor: `${meta.color}12`, color: meta.color }}
+                      >
+                        {meta.icon}
+                      </span>
+                      <span className="text-[13px] font-medium text-[var(--body)]">
+                        {hook.question}
+                      </span>
+                    </div>
+
+                    {/* Service name */}
+                    <h2 className="mt-3 text-[18px] font-semibold leading-snug text-[var(--ink)] group-hover:text-[var(--brand-teal)] transition-colors duration-200">
+                      {s.name}
+                    </h2>
+
+                    {/* Summary */}
+                    <p className="mt-1.5 text-[13px] leading-[1.5] text-[var(--body)] line-clamp-2">
+                      {s.summary}
+                    </p>
+
+                    {/* Benefits with checkmarks */}
+                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                      {hook.benefits.map((b, i) => (
+                        <span key={i} className="flex items-center gap-1 text-[12px] text-[var(--body)]">
+                          <IconCheck className="w-3.5 h-3.5 text-[var(--brand-teal)]" />
+                          {b}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[var(--brand-teal)] group-hover:text-[var(--ink)] transition-colors duration-200">
+                      {t("common.askThisScheme") || "Explore"}
+                      <IconChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
         </Stagger>
       )}
     </div>

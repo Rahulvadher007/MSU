@@ -16,7 +16,6 @@ import {
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { ConditionalNavs } from "@/components/layout/ConditionalNavs";
-import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const grotesk = Space_Grotesk({ variable: "--font-display-latin", subsets: ["latin"], weight: ["500"] });
@@ -68,11 +67,14 @@ const malayalam = Noto_Serif_Malayalam({
 });
 
 export const metadata: Metadata = {
-  title: "JanSayah — Cooperative Governance Assistant",
+  title: "JanSahay — Cooperative Governance Assistant",
   description:
     "Multilingual AI assistant for cooperative governance, PMFBY, PACS, financial literacy and grievance redressal.",
   icons: {
-    icon: "/goverment.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/goverment.png" },
+    ],
   },
 };
 
@@ -92,10 +94,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           Skip to content
         </a>
         <LanguageProvider>
-          <ConditionalNavs>
-            {children}
-          </ConditionalNavs>
-          <Footer />
+            <ConditionalNavs>
+              {children}
+            </ConditionalNavs>
         </LanguageProvider>
       </body>
     </html>
