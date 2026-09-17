@@ -21,6 +21,7 @@ const en: Record<string, string> = {
   "nav.services": "Services",
   "nav.faq": "FAQ",
   "nav.more": "More",
+  "nav.signIn": "Sign In",
 
   "common.send": "Send",
   "common.submit": "Submit",
@@ -385,6 +386,7 @@ const hi: Record<string, string> = {
   "nav.services": "सेवाएँ",
   "nav.faq": "FAQ",
   "nav.more": "और",
+  "nav.signIn": "साइन इन करें",
 
   "common.send": "भेजें",
   "common.submit": "जमा करें",
@@ -745,6 +747,7 @@ const mr: Record<string, string> = {
   "nav.services": "सेवा",
   "nav.faq": "FAQ",
   "nav.more": "अधिक",
+  "nav.signIn": "साइन इन करा",
 
   "common.send": "पाठवा",
   "common.submit": "सबमिट करा",
@@ -1101,6 +1104,7 @@ const bn: Record<string, string> = {
   "nav.services": "সেবা",
   "nav.faq": "FAQ",
   "nav.more": "আরও",
+  "nav.signIn": "সাইন ইন করুন",
 
   "common.send": "পাঠান",
   "common.submit": "জমা দিন",
@@ -1357,6 +1361,7 @@ const ta: Record<string, string> = {
   "nav.services": "சேவைகள்",
   "nav.faq": "FAQ",
   "nav.more": "மேலும்",
+  "nav.signIn": "உள்நுழைக",
 
   "common.send": "அனுப்பு",
   "common.submit": "சமர்ப்பி",
@@ -1666,6 +1671,7 @@ const te: Record<string, string> = {
   "nav.services": "సేవలు",
   "nav.faq": "FAQ",
   "nav.more": "మరిన్ని",
+  "nav.signIn": "సైన్ ఇన్ చేయండి",
 
   "common.send": "పంపండి",
   "common.submit": "సమర్పించండి",
@@ -1914,6 +1920,7 @@ const kn: Record<string, string> = {
   "nav.services": "ಸೇವೆಗಳು",
   "nav.faq": "FAQ",
   "nav.more": "ಇನ್ನಷ್ಟು",
+  "nav.signIn": "ಸೈನ್ ಇನ್ ಮಾಡಿ",
 
   "common.send": "ಕಳುಹಿಸಿ",
   "common.submit": "ಸಲ್ಲಿಸಿ",
@@ -2161,6 +2168,7 @@ const pa: Record<string, string> = {
   "nav.services": "ਸੇਵਾਵਾਂ",
   "nav.faq": "FAQ",
   "nav.more": "ਹੋਰ",
+  "nav.signIn": "ਸਾਈਨ ਇਨ ਕਰੋ",
 
   "common.send": "ਭੇਜੋ",
   "common.submit": "ਜਮ੍ਹਾਂ ਕਰੋ",
@@ -2408,6 +2416,7 @@ const gu: Record<string, string> = {
   "nav.services": "સેવાઓ",
   "nav.faq": "FAQ",
   "nav.more": "વધુ",
+  "nav.signIn": "સાઇન ઇન કરો",
 
   "common.send": "મોકલો",
   "common.submit": "સબમિટ કરો",
@@ -2723,6 +2732,7 @@ const or: Record<string, string> = {
   "nav.services": "ସେବା",
   "nav.faq": "FAQ",
   "nav.more": "ଅଧିକ",
+  "nav.signIn": "ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
 
   "common.send": "ପଠାନ୍ତୁ",
   "common.submit": "ଦାଖଲ କରନ୍ତୁ",
@@ -2970,6 +2980,7 @@ const ml: Record<string, string> = {
   "nav.services": "സേവനങ്ങൾ",
   "nav.faq": "FAQ",
   "nav.more": "കൂടുതൽ",
+  "nav.signIn": "സൈൻ ഇൻ ചെയ്യുക",
 
   "common.send": "അയയ്ക്കുക",
   "common.submit": "സമർപ്പിക്കുക",
@@ -3217,6 +3228,7 @@ const ur: Record<string, string> = {
   "nav.services": "خدمات",
   "nav.faq": "FAQ",
   "nav.more": "مزید",
+  "nav.signIn": "سائن ان کریں",
 
   "common.send": "بھیجیں",
   "common.submit": "جمع کریں",
