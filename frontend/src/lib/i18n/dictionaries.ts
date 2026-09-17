@@ -22,6 +22,12 @@ const en: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "More",
   "nav.signIn": "Sign In",
+  "nav.signUp": "Sign Up",
+
+  "auth.signInTitle": "Sign in to JanSahay",
+  "auth.signUpTitle": "Create your account",
+  "auth.required": "Please sign in to continue",
+  "auth.error": "Something went wrong. Please try again.",
 
   "common.send": "Send",
   "common.submit": "Submit",
@@ -387,6 +393,12 @@ const hi: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "और",
   "nav.signIn": "साइन इन करें",
+  "nav.signUp": "साइन अप करें",
+
+  "auth.signInTitle": "JanSahay में साइन इन करें",
+  "auth.signUpTitle": "अपना खाता बनाएँ",
+  "auth.required": "जारी रखने के लिए कृपया साइन इन करें",
+  "auth.error": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",
 
   "common.send": "भेजें",
   "common.submit": "जमा करें",
@@ -748,6 +760,12 @@ const mr: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "अधिक",
   "nav.signIn": "साइन इन करा",
+  "nav.signUp": "साइन अप करा",
+
+  "auth.signInTitle": "JanSahay मध्ये साइन इन करा",
+  "auth.signUpTitle": "तुमचे खाते तयार करा",
+  "auth.required": "सुरू ठेवण्यासाठी कृपया साइन इन करा",
+  "auth.error": "काहीतरी चूक झाली. कृपया पुन्हा प्रयत्न करा.",
 
   "common.send": "पाठवा",
   "common.submit": "सबमिट करा",
@@ -1105,6 +1123,12 @@ const bn: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "আরও",
   "nav.signIn": "সাইন ইন করুন",
+  "nav.signUp": "সাইন আপ করুন",
+
+  "auth.signInTitle": "JanSahay-তে সাইন ইন করুন",
+  "auth.signUpTitle": "আপনার অ্যাকাউন্ট তৈরি করুন",
+  "auth.required": "চালিয়ে যেতে সাইন ইন করুন",
+  "auth.error": "কিছু ভুল হয়েছে। আবার চেষ্টা করুন।",
 
   "common.send": "পাঠান",
   "common.submit": "জমা দিন",
@@ -1362,6 +1386,12 @@ const ta: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "மேலும்",
   "nav.signIn": "உள்நுழைக",
+  "nav.signUp": "பதிவு செய்",
+
+  "auth.signInTitle": "JanSahay-ல் உள்நுழையுங்கள்",
+  "auth.signUpTitle": "உங்கள் கணக்கை உருவாக்குங்கள்",
+  "auth.required": "தொடர உள்நுழையுங்கள்",
+  "auth.error": "ஏதோ தவறு ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
 
   "common.send": "அனுப்பு",
   "common.submit": "சமர்ப்பி",
@@ -1672,6 +1702,12 @@ const te: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "మరిన్ని",
   "nav.signIn": "సైన్ ఇన్ చేయండి",
+  "nav.signUp": "సైన్ అప్ చేయండి",
+
+  "auth.signInTitle": "JanSahay లో సైన్ ఇన్ చేయండి",
+  "auth.signUpTitle": "మీ ఖాతాను సృష్టించండి",
+  "auth.required": "కొనసాగించడానికి సైన్ ఇన్ చేయండి",
+  "auth.error": "ఏదో పొరపాటు జరిగింది. దయచేసి మళ్లీ ప్రయత్నించండి.",
 
   "common.send": "పంపండి",
   "common.submit": "సమర్పించండి",
@@ -1921,6 +1957,12 @@ const kn: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "ಇನ್ನಷ್ಟು",
   "nav.signIn": "ಸೈನ್ ಇನ್ ಮಾಡಿ",
+  "nav.signUp": "ಸೈನ್ ಅಪ್ ಮಾಡಿ",
+
+  "auth.signInTitle": "JanSahay ನಲ್ಲಿ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+  "auth.signUpTitle": "ನಿಮ್ಮ ಖಾತೆಯನ್ನು ರಚಿಸಿ",
+  "auth.required": "ಮುಂದುವರಿಯಲು ಸೈನ್ ಇನ್ ಮಾಡಿ",
+  "auth.error": "ಏನೋ ತಪ್ಪಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
 
   "common.send": "ಕಳುಹಿಸಿ",
   "common.submit": "ಸಲ್ಲಿಸಿ",
@@ -2169,6 +2211,12 @@ const pa: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "ਹੋਰ",
   "nav.signIn": "ਸਾਈਨ ਇਨ ਕਰੋ",
+  "nav.signUp": "ਸਾਈਨ ਅੱਪ ਕਰੋ",
+
+  "auth.signInTitle": "JanSahay ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
+  "auth.signUpTitle": "ਆਪਣਾ ਖਾਤਾ ਬਣਾਓ",
+  "auth.required": "ਜਾਰੀ ਰੱਖਣ ਲਈ ਕਿਰਪਾ ਕਰਕੇ ਸਾਈਨ ਇਨ ਕਰੋ",
+  "auth.error": "ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।",
 
   "common.send": "ਭੇਜੋ",
   "common.submit": "ਜਮ੍ਹਾਂ ਕਰੋ",
@@ -2417,6 +2465,12 @@ const gu: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "વધુ",
   "nav.signIn": "સાઇન ઇન કરો",
+  "nav.signUp": "સાઇન અપ કરો",
+
+  "auth.signInTitle": "JanSahay માં સાઇન ઇન કરો",
+  "auth.signUpTitle": "તમારું ખાતું બનાવો",
+  "auth.required": "ચાલુ રાખવા માટે કૃપા કરીને સાઇન ઇન કરો",
+  "auth.error": "કંઈક ખોટું થયું. કૃપા કરીને ફરી પ્રયાસ કરો.",
 
   "common.send": "મોકલો",
   "common.submit": "સબમિટ કરો",
@@ -2733,6 +2787,12 @@ const or: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "ଅଧିକ",
   "nav.signIn": "ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+  "nav.signUp": "ସାଇନ୍ ଅପ୍ କରନ୍ତୁ",
+
+  "auth.signInTitle": "JanSahay ରେ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+  "auth.signUpTitle": "ଆପଣଙ୍କ ଖାତା ସୃଷ୍ଟି କରନ୍ତୁ",
+  "auth.required": "ଚାଲୁ ରଖିବା ପାଇଁ ସାଇନ୍ ଇନ୍ କରନ୍ତୁ",
+  "auth.error": "କିଛି ଭୁଲ୍ ହୋଇଛି। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।",
 
   "common.send": "ପଠାନ୍ତୁ",
   "common.submit": "ଦାଖଲ କରନ୍ତୁ",
@@ -2981,6 +3041,12 @@ const ml: Record<string, string> = {
   "nav.faq": "FAQ",
   "nav.more": "കൂടുതൽ",
   "nav.signIn": "സൈൻ ഇൻ ചെയ്യുക",
+  "nav.signUp": "സൈൻ അപ്പ് ചെയ്യുക",
+
+  "auth.signInTitle": "JanSahay-ൽ സൈൻ ഇൻ ചെയ്യുക",
+  "auth.signUpTitle": "നിങ്ങളുടെ അക്കൗണ്ട് സൃഷ്ടിക്കുക",
+  "auth.required": "തുടരാൻ സൈൻ ഇൻ ചെയ്യുക",
+  "auth.error": "എന്തോ തെറ്റ് സംഭവിച്ചു. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
 
   "common.send": "അയയ്ക്കുക",
   "common.submit": "സമർപ്പിക്കുക",
