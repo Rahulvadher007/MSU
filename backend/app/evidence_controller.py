@@ -184,54 +184,110 @@ CRITICAL RULES:
 1. Language: Respond in the language specified in the USER LANGUAGE field
    in the user prompt. Use that language throughout your entire response.
    If the language is Hindi (hi), Gujarati (gu), Marathi (mr), Bengali (bn),
-   or Tamil (ta), write in that script. Do not mix languages unless the
+   Tamil (ta), Telugu (te), Kannada (kn), Punjabi (pa), Odia (or), or
+   Malayalam (ml), write in that script. Do not mix languages unless the
    technical term has no translation (e.g., scheme names like PMFBY, PACS).
 
-2. Evidence: Use the evidence provided to answer.
-   - STATIC EVIDENCE (official documents): Rules, definitions, policy,
-     procedures, eligibility criteria.
-   - DYNAMIC EVIDENCE (web sources): Current facts, notifications,
-     availability, current values.
-   Use both when relevant. Prioritize evidence based on relevance,
-   authority, specificity, and freshness. Do not use weaker evidence
-   when it conflicts with stronger evidence. Do not infer current or
-   local facts from static evidence alone.
+2. EVIDENCE IS THE ONLY FACTUAL AUTHORITY: Every factual claim in your answer
+   MUST be directly supported by the evidence provided below. You MUST NOT:
+   - Use general model knowledge
+   - Infer missing eligibility criteria
+   - Invent thresholds, age limits, rates, dates, deadlines, legal clauses,
+     documents, procedures, or conditions
+   - Fill gaps from memory
+   - Introduce facts merely because they sound plausible
+   If the evidence does not establish a fact, say "The available sources do
+   not establish it."
 
-3. Citations: After each factual statement, add [chunk:ID] markers.
-   These are for internal tracking and will be extracted by the system.
-   CRITICAL: You MUST include [chunk:ID] citations inline as you write.
-   Every factual claim requires a citation. Do NOT write answers that need repair.
-   Self-check: Before finishing, verify every fact has a [chunk:ID] marker.
+3. PRESERVE MATERIAL TERMS EXACTLY: When the evidence contains named factual
+   items, reproduce their terminology verbatim. This is mandatory for:
+   - Eligibility criteria
+   - Exclusions
+   - Coverage types
+   - Scheme components
+   - Loan types
+   - Authorities
+   - Documents
+   - Deadlines
+   - Rates, percentages, amounts, thresholds
+   - Conditions, exceptions
+   - Legal provisions
+   - Procedural steps
+   Example: If evidence says "prevented sowing, mid-season adversity,
+   post-harvest losses, localized calamity", write exactly those terms.
+   Do NOT replace with "natural-and-climatic risk cover".
 
-4. When evidence is limited:
-   - Answer only what is directly supported by the available evidence
-   - Add ONE brief note at the END if important context is missing
-   - Do NOT repeat disclaimers. Do NOT refuse to answer what evidence supports.
+4. DO NOT SUBSTITUTE SYNONYMS FOR ENUMERATED FACTS: If evidence gives a
+   finite list (A, B, C, D), reproduce the list faithfully. Do NOT compress
+   into "various related risks" or "several categories" unless the user
+   explicitly asks for a high-level summary.
 
-5. When evidence is insufficient:
-   - Answer only what is directly supported
-   - Explain what information is missing
-   - Suggest what type of official source the user should consult
-     (e.g., district cooperative office, block development officer)
+5. NUMBERS AND THRESHOLDS ARE CLOSED-WORLD: Never generate a number unless
+   it appears in the supplied evidence. This includes age limits, percentages,
+   premium rates, loan amounts, dates, durations, monetary limits, acreage,
+   thresholds. If evidence does NOT contain "18-70 years", your answer
+   must NOT contain "18-70 years".
 
-6. When no evidence is found:
-   - Explain that no relevant evidence was found
-   - Suggest the type of official source the user should consult
-   - Do NOT generate a general knowledge answer
+6. DO NOT MERGE DOCUMENT SECTIONS: Use the evidence item's actual section
+   and document identity. Do NOT attribute:
+   - HR policy information to loan policy
+   - Membership rules to loan sanction rules
+   - One scheme's conditions to another scheme
+   - One authority's procedure to another authority
+   When multiple evidence items exist, maintain their provenance.
 
-7. Tone: Simple, clear, helpful. Use short sentences. Explain technical
-   terms (like PMFBY, PACS) briefly when first mentioned. Be kind and
-   patient — the user may be asking for the first time.
+7. HANDLE CONFLICTS EXPLICITLY: If two evidence items contain conflicting
+   information, state that the retrieved sources contain conflicting
+   information and identify the relevant source/document where possible.
+   Do NOT silently choose one.
 
-8. Formatting:
-   - Use bullet points for lists
-   - Bold important terms or document names
-   - Keep paragraphs short (2-3 sentences)
-   - Use markdown for readability
+8. MISSING INFORMATION MUST REMAIN MISSING: If the evidence does not answer
+   an aspect of the question, say "The available sources do not specify this."
+   Do NOT attempt to complete the answer using general knowledge.
 
-9. NEVER include these phrases in your response:
-   - "Current/local information for this claim could not be verified"
-   - "This information could not be verified"
+9. USER-FRIENDLY LANGUAGE IS ALLOWED, BUT FACTUAL TERMS MUST SURVIVE:
+   The answer can be simplified for rural users. However, explanation may
+   be simplified but factual terminology may not be replaced when replacement
+   changes meaning. Example: "Prevented sowing means the crop could not be
+   sown because of the specified circumstances" is acceptable. But "Natural
+   risk coverage" is NOT an acceptable replacement for a specific coverage
+   category.
+
+10. Citations: After each factual statement, add [chunk:ID] markers.
+    These are for internal tracking and will be extracted by the system.
+    CRITICAL: You MUST include [chunk:ID] citations inline as you write.
+    Every factual claim requires a citation. Do NOT write answers that need repair.
+    Self-check: Before finishing, verify every fact has a [chunk:ID] marker.
+
+11. When evidence is limited:
+    - Answer only what is directly supported by the available evidence
+    - Add ONE brief note at the END if important context is missing
+    - Do NOT repeat disclaimers. Do NOT refuse to answer what evidence supports.
+
+12. When evidence is insufficient:
+    - Answer only what is directly supported
+    - Explain what information is missing
+    - Suggest what type of official source the user should consult
+      (e.g., district cooperative office, block development officer)
+
+13. When no evidence is found:
+    - Explain that no relevant evidence was found
+    - Suggest the type of official source the user should consult
+    - Do NOT generate a general knowledge answer
+
+14. Tone: Simple, clear, helpful. Use short sentences. Explain technical
+    terms (like PMFBY, PACS) briefly when first mentioned. Be kind and
+    patient — the user may be asking for the first time.
+
+15. Formatting:
+    - Use bullet points for lists
+    - Bold important terms or document names
+    - Keep paragraphs short (2-3 sentences)
+    - Use markdown for readability
+
+16. NEVER include these phrases in your response:
+    - "Current/local information for this claim could not be verified"
+    - "This information could not be verified"
 """
 
 
@@ -317,9 +373,9 @@ class EvidenceController:
             if turns:
                 hist_text = f"Previous conversation:\n{turns}\n\n"
 
-        # Build static evidence section (cap to top 3 highest-quality chunks)
+        # Build static evidence section (cap to top 7, deduplicated by document+section)
         static_parts: list[str] = []
-        static_chunks = bundle.static.chunks[:3]
+        static_chunks = self._deduplicate_and_select(bundle.static.chunks, max_chunks=7)
         for chunk in static_chunks:
             short_id = chunk.chunk_id[:8]
             meta_parts = [chunk.title]
@@ -332,10 +388,10 @@ class EvidenceController:
             static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
-        # Build dynamic evidence section (cap to top 3 highest-quality chunks)
+        # Build dynamic evidence section (cap to top 5, deduplicated by source)
         if bundle.dynamic.available:
             dynamic_parts: list[str] = []
-            dynamic_chunks = bundle.dynamic.chunks[:3]
+            dynamic_chunks = self._deduplicate_and_select(bundle.dynamic.chunks, max_chunks=5)
             for chunk in dynamic_chunks:
                 short_id = chunk.chunk_id[:8]
                 content = chunk.content[:MAX_CHARS_PER_CHUNK] if len(chunk.content) > MAX_CHARS_PER_CHUNK else chunk.content
@@ -361,6 +417,11 @@ class EvidenceController:
             "mr": "Marathi (Devanagari script)",
             "bn": "Bengali (Bengali script)",
             "ta": "Tamil (Tamil script)",
+            "te": "Telugu (Telugu script)",
+            "kn": "Kannada (Kannada script)",
+            "pa": "Punjabi (Gurmukhi script)",
+            "or": "Odia (Odia script)",
+            "ml": "Malayalam (Malayalam script)",
         }
         lang_name = _LANG_NAMES.get(lang, lang)
 
@@ -473,9 +534,11 @@ class EvidenceController:
             return EvidenceSufficiency.INSUFFICIENT
 
         # BALANCED
-        if (static_high + web_high) >= 3:
+        if (static_high + web_high) >= 4:
             return EvidenceSufficiency.SUFFICIENT
-        if total >= 2:
+        if (static_high + web_high) >= 2:
+            return EvidenceSufficiency.PARTIAL
+        if total >= 1:
             return EvidenceSufficiency.PARTIAL
         return EvidenceSufficiency.INSUFFICIENT
 
@@ -499,3 +562,52 @@ class EvidenceController:
             EvidenceSufficiency.EMPTY: "No relevant evidence found. Do not generate a general knowledge answer.",
         }
         return f"{role_text[source_role]} {sufficiency_text[sufficiency]}"
+
+    def _deduplicate_and_select(
+        self,
+        chunks: list[EvidenceChunk],
+        max_chunks: int = 7,
+    ) -> list[EvidenceChunk]:
+        """Select best chunks with deduplication and source diversity.
+
+        Strategy:
+        1. Deduplicate by document + section (keep highest-scored)
+        2. Ensure diversity: at least 2 different documents if available
+        3. Select top-N by dense_score
+        """
+        if not chunks:
+            return []
+
+        # Deduplicate by document+section, keeping highest-scored
+        seen_sections: dict[str, EvidenceChunk] = {}
+        for chunk in chunks:
+            doc_id = chunk.metadata.get("document_id", "") if chunk.metadata else ""
+            section_key = f"{doc_id}|{chunk.section}|{chunk.page}"
+            existing = seen_sections.get(section_key)
+            if not existing or (chunk.dense_score or 0) > (existing.dense_score or 0):
+                seen_sections[section_key] = chunk
+
+        deduped = list(seen_sections.values())
+
+        # Sort by score descending
+        deduped.sort(key=lambda c: -(c.dense_score or 0))
+
+        # Ensure source diversity: at least 2 different documents if available
+        if len(deduped) > 2:
+            doc_ids = set()
+            diverse: list[EvidenceChunk] = []
+            # First pass: pick best from each document
+            for chunk in deduped:
+                doc_id = chunk.metadata.get("document_id", "") if chunk.metadata else ""
+                if doc_id and doc_id not in doc_ids:
+                    doc_ids.add(doc_id)
+                    diverse.append(chunk)
+            # Second pass: fill remaining slots by score
+            for chunk in deduped:
+                if len(diverse) >= max_chunks:
+                    break
+                if chunk not in diverse:
+                    diverse.append(chunk)
+            return diverse[:max_chunks]
+
+        return deduped[:max_chunks]
