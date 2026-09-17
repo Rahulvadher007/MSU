@@ -20,19 +20,8 @@ def translate(req: TranslateRequest):
     from app.config import get_settings
     settings = get_settings()
 
-    # Try Sarvam first
-    try:
-        from app.providers.sarvam_translator import SarvamTranslator
-        translator = SarvamTranslator(settings)
-        results = []
-        for text in req.texts:
-            translated = translator.translate(text, to=req.target_language, source=req.source_language)
-            results.append(translated)
-        return {"translations": results}
-    except Exception:
-        pass
-
-    # Fallback: Azure Translator
+    # Client-side utility translation uses Azure only. Sarvam is reserved for
+    # chat and grievance language boundaries.
     try:
         from app.providers.translator import AzureTranslator
         translator = AzureTranslator(settings)

@@ -509,7 +509,8 @@ class EvidenceController:
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
-            f"6. Use markdown formatting (bullet points for lists, bold for key terms) to structure your answer cleanly.\n"
+            f"6. Use markdown formatting to make the answer easy to scan. Start with a one-sentence direct answer, then use a short heading and bullet points for each distinct type, condition, step, or document. Keep each bullet to one or two short sentences and leave a blank line between sections. Do not write one long paragraph when the evidence contains multiple items. Bold only key terms and names.\n"
+            f"7. Preserve the requested language and script throughout the answer. Translate explanatory text, but keep official scheme names, legal names, acronyms, section numbers, dates, amounts, and citation markers unchanged.\n"
             f"{enum_instruction}"
         )
 

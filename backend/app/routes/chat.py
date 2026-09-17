@@ -14,6 +14,8 @@ import asyncio
 import json
 import logging
 import queue
+import re
+import time
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Literal
@@ -595,7 +597,12 @@ def _translate_to_english(question: str, input_lang: str, settings: Settings) ->
     sarvam = SarvamTranslator(settings)
     if sarvam.configured:
         try:
-            return sarvam.translate(question, to="en", source=input_lang)
+            return sarvam.translate(
+                question,
+                to="en",
+                source=input_lang,
+                translation_stage="input_query",
+            )
         except Exception:
             logger.warning("Sarvam translation failed, trying Azure")
     try:
@@ -615,21 +622,45 @@ def _translate_from_english(text: str, target_lang: str, settings: Settings) -> 
     """
     if target_lang == "en":
         return text
+    text = str(text)
+    translation_start = time.monotonic()
+    citation_tokens: dict[str, str] = {}
+    protected_text = text
+    for index, marker in enumerate(re.findall(r"\[(?:chunk|web_)[^\]]+\]", text)):
+        token = f"TRANSLATIONCITATION{index}END"
+        citation_tokens[token] = marker
+        protected_text = protected_text.replace(marker, token, 1)
     sarvam = SarvamTranslator(settings)
     if sarvam.configured:
         try:
-            translated = sarvam.translate(text, to=target_lang, source="en")
-            if translated != text:
+            translated = sarvam.translate(
+                protected_text,
+                to=target_lang,
+                source="en",
+                translation_stage="final_answer",
+            )
+            if translated != protected_text:
+                translated = _restore_translation_tokens(translated, citation_tokens)
+                logger.info(
+                    "translation_stage=final_answer final_translation_ms=%.0f",
+                    (time.monotonic() - translation_start) * 1000,
+                )
                 return translated
         except Exception:
             logger.warning("Sarvam back-translation failed")
     try:
-        translated = AzureTranslator(settings).translate(text, to=target_lang, source="en")
-        if translated != text:
-            return translated
+        translated = AzureTranslator(settings).translate(protected_text, to=target_lang, source="en")
+        if translated != protected_text:
+            return _restore_translation_tokens(translated, citation_tokens)
     except Exception:
         logger.warning("Azure back-translation failed")
     logger.warning("All translation providers failed for '%s' → %s", target_lang, text[:80])
+    return text
+
+
+def _restore_translation_tokens(text: str, tokens: dict[str, str]) -> str:
+    for token, original in tokens.items():
+        text = text.replace(token, original)
     return text
 
 
@@ -1005,7 +1036,7 @@ async def chat(req: ChatRequest) -> dict:
             lang=ctx.lang,
             session_id=req.session_id,
             language_mix=ctx.language_mix,
-            model_override=req.mode,
+            pipeline_mode=req.mode,
         )
 
         # The LLM is instructed to respond in the user's language directly.
@@ -1357,11 +1388,11 @@ async def chat_stream(req: ChatRequest):
                 lang=ctx.lang,
                 session_id=req.session_id,
                 language_mix=ctx.language_mix,
-                model_override=req.mode,
+                pipeline_mode=req.mode,
             )
 
-            # Sarvam generates directly in user's language; only translate for Groq fallback
-            if rag_response.mode == "groq_fallback" and ctx.lang != "en":
+            # Keep the final language conversion at one explicit response boundary.
+            if ctx.lang != "en":
                 rag_response.answer = _translate_from_english(rag_response.answer, ctx.lang, ctx.settings)
                 rag_response.speech_text = prepare_speech_text(rag_response.answer)
                 rag_response.speech_segments = segment_speech(rag_response.answer, ctx.lang)

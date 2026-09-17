@@ -14,10 +14,11 @@ from app.key_rotator import KeyRotator
 class JinaReranker:
     """Thin wrapper around Jina Reranker v2 API."""
 
-    def __init__(self) -> None:
+    def __init__(self, timeout_s: float | None = None) -> None:
         settings = get_settings()
         self._model = settings.reranker_model
         self._endpoint = "https://api.jina.ai/v1/rerank"
+        self._timeout_s = timeout_s if timeout_s is not None else settings.jina_reranker_timeout_s
         keys = settings.jina_keys
         self._rotator = KeyRotator(keys, name="jina-reranker") if keys else None
 
@@ -52,7 +53,7 @@ class JinaReranker:
 
         try:
             def _rerank_with_key(key: str) -> list[dict]:
-                with httpx.Client(timeout=REQUEST_TIMEOUT_S) as client:
+                with httpx.Client(timeout=self._timeout_s) as client:
                     resp = client.post(
                         self._endpoint,
                         headers={
