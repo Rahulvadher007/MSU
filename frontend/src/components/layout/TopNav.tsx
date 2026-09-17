@@ -127,23 +127,22 @@ export function TopNav() {
 
             <LanguageSwitcher />
 
+            <Link
+              href="/chat"
+              className="hidden h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--on-primary)] transition-colors duration-150 hover:bg-[#1a1a1a] md:inline-flex"
+            >
+              {t("nav.chat")}
+            </Link>
+
             {isSignedIn ? (
               <UserButton />
             ) : (
-              <>
-                <Link
-                  href="/sign-in"
-                  className="hidden h-10 items-center justify-center rounded-full border border-[var(--hairline)] px-4 text-[14px] font-medium text-[var(--ink)] transition-colors duration-150 hover:bg-[var(--canvas-secondary)] md:inline-flex"
-                >
-                  {t("nav.signIn") ?? "Sign In"}
-                </Link>
-                <Link
-                  href="/chat"
-                  className="hidden h-10 items-center justify-center rounded-full bg-[var(--primary)] px-5 text-[14px] font-semibold text-[var(--on-primary)] transition-colors duration-150 hover:bg-[#1a1a1a] md:inline-flex"
-                >
-                  {t("nav.chat")}
-                </Link>
-              </>
+              <Link
+                href="/sign-in"
+                className="hidden h-10 items-center justify-center rounded-full border border-[var(--hairline)] px-4 text-[14px] font-medium text-[var(--ink)] transition-colors duration-150 hover:bg-[var(--canvas-secondary)] md:inline-flex"
+              >
+                {t("nav.signIn") ?? "Sign In"}
+              </Link>
             )}
 
             <HamburgerMenu />

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 
 import httpx
 from fastapi import Request, HTTPException
@@ -12,31 +13,41 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-_CLERK_JWKS_CACHE: dict = {}
-_CLERK_JWKS_URL_CACHE: str = ""
+_JWKS_TTL_SECONDS = 3600  # re-fetch keys every hour
+
+_jwks_cache: dict = {}
+_jwks_url: str = ""
+_jwks_fetched_at: float = 0.0
 
 
-def _get_jwks() -> dict:
-    """Fetch and cache Clerk's JWKS keys."""
-    global _CLERK_JWKS_CACHE, _CLERK_JWKS_URL_CACHE
+async def _get_jwks() -> dict:
+    """Fetch and cache Clerk's JWKS keys with TTL."""
+    global _jwks_cache, _jwks_url, _jwks_fetched_at
+
     s = get_settings()
     if not s.clerk_issuer:
         return {}
+
     url = f"{s.clerk_issuer}/.well-known/jwks.json"
-    if url == _CLERK_JWKS_URL_CACHE and _CLERK_JWKS_CACHE:
-        return _CLERK_JWKS_CACHE
+    now = time.monotonic()
+
+    if _jwks_cache and _jwks_url == url and (now - _jwks_fetched_at) < _JWKS_TTL_SECONDS:
+        return _jwks_cache
+
     try:
-        resp = httpx.get(url, timeout=10)
-        resp.raise_for_status()
-        _CLERK_JWKS_CACHE = resp.json()
-        _CLERK_JWKS_URL_CACHE = url
-        return _CLERK_JWKS_CACHE
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            _jwks_cache = resp.json()
+            _jwks_url = url
+            _jwks_fetched_at = now
+            return _jwks_cache
     except Exception:
         logger.exception("Failed to fetch Clerk JWKS")
-        return _CLERK_JWKS_CACHE
+        return _jwks_cache  # return stale cache on failure
 
 
-def verify_clerk_token(request: Request) -> str | None:
+async def verify_clerk_token(request: Request) -> str | None:
     """Extract and verify Clerk session JWT. Returns user_id or None."""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
@@ -46,7 +57,7 @@ def verify_clerk_token(request: Request) -> str | None:
     if not s.clerk_issuer or not s.clerk_secret_key:
         return None
     try:
-        jwks = _get_jwks()
+        jwks = await _get_jwks()
         if not jwks:
             return None
 
@@ -70,7 +81,7 @@ def verify_clerk_token(request: Request) -> str | None:
 
 async def require_auth(request: Request) -> str:
     """FastAPI dependency — returns user_id or raises 401."""
-    user_id = verify_clerk_token(request)
+    user_id = await verify_clerk_token(request)
     if not user_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return user_id
