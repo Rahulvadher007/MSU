@@ -50,6 +50,65 @@ _STATE_INDICATORS: dict[str, list[str]] = {
 
 _YEAR_PATTERN = re.compile(r"\b(20\d{2})\b")
 
+# Enumeration detection patterns
+_ENUMERATION_KEYWORDS_EN = [
+    "types", "categories", "kinds", "varieties",
+    "eligibility", "eligible", "requirements", "required", "criteria",
+    "documents", "papers", "certificates",
+    "steps", "procedure", "process",
+    "benefits", "advantages", "features",
+    "exclusions", "exceptions", "restrictions",
+    "coverage", "covered", "included",
+    "authorities", "offices", "departments",
+]
+
+_ENUMERATION_KEYWORDS_HI = [
+    "प्रकार", "श्रेणियां", "किस्में",
+    "पात्रता", "पात्र", "आवश्यकताएं", "आवश्यक", "मापदंड",
+    "दस्तावेज", "कागजात", "प्रमाणपत्र",
+    "चरण", "प्रक्रिया", "विधि",
+    "लाभ", "फायदे", "विशेषताएं",
+    "बहिष्करण", "अपवाद", "प्रतिबंध",
+    "कवरेज", "शामिल", "कवर",
+    "अधिकारियों", "कार्यालयों", "विभागों",
+]
+
+_ENUMERATION_KEYWORDS_GU = [
+    "પ્રકાર", "શ્રેણીઓ", "જાતો",
+    "પાત્રતા", "પાત્ર", "જરૂરિયાતો", "જરૂરી", "માપદંડો",
+    "દસ્તાવેજો", "કાગળો", "પ્રમાણપત્રો",
+    "પગલાં", "પ્રક્રિયા", "રીત",
+    "ફાયદા", "લાભો", "વિશેષતાઓ",
+    "બહિષ્કરણ", "અપવાદો", "પ્રતિબંધો",
+    "કવરેજ", "સામેલ", "આવરી",
+    "અધિકારીઓ", "કચેરીઓ", "વિભાગો",
+]
+
+
+def detect_enumeration_question(question: str) -> bool:
+    """Detect if user question asks for an enumeration/list.
+
+    Returns True if question contains keywords like types, categories,
+    eligibility, requirements, documents, steps, benefits, exclusions,
+    coverage, authorities.
+    """
+    q = question.lower()
+
+    # Check English keywords
+    if any(kw in q for kw in _ENUMERATION_KEYWORDS_EN):
+        return True
+
+    # Check Hindi keywords
+    if any(kw in question for kw in _ENUMERATION_KEYWORDS_HI):
+        return True
+
+    # Check Gujarati keywords
+    if any(kw in question for kw in _ENUMERATION_KEYWORDS_GU):
+        return True
+
+    return False
+
+
 # Gujarat districts (common)
 _GUJARAT_DISTRICTS: list[str] = [
     "surat", "valsad", "navsari", "bardoli", "ahmedabad", "rajkot",
