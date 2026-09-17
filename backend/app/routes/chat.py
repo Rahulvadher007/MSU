@@ -19,10 +19,11 @@ from dataclasses import dataclass
 from functools import lru_cache
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
+from app.auth import require_auth
 from app.config import Settings, get_settings
 from app.domains import get_anchor_store
 from app.grievance.workflow import GrievanceWorkflow, load_grievance_state
@@ -819,7 +820,7 @@ async def _resolve_context(req: ChatRequest) -> _ChatContext:
 
 
 @router.post("/chat")
-async def chat(req: ChatRequest) -> dict:
+async def chat(req: ChatRequest, user_id: str = Depends(require_auth)) -> dict:
     question = req.question.strip()
     if not question:
         return _abstain(req.language, session_id=req.session_id)
@@ -1168,7 +1169,7 @@ def _sse_event(event: str, data: dict | str) -> str:
 
 
 @router.post("/chat/stream")
-async def chat_stream(req: ChatRequest):
+async def chat_stream(req: ChatRequest, user_id: str = Depends(require_auth)):
     """Streaming version — delegates to orchestrator, emits SSE events."""
 
     async def generate():
