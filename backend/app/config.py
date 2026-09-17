@@ -77,6 +77,11 @@ class Settings(BaseSettings):
     # Grievance & evidence
     grievance_gemini_model: str = "gemini-3.5-flash-lite"
 
+    # Clerk authentication
+    clerk_secret_key: str = ""
+    clerk_webhook_secret: str = ""
+    clerk_issuer: str = ""  # e.g. "https://clerk.your-app.com"
+
     @property
     def tts_voices(self) -> dict[str, str]:
         """Parse azure_tts_voices into a dict."""
