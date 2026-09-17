@@ -73,6 +73,7 @@ async def _upsert_user(user: dict) -> None:
         )
         if resp.status_code >= 400:
             logger.error("Failed to upsert user: %s %s", resp.status_code, resp.text)
+            raise HTTPException(status_code=500, detail="Failed to upsert user")
 
 
 async def _delete_user(user_id: str) -> None:
@@ -86,11 +87,13 @@ async def _delete_user(user_id: str) -> None:
             headers={
                 "apikey": s.supabase_service_key,
                 "Authorization": f"Bearer {s.supabase_service_key}",
+                "Content-Type": "application/json",
             },
             timeout=10,
         )
         if resp.status_code >= 400:
             logger.error("Failed to delete user: %s %s", resp.status_code, resp.text)
+            raise HTTPException(status_code=500, detail="Failed to delete user")
 
 
 @router.post("/clerk")
@@ -105,7 +108,10 @@ async def clerk_webhook(request: Request):
         if not _verify_svix_signature(body, headers, s.clerk_webhook_secret):
             raise HTTPException(status_code=400, detail="Invalid signature")
 
-    payload = json.loads(body)
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid JSON payload")
     event_type = payload.get("type", "")
     data = payload.get("data", {})
 
