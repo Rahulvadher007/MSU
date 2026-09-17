@@ -1,6 +1,5 @@
 "use client";
 import { useState, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { useI18n } from "@/lib/i18n/provider";
 import { createSpeechService } from "@/lib/speech";
 import {
@@ -83,6 +82,24 @@ export default function GrievancePage() {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const startOver = useCallback(() => {
+    setStep("intake");
+    setComplaint("");
+    setClassification(null);
+    setMandatoryFields([]);
+    setOptionalFields([]);
+    setFieldAnswers({});
+    setActiveFieldIdx(0);
+    setShowOptional(false);
+    setShowClarify(false);
+    setClarification("");
+    setClassificationBusy(false);
+    setFieldsBusy(false);
+    setGrievance(null);
+    setError("");
+    setLoading(false);
+  }, []);
 
   const currentStepIdx = STEP_ORDER.indexOf(step);
   const steps = STEP_LABELS_KEY.map((k) => t(k));
@@ -649,6 +666,23 @@ export default function GrievancePage() {
                     </>
                   )}
 
+                  {grievance.fields && Object.keys(grievance.fields).length > 0 && (
+                    <>
+                      <Divider />
+                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--text-faint)]">
+                        {t("grievanceCard.fields")}
+                      </p>
+                      {Object.keys(grievance.fields).map((key) => {
+                        const value = grievance.fields![key];
+                        const camelKey = key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+                        const i18nKey = `field.${camelKey}` as Parameters<typeof t>[0];
+                        const translated = t(i18nKey);
+                        const label = translated !== i18nKey ? translated : key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+                        return <Row key={key} label={label} value={value} />;
+                      })}
+                    </>
+                  )}
+
                   {grievance.submission && (grievance.submission.portal_name || grievance.submission.portal_url) && (
                     <>
                       <Divider />
@@ -717,13 +751,14 @@ export default function GrievancePage() {
 
                 <div className="border-t border-[var(--border-soft)] px-4 sm:px-6 py-4">
                   <div className="flex justify-center">
-                    <Link
-                      href="/grievance"
+                    <button
+                      type="button"
+                      onClick={startOver}
                       className="inline-flex items-center gap-2 rounded-[var(--radius-cta)] bg-[var(--accent-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--accent-contrast)] transition-colors hover:bg-[var(--accent-hover)]"
                     >
                       {t("grievanceWizard.newComplaint")}
                       <IconChevronRight className="h-4 w-4" />
-                    </Link>
+                    </button>
                   </div>
                 </div>
               </div>
