@@ -7,13 +7,15 @@ import { FloatingChatWidget } from "@/components/FloatingChatWidget";
 export function ConditionalNavs({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isChat = pathname.startsWith("/chat");
+  const isAuth = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+  const hideNav = isChat || isAuth;
 
   return (
     <>
-      {!isChat && <TopNav />}
+      {!hideNav && <TopNav />}
       <main id="content">{children}</main>
-      {!isChat && <Footer />}
-      {!isChat && <FloatingChatWidget />}
+      {!hideNav && <Footer />}
+      {!hideNav && <FloatingChatWidget />}
     </>
   );
 }
