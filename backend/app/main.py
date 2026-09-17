@@ -12,6 +12,7 @@ from app.routes.evidence import router as evidence_router
 from app.routes.grievance import router as grievance_router
 from app.routes.documents import router as documents_router
 from app.routes.translate import router as translate_router
+from app.routes.webhooks import router as webhooks_router
 
 logging.basicConfig(level=logging.INFO,
                     format='{"level":"%(levelname)s","msg":"%(message)s"}')
@@ -35,6 +36,7 @@ app.include_router(evidence_router)
 app.include_router(grievance_router)
 app.include_router(documents_router)
 app.include_router(translate_router)
+app.include_router(webhooks_router)
 
 
 @app.get("/health")
