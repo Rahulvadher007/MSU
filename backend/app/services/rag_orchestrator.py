@@ -262,7 +262,12 @@ class RAGOrchestrator:
                 )
 
         # Step 9.5: Post-generation grounding check
-        grounding_result = verify_answer_grounding(answer, all_chunks)
+        grounding_result = verify_answer_grounding(
+            answer,
+            all_chunks,
+            use_llm_verification=self._settings.answer_grounding_llm_enabled,
+            settings=self._settings,
+        )
         if grounding_result.has_unsupported_claims:
             logger.warning(
                 "Grounding check found %d unsupported claims: %s",

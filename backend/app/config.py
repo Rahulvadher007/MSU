@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     groq_api_key: str
     gemini_api_key: str = ""
     jina_api_key: str = ""
+    jina_api_key_2: str = ""
     supabase_url: str
     supabase_service_key: str
     allowed_origins: str = "http://localhost:3000"
@@ -77,6 +78,9 @@ class Settings(BaseSettings):
     # Grievance & evidence
     grievance_gemini_model: str = "gemini-3.5-flash-lite"
 
+    # Answer grounding
+    answer_grounding_llm_enabled: bool = False  # Enable LLM verification layer
+
     @property
     def tts_voices(self) -> dict[str, str]:
         """Parse azure_tts_voices into a dict."""
@@ -111,6 +115,12 @@ class Settings(BaseSettings):
     def groq_keys(self) -> list[str]:
         """Return all non-empty Groq API keys for rotation."""
         keys = [k for k in [self.groq_api_key, self.groq_api_key_1, self.groq_api_key_2] if k]
+        return keys
+
+    @property
+    def jina_keys(self) -> list[str]:
+        """Return all non-empty Jina API keys for rotation."""
+        keys = [k for k in [self.jina_api_key, self.jina_api_key_2] if k]
         return keys
 
 EMBED_DIMS = 768
