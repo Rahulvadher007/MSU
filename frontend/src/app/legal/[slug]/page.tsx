@@ -47,10 +47,10 @@ export default function LegalDetailPage() {
     return (
       <div className="px-4 pt-20 pb-24 sm:px-6 md:px-12">
         <div className="text-center">
-          <h1 className="text-[24px] font-semibold text-[var(--ink)]">Document not found</h1>
+          <h1 className="text-[24px] font-semibold text-[var(--ink)]">{t("legal.detail.notFound")}</h1>
           <Link href="/legal" className="mt-4 inline-flex items-center gap-2 text-[#3b4a8a] hover:underline">
             <IconArrowLeft className="w-4 h-4" />
-            Back to legal
+            {t("legal.detail.backToLegal")}
           </Link>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function LegalDetailPage() {
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors duration-200"
         >
           <IconArrowLeft className="w-4 h-4" />
-          All legal documents
+          {t("legal.detail.allLegal")}
         </Link>
       </Reveal>
 
@@ -123,13 +123,13 @@ export default function LegalDetailPage() {
           <Card className="h-fit lg:sticky lg:top-24">
             <div className="p-5">
               <h3 className="text-[12px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                Quick Facts
+                {t("legal.detail.quickFacts")}
               </h3>
 
               <div className="mt-4 space-y-4">
                 {/* Category */}
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Type</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("legal.detail.type")}</span>
                   <div className="mt-1 flex items-center gap-2">
                     <span
                       className="flex h-5 w-5 items-center justify-center rounded-[var(--radius-sm)]"
@@ -143,16 +143,16 @@ export default function LegalDetailPage() {
 
                 {/* Key Provisions count */}
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Key Provisions</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("legal.detail.keyProvisions")}</span>
                   <p className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
-                    {sc.keyProvisions.length} provision{sc.keyProvisions.length !== 1 ? "s" : ""} listed
+                    {t("legal.detail.provisionCount").replace("{n}", sc.keyProvisions.length.toString())}
                   </p>
                 </div>
 
                 {/* Applicability */}
                 {sc.applicability.length > 0 && (
                   <div>
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Applicability</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("legal.detail.applicability")}</span>
                     <p className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
                       {sc.applicability[0]}
                     </p>
@@ -161,7 +161,7 @@ export default function LegalDetailPage() {
 
                 {/* Source */}
                 <div className="pt-3 border-t border-[var(--hairline)]">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Source</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("legal.detail.source")}</span>
                   <a
                     href={sc.source.url}
                     target="_blank"
@@ -209,7 +209,7 @@ export default function LegalDetailPage() {
               className="text-[20px] font-medium tracking-tight text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Related documents
+              {t("legal.detail.relatedDocs")}
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {relatedDocs.map((d) => {
@@ -249,16 +249,16 @@ export default function LegalDetailPage() {
       <Reveal trigger="load">
         <section className="mt-10 rounded-[var(--radius-xl)] bg-[#3b4a8a] px-8 py-8 text-center">
           <h2 className="text-[20px] font-medium text-white md:text-[24px]">
-            Have questions about {sc.title}?
+            {t("legal.detail.haveQuestions")} {sc.title}?
           </h2>
           <p className="mt-2 text-[14px] text-white/80">
-            Our AI assistant can help you understand this law, its provisions, and how it applies to you.
+            {t("legal.detail.aiHelp")}
           </p>
           <Link
             href={`/chat?q=${encodeURIComponent(formatLegalQuestion(sc.title, locale))}`}
             className="mt-5 inline-flex items-center gap-2 rounded-[var(--radius-cta)] bg-white px-5 py-2.5 text-[14px] font-medium text-[#3b4a8a] transition-all duration-200 hover:bg-white/90 hover:scale-[1.02]"
           >
-            Start a conversation
+            {t("legal.detail.startConversation")}
             <IconChevronRight className="w-4 h-4" />
           </Link>
         </section>

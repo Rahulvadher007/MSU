@@ -65,14 +65,14 @@ const CATEGORY_ALL = "all";
 const categories = ["all", "credit", "storage", "insurance", "agro-inputs", "subsidy", "membership"] as const;
 type Filter = (typeof categories)[number];
 
-const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; decoKey: string; label: string }> = {
-  all: { icon: <IconGrid className="w-5 h-5" />, color: "var(--ink)", decoKey: "teal", label: "All" },
-  credit: { icon: <IconRupee className="w-5 h-5" />, color: "#5691c7", decoKey: "blue", label: "Credit" },
-  storage: { icon: <IconWarehouse className="w-5 h-5" />, color: "#4e99a3", decoKey: "teal", label: "Storage" },
-  insurance: { icon: <IconShield className="w-5 h-5" />, color: "#bc811e", decoKey: "gold", label: "Insurance" },
-  "agro-inputs": { icon: <IconLeaf className="w-5 h-5" />, color: "#539e55", decoKey: "green", label: "Agro services" },
-  subsidy: { icon: <IconGift className="w-5 h-5" />, color: "#9b59b6", decoKey: "purple", label: "Subsidy" },
-  membership: { icon: <IconUsers className="w-5 h-5" />, color: "#e74c3c", decoKey: "red", label: "Membership" },
+const CATEGORY_META: Record<Filter, { icon: React.ReactNode; color: string; decoKey: string; labelKey: string }> = {
+  all: { icon: <IconGrid className="w-5 h-5" />, color: "var(--ink)", decoKey: "teal", labelKey: "services.all" },
+  credit: { icon: <IconRupee className="w-5 h-5" />, color: "#5691c7", decoKey: "blue", labelKey: "services.credit" },
+  storage: { icon: <IconWarehouse className="w-5 h-5" />, color: "#4e99a3", decoKey: "teal", labelKey: "services.storage" },
+  insurance: { icon: <IconShield className="w-5 h-5" />, color: "#bc811e", decoKey: "gold", labelKey: "services.insurance" },
+  "agro-inputs": { icon: <IconLeaf className="w-5 h-5" />, color: "#539e55", decoKey: "green", labelKey: "services.agroServices" },
+  subsidy: { icon: <IconGift className="w-5 h-5" />, color: "#9b59b6", decoKey: "purple", labelKey: "services.subsidy" },
+  membership: { icon: <IconUsers className="w-5 h-5" />, color: "#e74c3c", decoKey: "red", labelKey: "services.membership" },
 };
 
 export default function ServicesPage() {
@@ -151,7 +151,7 @@ export default function ServicesPage() {
                       {meta.icon}
                     </span>
                     <span className="text-[11px] font-medium text-white/90 text-center leading-tight">
-                      {meta.label}
+                      {t(meta.labelKey)}
                     </span>
                     <span className="text-[10px] text-white/60">
                       {categoryCounts[c] ?? 0}

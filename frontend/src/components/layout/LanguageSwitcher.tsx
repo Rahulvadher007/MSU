@@ -10,6 +10,11 @@ const SHORT: Record<Locale, string> = {
   mr: "MR",
   bn: "BN",
   ta: "TA",
+  te: "TE",
+  kn: "KN",
+  pa: "PA",
+  or: "OR",
+  ml: "ML",
 };
 
 export function LanguageSwitcher({ className = "" }: { className?: string }) {

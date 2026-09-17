@@ -201,7 +201,7 @@ export default function SchemesPage() {
                   {/* WHAT IT DOES */}
                   <div className="mt-4">
                     <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
-                      What it does
+                      {t("schemes.whatItDoes")}
                     </p>
                     <p className="mt-1.5 text-[14px] leading-[1.6] text-[var(--body)] line-clamp-3">
                       {s.benefit}
@@ -212,7 +212,7 @@ export default function SchemesPage() {
                   {whoCanBenefit && (
                     <div className="mt-4">
                       <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
-                        Who can benefit
+                        {t("schemes.whoCanBenefit")}
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <IconUsers className="w-4 h-4 shrink-0 text-[var(--muted)]" />
@@ -227,7 +227,7 @@ export default function SchemesPage() {
                   {keySupport && (
                     <div className="mt-4">
                       <p className="text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
-                        Key support
+                        {t("schemes.keySupport")}
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <IconShield className="w-4 h-4 shrink-0 text-[var(--muted)]" />
@@ -241,7 +241,7 @@ export default function SchemesPage() {
                   {/* Spacer + CTA */}
                   <div className="mt-auto pt-5">
                     <div className="flex items-center gap-1 text-[13px] font-semibold text-[var(--ink)] group-hover:text-[var(--brand-teal)] transition-colors duration-200">
-                      Learn how it helps
+                      {t("schemes.learnHow")}
                       <IconChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </div>
                   </div>

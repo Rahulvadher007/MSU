@@ -41,8 +41,8 @@ interface Conversation {
   pinned?: boolean;
 }
 
-const STORAGE_KEY = "jansayah_conversations";
-const ACTIVE_CONV_KEY = "jansayah_active_conv";
+const STORAGE_KEY = "jansahay_conversations";
+const ACTIVE_CONV_KEY = "jansahay_active_conv";
 const MODELS = [
   { id: "static", label: "JanSahay v1", desc: "Static RAG" },
   { id: "web", label: "JanSahay v2", desc: "Web Search" },

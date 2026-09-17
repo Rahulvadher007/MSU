@@ -107,7 +107,7 @@ export default function SchemeDetailPage() {
               </div>
               <span className="flex items-center gap-1.5 rounded-full bg-[var(--success)]/12 px-3 py-1 text-[11px] font-semibold text-[var(--success)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
-                Active
+                {t("schemes.detail.active")}
               </span>
             </div>
 
@@ -137,7 +137,7 @@ export default function SchemeDetailPage() {
                   style={{ color: "white" }}
                 >
                   <IconChat className="w-4 h-4" />
-                  Ask AI
+                  {t("schemes.detail.askAI")}
                 </Button>
               </Link>
             </div>
@@ -146,7 +146,7 @@ export default function SchemeDetailPage() {
             <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--hairline)] pt-4 text-[13px] text-[var(--muted)]">
               <span className="flex items-center gap-1.5">
                 <IconUsers className="w-3.5 h-3.5" />
-                {eligibility[0] ?? "Farmers"}
+                {eligibility[0] ?? t("schemes.detail.farmers")}
               </span>
               <span className="flex items-center gap-1.5">
                 <IconShield className="w-3.5 h-3.5" />
@@ -154,11 +154,11 @@ export default function SchemeDetailPage() {
               </span>
               <span className="flex items-center gap-1.5">
                 <IconBuilding className="w-3.5 h-3.5" />
-                Bank / PACS
+                {t("schemes.detail.bankOrPacs")}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-[var(--success)]" />
-                Active
+                {t("schemes.detail.active")}
               </span>
             </div>
           </div>
@@ -174,13 +174,13 @@ export default function SchemeDetailPage() {
       <Reveal trigger="load">
         <div className="mt-10 rounded-[var(--radius-xl)] border border-[var(--hairline)] bg-[var(--surface-elevated)] p-6 md:p-8">
           <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[var(--muted)]">
-            Quick overview
+            {t("schemes.detail.overview")}
           </p>
           <h2
             className="mt-3 text-[18px] font-semibold text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            What is it?
+            {t("schemes.detail.whatIsIt")}
           </h2>
           <p
             className="mt-2 text-[15px] leading-[1.75] text-[var(--body)]"
@@ -202,7 +202,7 @@ export default function SchemeDetailPage() {
               className="text-[18px] font-semibold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Who can apply?
+              {t("schemes.detail.whoCanApply")}
             </h2>
             <ul className="mt-4 space-y-3">
               {eligibility.map((item, i) => (
@@ -224,7 +224,7 @@ export default function SchemeDetailPage() {
               className="text-[18px] font-semibold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              What do you get?
+              {t("schemes.detail.whatDoYouGet")}
             </h2>
             <ul className="mt-4 space-y-3">
               {benefits.map((item, i) => (
@@ -252,7 +252,7 @@ export default function SchemeDetailPage() {
               className="text-[18px] font-semibold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              How to apply
+              {t("schemes.detail.howToApply")}
             </h2>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {howToApply.map((step, i) => (
@@ -282,7 +282,7 @@ export default function SchemeDetailPage() {
             className="text-[18px] font-semibold text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Key benefits
+            {t("schemes.detail.keyBenefits")}
           </h2>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {benefits.slice(0, 3).map((b, i) => (
@@ -314,7 +314,7 @@ export default function SchemeDetailPage() {
               className="text-[18px] font-semibold text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              Document checklist
+              {t("schemes.detail.documentChecklist")}
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {documents.map((doc, i) => (
@@ -336,17 +336,17 @@ export default function SchemeDetailPage() {
       <Reveal trigger="load">
         <section className="mt-10 rounded-[var(--radius-xl)] px-8 py-8 text-center" style={{ backgroundColor: catColor }}>
           <h2 className="text-[20px] font-medium text-white md:text-[24px]">
-            Have questions about {sc.name}?
+            {t("schemes.detail.haveQuestions").replace("{name}", sc.name)}
           </h2>
           <p className="mt-2 text-[14px] text-white/80">
-            Our AI assistant can help you understand eligibility, documents needed, and how to apply.
+            {t("schemes.detail.aiHelp")}
           </p>
           <Link
             href={`/chat?scheme=${sc.slug}&name=${encodeURIComponent(sc.name)}`}
             className="mt-5 inline-flex items-center gap-2 rounded-[var(--radius-cta)] bg-white px-5 py-2.5 text-[14px] font-medium transition-all duration-200 hover:bg-white/90 hover:scale-[1.02]"
             style={{ color: catColor }}
           >
-            Start a conversation
+            {t("schemes.detail.startConversation")}
             <IconChevronRight className="w-4 h-4" />
           </Link>
         </section>

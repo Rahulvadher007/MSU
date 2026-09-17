@@ -49,39 +49,6 @@ const REVIEWS = [
   },
 ];
 
-const BENTO_CARDS = [
-  {
-    icon: <IconGlobe className="w-7 h-7" />,
-    title: "Multilingual",
-    text: "Instantly translate complex governance — schemes, rights, legal provisions — into clear, native-language answers.",
-  },
-  {
-    icon: <IconDoc className="w-7 h-7" />,
-    title: "Voice-enabled",
-    text: "Ask questions and receive answers aloud — designed for every literacy level.",
-  },
-  {
-    icon: <IconMic className="w-7 h-7" />,
-    title: "Evidence-backed",
-    text: "Every response anchored to verified official sources and legal citations.",
-  },
-  {
-    icon: <IconShield className="w-7 h-7" />,
-    title: "6 Languages",
-    text: "Full support across Hindi, Gujarati, Marathi, Bengali, Tamil, and English.",
-  },
-  {
-    icon: <IconSparkles className="w-7 h-7" />,
-    title: "Secure & Private",
-    text: "Your conversations stay protected — no data sold, no tracking.",
-  },
-  {
-    icon: <IconChat className="w-7 h-7" />,
-    title: "Guided Next Steps",
-    text: "From eligibility checks to grievance filing — actionable paths, not just information.",
-  },
-];
-
 const HOW_STEPS = [
   {
     num: "01",
@@ -112,6 +79,39 @@ const HOW_STEPS = [
 
 export default function HomePage() {
   const { t } = useI18n();
+
+  const BENTO_CARDS = [
+    {
+      icon: <IconGlobe className="w-7 h-7" />,
+      title: t("landing.bento1title"),
+      text: t("landing.bento1text"),
+    },
+    {
+      icon: <IconDoc className="w-7 h-7" />,
+      title: t("landing.bento2title"),
+      text: t("landing.bento2text"),
+    },
+    {
+      icon: <IconMic className="w-7 h-7" />,
+      title: t("landing.bento3title"),
+      text: t("landing.bento3text"),
+    },
+    {
+      icon: <IconShield className="w-7 h-7" />,
+      title: t("landing.bento4title"),
+      text: t("landing.bento4text"),
+    },
+    {
+      icon: <IconSparkles className="w-7 h-7" />,
+      title: t("landing.bento5title"),
+      text: t("landing.bento5text"),
+    },
+    {
+      icon: <IconChat className="w-7 h-7" />,
+      title: t("landing.bento6title"),
+      text: t("landing.bento6text"),
+    },
+  ];
 
   const stats = [
     { n: rawSchemes.length, label: t("nav.schemes") },
@@ -295,7 +295,7 @@ export default function HomePage() {
             className="mt-3 text-[30px] font-medium tracking-tight text-[var(--ink)] md:text-[40px]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            Trusted by Cooperative Members Across India
+            {t("landing.reviewsTitle")}
           </h2>
         </Reveal>
 

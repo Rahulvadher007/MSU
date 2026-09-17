@@ -37,10 +37,10 @@ export default function ServiceDetailPage() {
     return (
       <div className="px-4 pt-20 pb-24 sm:px-6 md:px-12">
         <div className="text-center">
-          <h1 className="text-[24px] font-semibold text-[var(--ink)]">Service not found</h1>
+          <h1 className="text-[24px] font-semibold text-[var(--ink)]">{t("services.detail.notFound")}</h1>
           <Link href="/services" className="mt-4 inline-flex items-center gap-2 text-[var(--brand-teal)] hover:underline">
             <IconArrowLeft className="w-4 h-4" />
-            Back to services
+            {t("services.detail.backToServices")}
           </Link>
         </div>
       </div>
@@ -59,7 +59,7 @@ export default function ServiceDetailPage() {
           className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[var(--muted)] hover:text-[var(--ink)] transition-colors duration-200"
         >
           <IconArrowLeft className="w-4 h-4" />
-          All services
+          {t("services.detail.allServices")}
         </Link>
       </Reveal>
 
@@ -94,7 +94,7 @@ export default function ServiceDetailPage() {
 
             {/* Who it's for — inline chips */}
             <div className="mt-5 flex flex-wrap items-center gap-2">
-              <span className="text-[12px] font-semibold uppercase tracking-wider text-[var(--muted)]">For</span>
+              <span className="text-[12px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("services.detail.for")}</span>
               {service.whoCanUse.map((item, i) => (
                 <span
                   key={i}
@@ -121,13 +121,13 @@ export default function ServiceDetailPage() {
           <Card className="h-fit lg:sticky lg:top-24">
             <div className="p-5">
               <h3 className="text-[12px] font-semibold uppercase tracking-wider text-[var(--muted)]">
-                Quick Facts
+                {t("services.detail.quickFacts")}
               </h3>
 
               <div className="mt-4 space-y-4">
                 {/* ACCESS */}
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Access</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("services.detail.access")}</span>
                   <p className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
                     {service.howToAccess[0]}
                   </p>
@@ -135,7 +135,7 @@ export default function ServiceDetailPage() {
 
                 {/* BENEFITS */}
                 <div>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Benefits</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("services.detail.benefits")}</span>
                   <p className="mt-1 text-[13px] leading-snug text-[var(--ink)]">
                     {service.summary}
                   </p>
@@ -143,7 +143,7 @@ export default function ServiceDetailPage() {
 
                 {/* Source */}
                 <div className="pt-3 border-t border-[var(--hairline)]">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">Source</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)]">{t("services.detail.source")}</span>
                   <a
                     href={service.source.url}
                     target="_blank"
@@ -166,7 +166,7 @@ export default function ServiceDetailPage() {
             className="text-[20px] font-medium tracking-tight text-[var(--ink)]"
             style={{ fontFamily: "var(--font-display)" }}
           >
-            How to join
+            {t("services.detail.howToJoin")}
           </h2>
           <div className="mt-5 flex flex-col gap-3">
             {service.howToAccess.map((step, i) => (
@@ -191,7 +191,7 @@ export default function ServiceDetailPage() {
               className="text-[20px] font-medium tracking-tight text-[var(--ink)]"
               style={{ fontFamily: "var(--font-display)" }}
             >
-              What you get
+              {t("services.detail.whatYouGet")}
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {whatYouGet.map((s) => {
@@ -231,17 +231,17 @@ export default function ServiceDetailPage() {
       <Reveal trigger="load">
         <section className="mt-10 rounded-[var(--radius-xl)] px-8 py-8 text-center" style={{ backgroundColor: meta.color }}>
           <h2 className="text-[20px] font-medium text-white md:text-[24px]">
-            Have questions about {service.name}?
+            {t("services.detail.haveQuestions")}
           </h2>
           <p className="mt-2 text-[14px] text-white/80">
-            Our AI assistant can help you understand eligibility, process, and next steps.
+            {t("services.detail.aiHelp")}
           </p>
           <Link
             href="/chat"
             className="mt-5 inline-flex items-center gap-2 rounded-[var(--radius-cta)] bg-white px-5 py-2.5 text-[14px] font-medium transition-all duration-200 hover:bg-white/90 hover:scale-[1.02]"
             style={{ color: meta.color }}
           >
-            Start a conversation
+            {t("services.detail.startConversation")}
             <IconChevronRight className="w-4 h-4" />
           </Link>
         </section>

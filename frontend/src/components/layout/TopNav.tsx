@@ -63,7 +63,7 @@ export function TopNav() {
               className="flex items-center gap-2.5 px-3 py-2"
             >
               <img
-                src="/goverment.png"
+                src="/favicon.ico"
                 alt="JanSahay logo"
                 className="h-9 w-9 rounded-full object-cover"
               />

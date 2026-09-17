@@ -134,13 +134,14 @@ class RAGOrchestrator:
         # Step 1: Classify query requirements
         query_requirements = self._query_classifier.classify(query, lang)
 
-        # Step 2: Run both pipelines in parallel via asyncio.gather
+        # Step 2: Run pipelines based on mode
         static_result, web_result = await self._run_pipelines(
             english_query=english_query,
             embedding=embedding,
             domain=domain,
             state=state,
             classification=classification,
+            mode=model_override,
         )
 
         if on_step:
@@ -336,21 +337,71 @@ class RAGOrchestrator:
         domain: str,
         state: str | None,
         classification: QueryClassification | None,
+        mode: str | None = None,
     ) -> tuple[RAGResult, RAGResult]:
-        """Run static and web RAG pipelines in parallel via asyncio.gather."""
+        """Run static and/or web RAG pipelines based on mode.
+
+        Modes:
+          - "static": Static RAG only (no web search)
+          - "web": Web RAG only (no static retrieval)
+          - "rag_web" or None: Both pipelines in parallel (default)
+        """
+        abstain = RAGResult(
+            chunks=[], abstained=True,
+            reason=AbstentionReason.NO_ELIGIBLE_SOURCE, domain=domain,
+        )
+
+        # Static-only mode (V1)
+        if mode == "static":
+            try:
+                static_result = await asyncio.to_thread(
+                    self._static_rag.retrieve,
+                    embedding=embedding, query=english_query,
+                    domain=domain, state=state,
+                )
+            except Exception:
+                logger.exception("Static RAG pipeline failed")
+                static_result = RAGResult(
+                    chunks=[], abstained=True,
+                    reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
+                )
+            return static_result, abstain
+
+        # Web-only mode (V2)
+        if mode == "web":
+            try:
+                web_result = await asyncio.wait_for(
+                    asyncio.to_thread(
+                        self._web_rag.retrieve,
+                        query=english_query, domain=domain,
+                        state=state, classification=classification,
+                    ),
+                    timeout=90.0,
+                )
+            except asyncio.TimeoutError:
+                logger.warning("Web RAG timed out after 90s")
+                web_result = RAGResult(
+                    chunks=[], abstained=True,
+                    reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
+                )
+            except Exception:
+                logger.exception("Web RAG pipeline failed")
+                web_result = RAGResult(
+                    chunks=[], abstained=True,
+                    reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
+                )
+            return abstain, web_result
+
+        # Dual mode (V3) — both pipelines in parallel
         static_coro = asyncio.to_thread(
             self._static_rag.retrieve,
-            embedding=embedding,
-            query=english_query,
-            domain=domain,
-            state=state,
+            embedding=embedding, query=english_query,
+            domain=domain, state=state,
         )
         web_coro = asyncio.to_thread(
             self._web_rag.retrieve,
-            query=english_query,
-            domain=domain,
-            state=state,
-            classification=classification,
+            query=english_query, domain=domain,
+            state=state, classification=classification,
         )
 
         # Wrap web RAG with a hard timeout so slow search/embeddings

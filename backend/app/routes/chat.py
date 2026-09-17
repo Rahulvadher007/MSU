@@ -569,7 +569,7 @@ def _translate_grievance_response_back(
 class ChatRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     session_id: str
-    language: Literal["en", "hi", "gu", "mr", "bn", "ta"]
+    language: Literal["en", "hi", "gu", "mr", "bn", "ta", "te", "kn", "pa", "or", "ml"]
     ui_language_explicit: bool = False
     state: str | None = None
     as_of_date: str | None = None
@@ -1006,6 +1006,7 @@ async def chat(req: ChatRequest) -> dict:
             lang=ctx.lang,
             session_id=req.session_id,
             language_mix=ctx.language_mix,
+            model_override=req.mode,
         )
 
         # The LLM is instructed to respond in the user's language directly.
@@ -1037,6 +1038,11 @@ _THINKING_MESSAGES = {
     "mr": ["अधिकृत दस्तावेज आणि वेब शोधत आहोत...", "दोन्ही स्रोतांमधून पुराव्याचे विश्लेषण...", "उत्तर तयार करत आहोत..."],
     "bn": ["সরকারি নথিপত্র এবং ওয়েব খুঁজছি...", "উভয় উৎস থেকে প্রমাণ বিশ্লেষণ...", "উত্তর প্রস্তুত করছি..."],
     "ta": ["அதிகாரப்பூர்வ ஆவணங்கள் மற்றும் வலைத்தளத்தை தேடுகிறோம்...", "இரண்டு மூலங்களிலிருந்தும் சான்றுகளை பகுப்பாய்வு செய்கிறோம்...", "பதிலை தயாரிக்கிறோம்..."],
+    "te": ["అధికారిక పత్రాలు మరియు వెబ్‌ను శోధిస్తోంది...", "రెండు మూలాల నుండి సాక్ష్యాలను విశ్లేషిస్తోంది...", "సమాధానం తయారు చేస్తోంది..."],
+    "kn": ["ಅಧಿಕೃತ ದಸ್ತಾವೇಜುಗಳು ಮತ್ತು ವೆಬ್ ಹುಡುಕುತ್ತಿದೆ...", "ಎರಡೂ ಮೂಲಗಳಿಂದ ಸಾಕ್ಷ್ಯಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುತ್ತಿದೆ...", "ಉತ್ತರ ತಯಾರಿಸುತ್ತಿದೆ..."],
+    "pa": ["ਸਰਕਾਰੀ ਦਸਤਾਵੇਜ਼ ਅਤੇ ਵੈੱਬ ਖੋਜ ਰਹੇ ਹਾਂ...", "ਦੋਵਾਂ ਸਰੋਤਾਂ ਤੋਂ ਸਬੂਤਾਂ ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ...", "ਜਵਾਬ ਤਿਆਰ ਕਰ ਰਹੇ ਹਾਂ..."],
+    "or": ["ଅଧିକାରିକ ଦସ୍ତାବିଜ ଏବଂ ୱେବ୍ ଖୋଜୁଛି...", "ଉଭୟ ଉତ୍ସରୁ ପ୍ରମାଣ ବିଶ୍ଳେଷଣ...", "ଉତ୍ତର ପ୍ରସ୍ତୁତ କରୁଛି..."],
+    "ml": ["�ദ്യോഗിക രേഖകളും വെബും തിരയുന്നു...", "രണ്ട് ഉറവിടങ്ങളിൽ നിന്നുള്ള തെളിവുകൾ വിശകലനം ചെയ്യുന്നു...", "ഉത്തരം തയ്യാറാക്കുന്നു..."],
 }
 
 _STEP_LABELS = {
@@ -1087,6 +1093,46 @@ _STEP_LABELS = {
         "evidence_merge": "சான்றுகளை இணைக்கிறோம்",
         "llm_generate": "பதிலை உருவாக்குகிறோம்",
         "citation_verify": "மேற்கோள்களை சரிபார்க்கிறோம்",
+    },
+    "te": {
+        "retrieval_start": "మూలాలను శోధిస్తోంది",
+        "static_done": "పత్ర శోధన పూర్తయింది",
+        "web_done": "వెబ్ శోధన పూర్తయింది",
+        "evidence_merge": "సాక్ష్యాలను మిళితం చేస్తోంది",
+        "llm_generate": "సమాధానం రూపొందిస్తోంది",
+        "citation_verify": "ఉల్లేఖనాలను ధృవీకరిస్తోంది",
+    },
+    "kn": {
+        "retrieval_start": "ಮೂಲಗಳನ್ನು ಹುಡುಕುತ್ತಿದೆ",
+        "static_done": "ದಸ್ತಾವೇಜು ಹುಡುಕಾಟ ಪೂರ್ಣಗೊಂಡಿದೆ",
+        "web_done": "ವೆಬ್ ಹುಡುಕಾಟ ಪೂರ್ಣಗೊಂಡಿದೆ",
+        "evidence_merge": "ಸಾಕ್ಷ್ಯಗಳನ್ನು ಮಿಶ್ರಣ ಮಾಡುತ್ತಿದೆ",
+        "llm_generate": "ಉತ್ತರವನ್ನು ರಚಿಸುತ್ತಿದೆ",
+        "citation_verify": "ಉಲ್ಲೇಖಗಳನ್ನು ಪರಿಶೀಲಿಸುತ್ತಿದೆ",
+    },
+    "pa": {
+        "retrieval_start": "ਸਰੋਤ ਖੋਜ ਰਹੇ ਹਾਂ",
+        "static_done": "ਦਸਤਾਵੇਜ਼ ਖੋਜ ਪੂਰੀ",
+        "web_done": "ਵੈੱਬ ਖੋਜ ਪੂਰੀ",
+        "evidence_merge": "ਸਬੂਤ ਮਿਲਾ ਰਹੇ ਹਾਂ",
+        "llm_generate": "ਜਵਾਬ ਤਿਆਰ ਕਰ ਰਹੇ ਹਾਂ",
+        "citation_verify": "ਹਵਾਲੇ ਜਾਂਚ ਰਹੇ ਹਾਂ",
+    },
+    "or": {
+        "retrieval_start": "ଉତ୍ସ ଖୋଜୁଛି",
+        "static_done": "ଦସ୍ତାବିଜ ଖୋଜ ସମ୍ପୂର୍ଣ୍ଣ",
+        "web_done": "ୱେବ୍ ଖୋଜ ସମ୍ପୂର୍ଣ୍ଣ",
+        "evidence_merge": "ପ୍ରମାଣ ମିଶାଉଛି",
+        "llm_generate": "ଉତ୍ତର ତିଆରି କରୁଛି",
+        "citation_verify": "ହୱାଲା ଯାଞ୍ଚ କରୁଛି",
+    },
+    "ml": {
+        "retrieval_start": "ഉറവിടങ്ങൾ തിരയുന്നു",
+        "static_done": "രേഖ തേടൽ പൂർത്തിയായി",
+        "web_done": "വെബ് തേടൽ പൂർത്തിയായി",
+        "evidence_merge": "തെളിവുകൾ ലയിപ്പിക്കുന്നു",
+        "llm_generate": "ഉത്തരം തയ്യാറാക്കുന്നു",
+        "citation_verify": "ഉദ്ധരണികൾ പരിശോധിക്കുന്നു",
     },
 }
 
@@ -1312,6 +1358,7 @@ async def chat_stream(req: ChatRequest):
                 lang=ctx.lang,
                 session_id=req.session_id,
                 language_mix=ctx.language_mix,
+                model_override=req.mode,
             )
 
             # Sarvam generates directly in user's language; only translate for Groq fallback

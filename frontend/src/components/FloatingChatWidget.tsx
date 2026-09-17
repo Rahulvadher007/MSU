@@ -111,7 +111,7 @@ export function FloatingChatWidget() {
     } catch (err) {
       console.error("Chat error:", err);
       if (err instanceof Error && err.name === "AbortError") return;
-      setMsgs((m) => [...m, { role: "assistant", text: "Sorry, something went wrong. Please try again." }]);
+      setMsgs((m) => [...m, { role: "assistant", text: t("chat.widget.error") }]);
       setDisplayedAnswer("");
     } finally {
       setTyping(false);
@@ -179,14 +179,14 @@ export function FloatingChatWidget() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-[var(--ink)]">JanSahay</p>
-              <p className="text-[11px] text-[var(--muted)]">Cooperative governance assistant</p>
+              <p className="text-[11px] text-[var(--muted)]">{t("chat.widget.subtitle")}</p>
             </div>
             <div className="flex items-center gap-1">
               <Link
                 href="/chat"
                 className="rounded-full bg-[var(--primary)] px-3 py-1 text-[11px] font-semibold text-[var(--on-primary)] transition-colors hover:bg-[#1a1a1a]"
               >
-                Open full chat
+                {t("chat.widget.openFull")}
               </Link>
               <button
                 type="button"
@@ -208,7 +208,7 @@ export function FloatingChatWidget() {
                     <IconBot className="h-4 w-4" />
                   </div>
                   <div className="max-w-[80%] rounded-[var(--radius-lg)] bg-[var(--surface-soft)] px-4 py-3 text-[13px] leading-relaxed text-[var(--ink)]">
-                    Hi! I&apos;m <strong>Sahkarita</strong>, your cooperative governance assistant. Ask me about schemes, PACS, laws, or grievances.
+                    <span dangerouslySetInnerHTML={{ __html: t("chat.widget.greeting") }} />
                   </div>
                 </div>
                 <div className="space-y-2 pl-11">
@@ -304,7 +304,7 @@ export function FloatingChatWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={onKeyDown}
                 rows={1}
-                placeholder="Ask anything..."
+                placeholder={t("chat.widget.placeholder")}
                 aria-label="Chat input"
                 className="min-h-[36px] max-h-[100px] flex-1 resize-none bg-transparent text-[13px] leading-relaxed text-[var(--ink)] placeholder:text-[var(--muted-soft)] focus:outline-none"
               />

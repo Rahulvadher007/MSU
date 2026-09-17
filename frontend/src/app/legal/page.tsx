@@ -107,7 +107,7 @@ export default function LegalPage() {
                       {meta.icon}
                     </span>
                     <span className="text-[11px] font-medium text-white/90 text-center leading-tight">
-                      {meta.label}
+                      {c === "act" ? t("legal.acts") : c === "bye-laws" ? t("legal.bylaws") : t("legal.provisions")}
                     </span>
                     <span className="text-[10px] text-white/60">
                       {categoryCounts[c] ?? 0}
@@ -183,7 +183,7 @@ export default function LegalPage() {
                         </span>
                         <div>
                           <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: meta.color }}>
-                            {meta.label}
+                            {d.category === "act" ? t("legal.acts") : d.category === "bye-laws" ? t("legal.bylaws") : t("legal.provisions")}
                           </span>
                         </div>
                       </div>
