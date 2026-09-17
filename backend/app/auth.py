@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import logging
-from functools import lru_cache
 
 import httpx
 from fastapi import Request, HTTPException
-from jose import jwt, JWTError
+from jose import jwt, jwk, JWTError
 
 from app.config import get_settings
 
@@ -50,9 +49,17 @@ def verify_clerk_token(request: Request) -> str | None:
         jwks = _get_jwks()
         if not jwks:
             return None
+
+        header = jwt.get_unverified_header(token)
+        kid = header.get("kid")
+        key_data = next((k for k in jwks.get("keys", []) if k.get("kid") == kid), None)
+        if not key_data:
+            return None
+
+        public_key = jwk.construct(key_data)
         payload = jwt.decode(
             token,
-            jwks,
+            public_key,
             algorithms=["RS256"],
             issuer=s.clerk_issuer,
         )
