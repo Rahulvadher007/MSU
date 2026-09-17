@@ -35,6 +35,7 @@ from app.contracts import (
 )
 from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
+from app.scenario_reasoning import QueryComplexityClassifier
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.sarvam_chat import SarvamChatProvider
@@ -82,6 +83,7 @@ class RAGOrchestrator:
         self._web_rag = WebRAGService()
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
+        self._complexity_classifier = QueryComplexityClassifier()
 
     async def run(
         self,

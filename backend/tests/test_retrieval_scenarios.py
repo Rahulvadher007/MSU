@@ -23,18 +23,14 @@ Plus scenario-shaped questions to verify evidence completeness.
 """
 from __future__ import annotations
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from app.config import Settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
     EvidenceChunk,
-    EvidenceSufficiency,
-    RAGResult,
-    SourceRole,
 )
-from app.evidence_controller import QueryRequirementClassifier
 from app.evidence_gate import evidence_gate
 from app.retrieval import RetrievedChunk
 from app.services.static_rag import StaticRAGService
@@ -155,7 +151,7 @@ class TestDirectSchemeQuestion:
             _evidence("c1", "PMFBY provides crop insurance", dense_score=0.85),
             _evidence("c2", "PMFBY premium rates", dense_score=0.72),
         ]
-        abstained, reason, band = evidence_gate(
+        abstained, _reason, band = evidence_gate(
             chunks, expected_domain="pmfby",
         )
         assert not abstained

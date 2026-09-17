@@ -22,42 +22,42 @@ import {
   IconCheck,
 } from "@/components/ui/Icons";
 
-const SERVICE_HOOKS: Record<string, { question: string; benefits: string[] }> = {
+const SERVICE_HOOKS: Record<string, { questionKey: string; benefitKeys: string[] }> = {
   "pacs-membership": {
-    question: "Want access to credit and services?",
-    benefits: ["Affordable credit", "Storage & inputs", "Grievance support"],
+    questionKey: "serviceHooks.pacs-membership.question",
+    benefitKeys: ["serviceHooks.pacs-membership.b0", "serviceHooks.pacs-membership.b1", "serviceHooks.pacs-membership.b2"],
   },
   "short-term-crop-credit": {
-    question: "Need credit for your crop?",
-    benefits: ["Covers seasonal farming needs", "Subsidised interest"],
+    questionKey: "serviceHooks.short-term-crop-credit.question",
+    benefitKeys: ["serviceHooks.short-term-crop-credit.b0", "serviceHooks.short-term-crop-credit.b1"],
   },
   "godown-storage": {
-    question: "Looking for safe storage?",
-    benefits: ["Avoid distress sales", "Pledge loans against stock"],
+    questionKey: "serviceHooks.godown-storage.question",
+    benefitKeys: ["serviceHooks.godown-storage.b0", "serviceHooks.godown-storage.b1"],
   },
   "agro-input-supply": {
-    question: "Need quality seeds and fertiliser?",
-    benefits: ["Certified inputs", "Fair cooperative prices"],
+    questionKey: "serviceHooks.agro-input-supply.question",
+    benefitKeys: ["serviceHooks.agro-input-supply.b0", "serviceHooks.agro-input-supply.b1"],
   },
   "pmfby-enrolment": {
-    question: "Want crop insurance coverage?",
-    benefits: ["Natural calamity protection", "Low premium rates"],
+    questionKey: "serviceHooks.pmfby-enrolment.question",
+    benefitKeys: ["serviceHooks.pmfby-enrolment.b0", "serviceHooks.pmfby-enrolment.b1"],
   },
   "cooperative-subsidy": {
-    question: "Need funding for cooperative infra?",
-    benefits: ["Capital subsidies", "Interest subvention"],
+    questionKey: "serviceHooks.cooperative-subsidy.question",
+    benefitKeys: ["serviceHooks.cooperative-subsidy.b0", "serviceHooks.cooperative-subsidy.b1"],
   },
   "pm-fb-enrollment": {
-    question: "Need help with crop insurance?",
-    benefits: ["Free enrolment assistance", "Claim filing support"],
+    questionKey: "serviceHooks.pm-fb-enrollment.question",
+    benefitKeys: ["serviceHooks.pm-fb-enrollment.b0", "serviceHooks.pm-fb-enrollment.b1"],
   },
   "cooperative-training": {
-    question: "Want to build cooperative skills?",
-    benefits: ["Management courses", "Legal compliance training"],
+    questionKey: "serviceHooks.cooperative-training.question",
+    benefitKeys: ["serviceHooks.cooperative-training.b0", "serviceHooks.cooperative-training.b1"],
   },
   "digital-banking": {
-    question: "Need digital banking access?",
-    benefits: ["UPI & net banking", "Mobile banking apps"],
+    questionKey: "serviceHooks.digital-banking.question",
+    benefitKeys: ["serviceHooks.digital-banking.b0", "serviceHooks.digital-banking.b1"],
   },
 };
 
@@ -203,7 +203,7 @@ export default function ServicesPage() {
         <Stagger className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((s) => {
             const meta = CATEGORY_META[s.category];
-            const hook = SERVICE_HOOKS[s.slug] || { question: `Explore ${s.name}?`, benefits: [s.summary.slice(0, 40)] };
+            const hook = SERVICE_HOOKS[s.slug];
             return (
               <Link key={s.slug} href={`/services/${s.slug}`} className="block group">
                 <Card interactive className="relative overflow-hidden h-full">
@@ -215,17 +215,19 @@ export default function ServicesPage() {
 
                   <div className="pl-5 pr-5 py-5">
                     {/* Hook question */}
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)]"
-                        style={{ backgroundColor: `${meta.color}12`, color: meta.color }}
-                      >
-                        {meta.icon}
-                      </span>
-                      <span className="text-[13px] font-medium text-[var(--body)]">
-                        {hook.question}
-                      </span>
-                    </div>
+                    {hook && (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)]"
+                          style={{ backgroundColor: `${meta.color}12`, color: meta.color }}
+                        >
+                          {meta.icon}
+                        </span>
+                        <span className="text-[13px] font-medium text-[var(--body)]">
+                          {t(hook.questionKey)}
+                        </span>
+                      </div>
+                    )}
 
                     {/* Service name */}
                     <h2 className="mt-3 text-[18px] font-semibold leading-snug text-[var(--ink)] group-hover:text-[var(--brand-teal)] transition-colors duration-200">
@@ -238,14 +240,16 @@ export default function ServicesPage() {
                     </p>
 
                     {/* Benefits with checkmarks */}
-                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
-                      {hook.benefits.map((b, i) => (
-                        <span key={i} className="flex items-center gap-1 text-[12px] text-[var(--body)]">
-                          <IconCheck className="w-3.5 h-3.5 text-[var(--brand-teal)]" />
-                          {b}
-                        </span>
-                      ))}
-                    </div>
+                    {hook && (
+                      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                        {hook.benefitKeys.map((key, i) => (
+                          <span key={i} className="flex items-center gap-1 text-[12px] text-[var(--body)]">
+                            <IconCheck className="w-3.5 h-3.5 text-[var(--brand-teal)]" />
+                            {t(key)}
+                          </span>
+                        ))}
+                      </div>
+                    )}
 
                     {/* CTA */}
                     <div className="mt-4 flex items-center gap-1 text-[13px] font-medium text-[var(--brand-teal)] group-hover:text-[var(--ink)] transition-colors duration-200">

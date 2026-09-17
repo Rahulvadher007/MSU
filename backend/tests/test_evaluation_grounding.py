@@ -6,7 +6,6 @@ Based on observed failures:
 - S08: HR policy attributed to loan policy
 """
 
-import pytest
 from app.answer_grounding import verify_answer_grounding
 from app.contracts import EvidenceChunk
 
