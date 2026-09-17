@@ -110,7 +110,7 @@ _EXPLICIT_LANG_NAMES = {
     "telugu": "te", "తెలుగు": "te",
     "kannada": "kn", "ಕನ್ನಡ": "kn",
     "punjabi": "pa", "ਪੰਜਾਬੀ": "pa", "gurmukhi": "pa",
-    "odia": "or", "odia": "or", "ଓଡ଼ିଆ": "or",
+    "odia": "or", "ଓଡ଼ିଆ": "or",
     "malayalam": "ml", "മലയാളം": "ml",
 }
 _EXPLICIT_RE = re.compile(

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     groq_api_key: str
     gemini_api_key: str = ""
     jina_api_key: str = ""
+    jina_api_key_2: str = ""
     supabase_url: str
     supabase_service_key: str
     allowed_origins: str = "http://localhost:3000"
@@ -82,6 +83,14 @@ class Settings(BaseSettings):
     clerk_webhook_secret: str = ""
     clerk_issuer: str = ""  # e.g. "https://clerk.your-app.com"
 
+    # Answer grounding
+    answer_grounding_llm_enabled: bool = False  # Enable LLM verification layer
+
+    # Web RAG latency budgets
+    gemini_reranker_timeout_s: float = 8.0
+    jina_reranker_timeout_s: float = 5.0
+    web_rag_timeout_s: float = 15.0
+
     @property
     def tts_voices(self) -> dict[str, str]:
         """Parse azure_tts_voices into a dict."""
@@ -116,6 +125,12 @@ class Settings(BaseSettings):
     def groq_keys(self) -> list[str]:
         """Return all non-empty Groq API keys for rotation."""
         keys = [k for k in [self.groq_api_key, self.groq_api_key_1, self.groq_api_key_2] if k]
+        return keys
+
+    @property
+    def jina_keys(self) -> list[str]:
+        """Return all non-empty Jina API keys for rotation."""
+        keys = [k for k in [self.jina_api_key, self.jina_api_key_2] if k]
         return keys
 
 EMBED_DIMS = 768

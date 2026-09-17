@@ -416,8 +416,15 @@ export function MessageBubble({ resp, isStreaming = false }: { resp: ChatRespons
                     li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>,
                     strong: ({ children }) => <strong className="font-semibold text-[var(--ink)]">{children}</strong>,
                     h1: ({ children }) => <h1 className="text-lg font-bold my-2 text-[var(--ink)]">{children}</h1>,
-                    h2: ({ children }) => <h2 className="text-base font-bold my-2 text-[var(--ink)]">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-sm font-semibold my-1.5 text-[var(--ink)]">{children}</h3>,
+                    h2: ({ children }) => <h2 className="mt-5 mb-2 border-b border-[var(--border-soft)] pb-1.5 text-base font-bold text-[var(--ink)]">{children}</h2>,
+                    h3: ({ children }) => <h3 className="mt-4 mb-1.5 text-sm font-semibold text-[var(--accent-legal)]">{children}</h3>,
+                    blockquote: ({ children }) => <blockquote className="my-3 border-l-2 border-[var(--accent-legal)]/40 pl-3 italic text-[var(--text-tertiary)]">{children}</blockquote>,
+                    table: ({ children }) => <div className="my-3 overflow-x-auto rounded-[var(--radius-sm)] border border-[var(--border-soft)]"><table className="w-full min-w-[420px] border-collapse text-left text-xs">{children}</table></div>,
+                    thead: ({ children }) => <thead className="bg-[var(--cream)] text-[var(--ink)]">{children}</thead>,
+                    th: ({ children }) => <th className="border-b border-[var(--border-soft)] px-3 py-2 font-semibold">{children}</th>,
+                    td: ({ children }) => <td className="border-b border-[var(--border-soft)] px-3 py-2 align-top leading-relaxed last:border-b-0">{children}</td>,
+                    hr: () => <hr className="my-4 border-[var(--border-soft)]" />,
+                    a: ({ children, href }) => <a href={href} className="font-medium text-[var(--accent-legal)] underline decoration-[var(--accent-legal)]/30 underline-offset-2 hover:decoration-current" target="_blank" rel="noreferrer">{children}</a>,
                   }}
                 >
                   {cleanMarkdownForDisplay(seg.value)}

@@ -39,10 +39,10 @@ from app.contracts import (
     RAGResult,
 )
 from app.evidence_gate import evidence_gate
-from app.retrieval.bm25_retriever import BM25Retriever
 from app.retrieval.gemini_reranker import GeminiReranker
 from app.retrieval.rrf import reciprocal_rank_fusion
 from app.security.source_verifier import SourceVerifier
+from app.web_rag.bm25_ranker import WebBM25Ranker
 from app.web_rag.query_classifier import QueryClassification
 from app.web_rag.service import WebDiscoveryService
 
@@ -99,7 +99,7 @@ class WebRAGService:
         self.minimum_relevance_score = float(minimum_relevance_score)
 
         self.web_discovery = WebDiscoveryService()
-        self.bm25 = BM25Retriever()
+        self.bm25 = WebBM25Ranker()
         self.reranker = GeminiReranker()
         self.source_verifier = SourceVerifier(
             minimum_trust_score=minimum_trust_score,

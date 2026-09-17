@@ -23,6 +23,7 @@ import re
 import time
 from typing import Any, Callable
 
+from app.answer_grounding import verify_answer_grounding
 from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
 from app.contracts import (
@@ -34,6 +35,7 @@ from app.contracts import (
 )
 from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
+from app.scenario_reasoning import QueryComplexityClassifier
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.sarvam_chat import SarvamChatProvider
@@ -81,6 +83,7 @@ class RAGOrchestrator:
         self._web_rag = WebRAGService()
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
+        self._complexity_classifier = QueryComplexityClassifier()
 
     async def run(
         self,
@@ -95,6 +98,7 @@ class RAGOrchestrator:
         session_id: str,
         language_mix: dict[str, float] | None = None,
         model_override: str | None = None,
+        pipeline_mode: str | None = None,
         on_step: Callable[[dict], None] | None = None,
     ) -> RAGResponse:
         """Execute the full async dual-pipeline RAG flow.
@@ -141,8 +145,9 @@ class RAGOrchestrator:
             domain=domain,
             state=state,
             classification=classification,
-            mode=model_override,
+            mode=pipeline_mode or "rag_web",
         )
+        web_total_ms = float(web_result.metadata.get("web_total_ms", 0.0))
 
         if on_step:
             static_count = len(static_result.chunks) if not static_result.abstained else 0
@@ -186,7 +191,7 @@ class RAGOrchestrator:
         # Step 6: Build curated prompt with source-priority rules
         _t_prompt_start = time.monotonic()
         system_prompt, user_prompt = self._evidence_controller.build_curated_prompt(
-            bundle, english_query, history, lang,
+            bundle, english_query, history, "en",
             language_mix=language_mix,
             assessment=assessment,
         )
@@ -260,6 +265,33 @@ class RAGOrchestrator:
                     session_id=session_id,
                 )
 
+        # Step 9.5: Post-generation grounding check
+        _t_grounding_start = time.monotonic()
+        grounding_result = verify_answer_grounding(
+            answer,
+            all_chunks,
+            use_llm_verification=self._settings.answer_grounding_llm_enabled,
+            settings=self._settings,
+        )
+        if grounding_result.has_unsupported_claims:
+            logger.warning(
+                "Grounding check found %d unsupported claims: %s",
+                len(grounding_result.unsupported_claims),
+                [c.claim_text for c in grounding_result.unsupported_claims],
+            )
+            # Remove unsupported claims from answer
+            for claim in grounding_result.unsupported_claims:
+                # Try to remove the sentence containing the unsupported claim
+                # Simple approach: remove the claim text and surrounding context
+                answer = re.sub(
+                    rf"[^.]*\b{re.escape(claim.claim_text)}\b[^.]*\.",
+                    "",
+                    answer,
+                )
+            # Clean up extra spaces
+            answer = re.sub(r'  +', ' ', answer).strip()
+        grounding_ms = (time.monotonic() - _t_grounding_start) * 1000
+
         if on_step:
             on_step({"id": "llm_generate", "detail": "Response generated", "status": "completed"})
             on_step({"id": "citation_verify", "detail": f"Verified {len(all_chunks)} citations against source documents", "status": "completed"})
@@ -309,6 +341,13 @@ class RAGOrchestrator:
             model_name, _input_chars, _input_tokens_est, _output_tokens_est,
             len(citations),
         )
+        logger.info(
+            "RAG timing: static_retrieval_ms=%.0f web_total_ms=%.0f generation_ms=%.0f grounding_ms=%.0f",
+            float(static_result.metadata.get("retrieval_ms", 0.0)),
+            web_total_ms,
+            generation_total_ms,
+            grounding_ms,
+        )
 
         logger.info(
             "RAGOrchestrator response: confidence=%.2f band=%s mode=%s citations=%d",
@@ -353,6 +392,7 @@ class RAGOrchestrator:
 
         # Static-only mode (V1)
         if mode == "static":
+            started = time.monotonic()
             try:
                 static_result = await asyncio.to_thread(
                     self._static_rag.retrieve,
@@ -365,10 +405,12 @@ class RAGOrchestrator:
                     chunks=[], abstained=True,
                     reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
                 )
+            static_result.metadata["retrieval_ms"] = (time.monotonic() - started) * 1000
             return static_result, abstain
 
         # Web-only mode (V2)
         if mode == "web":
+            started = time.monotonic()
             try:
                 web_result = await asyncio.wait_for(
                     asyncio.to_thread(
@@ -376,10 +418,10 @@ class RAGOrchestrator:
                         query=english_query, domain=domain,
                         state=state, classification=classification,
                     ),
-                    timeout=90.0,
+                    timeout=self._settings.web_rag_timeout_s,
                 )
             except asyncio.TimeoutError:
-                logger.warning("Web RAG timed out after 90s")
+                logger.warning("Web RAG timed out after %.1fs", self._settings.web_rag_timeout_s)
                 web_result = RAGResult(
                     chunks=[], abstained=True,
                     reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
@@ -390,33 +432,53 @@ class RAGOrchestrator:
                     chunks=[], abstained=True,
                     reason=AbstentionReason.PROVIDER_UNAVAILABLE, domain=domain,
                 )
+            web_result.metadata["web_total_ms"] = (time.monotonic() - started) * 1000
             return abstain, web_result
 
         # Dual mode (V3) — both pipelines in parallel
-        static_coro = asyncio.to_thread(
-            self._static_rag.retrieve,
-            embedding=embedding, query=english_query,
-            domain=domain, state=state,
-        )
+        async def _static_with_timing() -> RAGResult:
+            started = time.monotonic()
+            result = await asyncio.to_thread(
+                self._static_rag.retrieve,
+                embedding=embedding, query=english_query,
+                domain=domain, state=state,
+            )
+            result.metadata["retrieval_ms"] = (time.monotonic() - started) * 1000
+            return result
+
+        static_coro = _static_with_timing()
         web_coro = asyncio.to_thread(
             self._web_rag.retrieve,
             query=english_query, domain=domain,
             state=state, classification=classification,
         )
 
-        # Wrap web RAG with a hard timeout so slow search/embeddings
-        # cannot stall the whole request. 90s allows full web discovery to finish safely.
+        # Keep Web RAG optional: static evidence must continue within a bounded budget.
         async def _web_with_timeout() -> RAGResult:
+            started = time.monotonic()
             try:
-                return await asyncio.wait_for(web_coro, timeout=90.0)
+                web_task = asyncio.create_task(web_coro)
+                try:
+                    result = await asyncio.wait_for(web_task, timeout=self._settings.web_rag_timeout_s)
+                    result.metadata["web_total_ms"] = (time.monotonic() - started) * 1000
+                    return result
+                except asyncio.TimeoutError:
+                    web_task.cancel()
+                    await asyncio.gather(web_task, return_exceptions=True)
+                    raise
             except asyncio.TimeoutError:
-                logger.warning("Web RAG timed out after 90s — using static only")
-                return RAGResult(
+                logger.warning(
+                    "Web RAG timed out after %.1fs — using static only",
+                    self._settings.web_rag_timeout_s,
+                )
+                result = RAGResult(
                     chunks=[],
                     abstained=True,
                     reason=AbstentionReason.PROVIDER_UNAVAILABLE,
                     domain=domain,
                 )
+                result.metadata["web_total_ms"] = (time.monotonic() - started) * 1000
+                return result
 
         results = await asyncio.gather(static_coro, _web_with_timeout(), return_exceptions=True)
 
@@ -452,13 +514,34 @@ class RAGOrchestrator:
         static_chunks: list[EvidenceChunk],
         web_chunks: list[EvidenceChunk],
     ) -> list[EvidenceChunk]:
-        """Merge evidence from both pipelines with equal priority.
+        """Merge evidence from both pipelines with cross-source ranking.
 
-        Static chunks come first (official documents), then web chunks.
+        Static chunks (official documents) get an authority boost.
+        Weak web results cannot displace stronger static evidence.
+        Deduplicates by chunk_id.
         """
-        merged = list(static_chunks) + list(web_chunks)
+        AUTHORITY_BOOST_STATIC = 0.05
+
+        # Deduplicate by chunk_id, keeping the best score
+        seen: dict[str, EvidenceChunk] = {}
+        for chunk in static_chunks:
+            scored = (chunk.dense_score or 0) + AUTHORITY_BOOST_STATIC
+            existing = seen.get(chunk.chunk_id)
+            if not existing or scored > ((existing.dense_score or 0) + AUTHORITY_BOOST_STATIC):
+                seen[chunk.chunk_id] = chunk
+        for chunk in web_chunks:
+            existing = seen.get(chunk.chunk_id)
+            if not existing or (chunk.dense_score or 0) > (existing.dense_score or 0):
+                seen[chunk.chunk_id] = chunk
+
+        # Sort by effective score descending
+        merged = sorted(
+            seen.values(),
+            key=lambda c: -(c.dense_score or 0),
+        )
+
         logger.info(
-            "Merged evidence: %d static + %d web = %d total",
+            "Merged evidence: %d static + %d web = %d total (after dedup+rank)",
             len(static_chunks), len(web_chunks), len(merged),
         )
         return merged

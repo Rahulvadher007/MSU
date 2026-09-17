@@ -50,6 +50,65 @@ _STATE_INDICATORS: dict[str, list[str]] = {
 
 _YEAR_PATTERN = re.compile(r"\b(20\d{2})\b")
 
+# Enumeration detection patterns
+_ENUMERATION_KEYWORDS_EN = [
+    "types", "categories", "kinds", "varieties",
+    "eligibility", "eligible", "requirements", "required", "criteria",
+    "documents", "papers", "certificates",
+    "steps", "procedure", "process",
+    "benefits", "advantages", "features",
+    "exclusions", "exceptions", "restrictions",
+    "coverage", "covered", "included",
+    "authorities", "offices", "departments",
+]
+
+_ENUMERATION_KEYWORDS_HI = [
+    "प्रकार", "श्रेणियां", "किस्में",
+    "पात्रता", "पात्र", "आवश्यकताएं", "आवश्यक", "मापदंड",
+    "दस्तावेज", "कागजात", "प्रमाणपत्र",
+    "चरण", "प्रक्रिया", "विधि",
+    "लाभ", "फायदे", "विशेषताएं",
+    "बहिष्करण", "अपवाद", "प्रतिबंध",
+    "कवरेज", "शामिल", "कवर",
+    "अधिकारियों", "कार्यालयों", "विभागों",
+]
+
+_ENUMERATION_KEYWORDS_GU = [
+    "પ્રકાર", "શ્રેણીઓ", "જાતો",
+    "પાત્રતા", "પાત્ર", "જરૂરિયાતો", "જરૂરી", "માપદંડો",
+    "દસ્તાવેજો", "કાગળો", "પ્રમાણપત્રો",
+    "પગલાં", "પ્રક્રિયા", "રીત",
+    "ફાયદા", "લાભો", "વિશેષતાઓ",
+    "બહિષ્કરણ", "અપવાદો", "પ્રતિબંધો",
+    "કવરેજ", "સામેલ", "આવરી",
+    "અધિકારીઓ", "કચેરીઓ", "વિભાગો",
+]
+
+
+def detect_enumeration_question(question: str) -> bool:
+    """Detect if user question asks for an enumeration/list.
+
+    Returns True if question contains keywords like types, categories,
+    eligibility, requirements, documents, steps, benefits, exclusions,
+    coverage, authorities.
+    """
+    q = question.lower()
+
+    # Check English keywords
+    if any(kw in q for kw in _ENUMERATION_KEYWORDS_EN):
+        return True
+
+    # Check Hindi keywords
+    if any(kw in question for kw in _ENUMERATION_KEYWORDS_HI):
+        return True
+
+    # Check Gujarati keywords
+    if any(kw in question for kw in _ENUMERATION_KEYWORDS_GU):
+        return True
+
+    return False
+
+
 # Gujarat districts (common)
 _GUJARAT_DISTRICTS: list[str] = [
     "surat", "valsad", "navsari", "bardoli", "ahmedabad", "rajkot",
@@ -184,54 +243,110 @@ CRITICAL RULES:
 1. Language: Respond in the language specified in the USER LANGUAGE field
    in the user prompt. Use that language throughout your entire response.
    If the language is Hindi (hi), Gujarati (gu), Marathi (mr), Bengali (bn),
-   or Tamil (ta), write in that script. Do not mix languages unless the
+   Tamil (ta), Telugu (te), Kannada (kn), Punjabi (pa), Odia (or), or
+   Malayalam (ml), write in that script. Do not mix languages unless the
    technical term has no translation (e.g., scheme names like PMFBY, PACS).
 
-2. Evidence: Use the evidence provided to answer.
-   - STATIC EVIDENCE (official documents): Rules, definitions, policy,
-     procedures, eligibility criteria.
-   - DYNAMIC EVIDENCE (web sources): Current facts, notifications,
-     availability, current values.
-   Use both when relevant. Prioritize evidence based on relevance,
-   authority, specificity, and freshness. Do not use weaker evidence
-   when it conflicts with stronger evidence. Do not infer current or
-   local facts from static evidence alone.
+2. EVIDENCE IS THE ONLY FACTUAL AUTHORITY: Every factual claim in your answer
+   MUST be directly supported by the evidence provided below. You MUST NOT:
+   - Use general model knowledge
+   - Infer missing eligibility criteria
+   - Invent thresholds, age limits, rates, dates, deadlines, legal clauses,
+     documents, procedures, or conditions
+   - Fill gaps from memory
+   - Introduce facts merely because they sound plausible
+   If the evidence does not establish a fact, say "The available sources do
+   not establish it."
 
-3. Citations: After each factual statement, add [chunk:ID] markers.
-   These are for internal tracking and will be extracted by the system.
-   CRITICAL: You MUST include [chunk:ID] citations inline as you write.
-   Every factual claim requires a citation. Do NOT write answers that need repair.
-   Self-check: Before finishing, verify every fact has a [chunk:ID] marker.
+3. PRESERVE MATERIAL TERMS EXACTLY: When the evidence contains named factual
+   items, reproduce their terminology verbatim. This is mandatory for:
+   - Eligibility criteria
+   - Exclusions
+   - Coverage types
+   - Scheme components
+   - Loan types
+   - Authorities
+   - Documents
+   - Deadlines
+   - Rates, percentages, amounts, thresholds
+   - Conditions, exceptions
+   - Legal provisions
+   - Procedural steps
+   Example: If evidence says "prevented sowing, mid-season adversity,
+   post-harvest losses, localized calamity", write exactly those terms.
+   Do NOT replace with "natural-and-climatic risk cover".
 
-4. When evidence is limited:
-   - Answer only what is directly supported by the available evidence
-   - Add ONE brief note at the END if important context is missing
-   - Do NOT repeat disclaimers. Do NOT refuse to answer what evidence supports.
+4. DO NOT SUBSTITUTE SYNONYMS FOR ENUMERATED FACTS: If evidence gives a
+   finite list (A, B, C, D), reproduce the list faithfully. Do NOT compress
+   into "various related risks" or "several categories" unless the user
+   explicitly asks for a high-level summary.
 
-5. When evidence is insufficient:
-   - Answer only what is directly supported
-   - Explain what information is missing
-   - Suggest what type of official source the user should consult
-     (e.g., district cooperative office, block development officer)
+5. NUMBERS AND THRESHOLDS ARE CLOSED-WORLD: Never generate a number unless
+   it appears in the supplied evidence. This includes age limits, percentages,
+   premium rates, loan amounts, dates, durations, monetary limits, acreage,
+   thresholds. If evidence does NOT contain "18-70 years", your answer
+   must NOT contain "18-70 years".
 
-6. When no evidence is found:
-   - Explain that no relevant evidence was found
-   - Suggest the type of official source the user should consult
-   - Do NOT generate a general knowledge answer
+6. DO NOT MERGE DOCUMENT SECTIONS: Use the evidence item's actual section
+   and document identity. Do NOT attribute:
+   - HR policy information to loan policy
+   - Membership rules to loan sanction rules
+   - One scheme's conditions to another scheme
+   - One authority's procedure to another authority
+   When multiple evidence items exist, maintain their provenance.
 
-7. Tone: Simple, clear, helpful. Use short sentences. Explain technical
-   terms (like PMFBY, PACS) briefly when first mentioned. Be kind and
-   patient — the user may be asking for the first time.
+7. HANDLE CONFLICTS EXPLICITLY: If two evidence items contain conflicting
+   information, state that the retrieved sources contain conflicting
+   information and identify the relevant source/document where possible.
+   Do NOT silently choose one.
 
-8. Formatting:
-   - Use bullet points for lists
-   - Bold important terms or document names
-   - Keep paragraphs short (2-3 sentences)
-   - Use markdown for readability
+8. MISSING INFORMATION MUST REMAIN MISSING: If the evidence does not answer
+   an aspect of the question, say "The available sources do not specify this."
+   Do NOT attempt to complete the answer using general knowledge.
 
-9. NEVER include these phrases in your response:
-   - "Current/local information for this claim could not be verified"
-   - "This information could not be verified"
+9. USER-FRIENDLY LANGUAGE IS ALLOWED, BUT FACTUAL TERMS MUST SURVIVE:
+   The answer can be simplified for rural users. However, explanation may
+   be simplified but factual terminology may not be replaced when replacement
+   changes meaning. Example: "Prevented sowing means the crop could not be
+   sown because of the specified circumstances" is acceptable. But "Natural
+   risk coverage" is NOT an acceptable replacement for a specific coverage
+   category.
+
+10. Citations: After each factual statement, add [chunk:ID] markers.
+    These are for internal tracking and will be extracted by the system.
+    CRITICAL: You MUST include [chunk:ID] citations inline as you write.
+    Every factual claim requires a citation. Do NOT write answers that need repair.
+    Self-check: Before finishing, verify every fact has a [chunk:ID] marker.
+
+11. When evidence is limited:
+    - Answer only what is directly supported by the available evidence
+    - Add ONE brief note at the END if important context is missing
+    - Do NOT repeat disclaimers. Do NOT refuse to answer what evidence supports.
+
+12. When evidence is insufficient:
+    - Answer only what is directly supported
+    - Explain what information is missing
+    - Suggest what type of official source the user should consult
+      (e.g., district cooperative office, block development officer)
+
+13. When no evidence is found:
+    - Explain that no relevant evidence was found
+    - Suggest the type of official source the user should consult
+    - Do NOT generate a general knowledge answer
+
+14. Tone: Simple, clear, helpful. Use short sentences. Explain technical
+    terms (like PMFBY, PACS) briefly when first mentioned. Be kind and
+    patient — the user may be asking for the first time.
+
+15. Formatting:
+    - Use bullet points for lists
+    - Bold important terms or document names
+    - Keep paragraphs short (2-3 sentences)
+    - Use markdown for readability
+
+16. NEVER include these phrases in your response:
+    - "Current/local information for this claim could not be verified"
+    - "This information could not be verified"
 """
 
 
@@ -317,7 +432,7 @@ class EvidenceController:
             if turns:
                 hist_text = f"Previous conversation:\n{turns}\n\n"
 
-        # Build static evidence section (cap to top 3 highest-quality chunks)
+        # Build static evidence section (cap to top 3)
         static_parts: list[str] = []
         static_chunks = bundle.static.chunks[:3]
         for chunk in static_chunks:
@@ -332,7 +447,7 @@ class EvidenceController:
             static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
-        # Build dynamic evidence section (cap to top 3 highest-quality chunks)
+        # Build dynamic evidence section (cap to top 3)
         if bundle.dynamic.available:
             dynamic_parts: list[str] = []
             dynamic_chunks = bundle.dynamic.chunks[:3]
@@ -351,6 +466,16 @@ class EvidenceController:
         if assessment:
             assessment_text = f"\n== EVIDENCE ASSESSMENT ==\n{assessment.assessment_text}\n"
 
+        # Detect enumeration questions and add specific instruction
+        enum_instruction = ""
+        if detect_enumeration_question(english_query):
+            enum_instruction = (
+                "7. ENUMERATION MODE: The user is asking for a list or categories. "
+                "You MUST reproduce ALL enumerated items from the evidence exactly "
+                "as they appear. Do NOT compress into a generic summary. "
+                "If evidence lists A, B, C, D, your answer must list A, B, C, D.\n"
+            )
+
         # Language instruction injected per-request so the LLM writes in the
         # correct language directly. Translation in chat.py is a secondary
         # safety net; the LLM is the primary language enforcement mechanism.
@@ -361,6 +486,11 @@ class EvidenceController:
             "mr": "Marathi (Devanagari script)",
             "bn": "Bengali (Bengali script)",
             "ta": "Tamil (Tamil script)",
+            "te": "Telugu (Telugu script)",
+            "kn": "Kannada (Kannada script)",
+            "pa": "Punjabi (Gurmukhi script)",
+            "or": "Odia (Odia script)",
+            "ml": "Malayalam (Malayalam script)",
         }
         lang_name = _LANG_NAMES.get(lang, lang)
 
@@ -379,7 +509,9 @@ class EvidenceController:
             f"3. Include [chunk:ID] citations for every factual claim.\n"
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
-            f"6. Use markdown formatting (bullet points for lists, bold for key terms) to structure your answer cleanly.\n"
+            f"6. Use markdown formatting to make the answer easy to scan. Start with a one-sentence direct answer, then use a short heading and bullet points for each distinct type, condition, step, or document. Keep each bullet to one or two short sentences and leave a blank line between sections. Do not write one long paragraph when the evidence contains multiple items. Bold only key terms and names.\n"
+            f"7. Preserve the requested language and script throughout the answer. Translate explanatory text, but keep official scheme names, legal names, acronyms, section numbers, dates, amounts, and citation markers unchanged.\n"
+            f"{enum_instruction}"
         )
 
         return system_prompt, user_prompt
@@ -499,3 +631,5 @@ class EvidenceController:
             EvidenceSufficiency.EMPTY: "No relevant evidence found. Do not generate a general knowledge answer.",
         }
         return f"{role_text[source_role]} {sufficiency_text[sufficiency]}"
+
+
