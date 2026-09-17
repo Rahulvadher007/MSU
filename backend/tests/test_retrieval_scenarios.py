@@ -525,6 +525,43 @@ class TestWeakSemanticMatch:
 class TestDuplicateEvidence:
     """Duplicate chunks from same document+section should be deduplicated."""
 
+    def test_same_chunk_id_deduplicated_in_merge(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        static = [_evidence("c1", "Static version of chunk", dense_score=0.80)]
+        web = [_evidence("c1", "Web version of chunk", dense_score=0.70)]
+
+        merged = orch._merge_evidence(static, web)
+
+        assert len(merged) == 1
+        assert merged[0].chunk_id == "c1"
+
+    def test_different_chunks_preserved(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        static = [_evidence("c1", "First chunk", dense_score=0.80)]
+        web = [_evidence("c2", "Second chunk", dense_score=0.70)]
+
+        merged = orch._merge_evidence(static, web)
+
+        assert len(merged) == 2
+        ids = {c.chunk_id for c in merged}
+        assert ids == {"c1", "c2"}
+
+    def test_higher_score_wins_on_duplicate(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        static = [_evidence("c1", "Lower score static", dense_score=0.50)]
+        web = [_evidence("c1", "Higher score web", dense_score=0.90)]
+
+        merged = orch._merge_evidence(static, web)
+
+        assert len(merged) == 1
+        assert merged[0].content == "Higher score web"
+
 
 # ---------------------------------------------------------------------------
 # 13. Citation preservation
@@ -532,6 +569,54 @@ class TestDuplicateEvidence:
 
 class TestCitationPreservation:
     """Every evidence chunk must have valid metadata for citation."""
+
+    def test_existing_citations_preserved(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        chunks = [_evidence("c1", "Content", dense_score=0.80)]
+        answer = "PMFBY provides crop insurance [chunk:c1-abcd1234]."
+
+        result = orch._auto_append_citations(answer, chunks)
+
+        assert "[chunk:c1-abcd1234]" in result
+
+    def test_non_citation_brackets_cleaned(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        chunks = [_evidence("c1", "Content", dense_score=0.80)]
+        answer = "PMFBY provides [1] crop insurance [Note] here."
+
+        result = orch._auto_append_citations(answer, chunks)
+
+        assert "[1]" not in result
+        assert "[Note]" not in result
+
+    def test_citations_appended_when_missing(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        chunks = [
+            _evidence("c1", "First chunk", dense_score=0.80),
+            _evidence("c2", "Second chunk", dense_score=0.70),
+        ]
+        answer = "PMFBY provides crop insurance."
+
+        result = orch._auto_append_citations(answer, chunks)
+
+        assert "[chunk:" in result
+
+    def test_web_citation_markers_preserved(self):
+        from app.services.rag_orchestrator import RAGOrchestrator
+
+        orch = RAGOrchestrator(_settings())
+        chunks = [_evidence("c1", "Content", dense_score=0.80)]
+        answer = "According to [web_source_1], PMFBY exists."
+
+        result = orch._auto_append_citations(answer, chunks)
+
+        assert "[web_source_1]" in result
 
 
 # ---------------------------------------------------------------------------
