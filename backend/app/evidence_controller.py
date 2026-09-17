@@ -373,9 +373,9 @@ class EvidenceController:
             if turns:
                 hist_text = f"Previous conversation:\n{turns}\n\n"
 
-        # Build static evidence section (cap to top 7, deduplicated by document+section)
+        # Build static evidence section (cap to top 3)
         static_parts: list[str] = []
-        static_chunks = self._deduplicate_and_select(bundle.static.chunks, max_chunks=7)
+        static_chunks = bundle.static.chunks[:3]
         for chunk in static_chunks:
             short_id = chunk.chunk_id[:8]
             meta_parts = [chunk.title]
@@ -388,10 +388,10 @@ class EvidenceController:
             static_parts.append(f"[STATIC] [chunk:{short_id}] ({meta_str})\n{content}")
         static_section = "\n\n---\n\n".join(static_parts) if static_parts else "No static evidence available."
 
-        # Build dynamic evidence section (cap to top 5, deduplicated by source)
+        # Build dynamic evidence section (cap to top 3)
         if bundle.dynamic.available:
             dynamic_parts: list[str] = []
-            dynamic_chunks = self._deduplicate_and_select(bundle.dynamic.chunks, max_chunks=5)
+            dynamic_chunks = bundle.dynamic.chunks[:3]
             for chunk in dynamic_chunks:
                 short_id = chunk.chunk_id[:8]
                 content = chunk.content[:MAX_CHARS_PER_CHUNK] if len(chunk.content) > MAX_CHARS_PER_CHUNK else chunk.content
@@ -534,11 +534,9 @@ class EvidenceController:
             return EvidenceSufficiency.INSUFFICIENT
 
         # BALANCED
-        if (static_high + web_high) >= 4:
+        if (static_high + web_high) >= 3:
             return EvidenceSufficiency.SUFFICIENT
-        if (static_high + web_high) >= 2:
-            return EvidenceSufficiency.PARTIAL
-        if total >= 1:
+        if total >= 2:
             return EvidenceSufficiency.PARTIAL
         return EvidenceSufficiency.INSUFFICIENT
 
@@ -563,51 +561,4 @@ class EvidenceController:
         }
         return f"{role_text[source_role]} {sufficiency_text[sufficiency]}"
 
-    def _deduplicate_and_select(
-        self,
-        chunks: list[EvidenceChunk],
-        max_chunks: int = 7,
-    ) -> list[EvidenceChunk]:
-        """Select best chunks with deduplication and source diversity.
 
-        Strategy:
-        1. Deduplicate by document + section (keep highest-scored)
-        2. Ensure diversity: at least 2 different documents if available
-        3. Select top-N by dense_score
-        """
-        if not chunks:
-            return []
-
-        # Deduplicate by document+section, keeping highest-scored
-        seen_sections: dict[str, EvidenceChunk] = {}
-        for chunk in chunks:
-            doc_id = chunk.metadata.get("document_id", "") if chunk.metadata else ""
-            section_key = f"{doc_id}|{chunk.section}|{chunk.page}"
-            existing = seen_sections.get(section_key)
-            if not existing or (chunk.dense_score or 0) > (existing.dense_score or 0):
-                seen_sections[section_key] = chunk
-
-        deduped = list(seen_sections.values())
-
-        # Sort by score descending
-        deduped.sort(key=lambda c: -(c.dense_score or 0))
-
-        # Ensure source diversity: at least 2 different documents if available
-        if len(deduped) > 2:
-            doc_ids = set()
-            diverse: list[EvidenceChunk] = []
-            # First pass: pick best from each document
-            for chunk in deduped:
-                doc_id = chunk.metadata.get("document_id", "") if chunk.metadata else ""
-                if doc_id and doc_id not in doc_ids:
-                    doc_ids.add(doc_id)
-                    diverse.append(chunk)
-            # Second pass: fill remaining slots by score
-            for chunk in deduped:
-                if len(diverse) >= max_chunks:
-                    break
-                if chunk not in diverse:
-                    diverse.append(chunk)
-            return diverse[:max_chunks]
-
-        return deduped[:max_chunks]
