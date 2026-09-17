@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 
 from app.contracts import EvidenceChunk
@@ -38,8 +39,12 @@ class GroundingResult:
 # ---------------------------------------------------------------------------
 
 # Numbers: integers, decimals, percentages, currency
+# Requires either a % suffix or a currency prefix to avoid extracting
+# bare numbers that are parts of dates (e.g., "31" in "31 March 2025").
 _NUMBER_PATTERN = re.compile(
-    r'(?:₹|Rs\.?|INR)?\s*\d+(?:\.\d+)?%?(?:\s*(?:lakh|crore|million|billion))?'
+    r'(?:₹|Rs\.?|INR)\s*\d+(?:\.\d+)?(?:\s*(?:lakh|crore|million|billion))?'
+    r'|\d+(?:\.\d+)?%'
+    r'|\d+(?:\.\d+)?\s*(?:lakh|crore|million|billion)'
 )
 
 # Dates: DD Month YYYY, Month YYYY, DD/MM/YYYY, YYYY-MM-DD
@@ -97,6 +102,47 @@ def _build_evidence_text(chunks: list[EvidenceChunk]) -> str:
     return " ".join(chunk.content for chunk in chunks)
 
 
+def _check_claims(
+    answer: str,
+    evidence_text: str,
+    extractor: Callable[[str], list[str]],
+    claim_type: str,
+    evidence_chunk_ids: list[str],
+    case_sensitive: bool = True,
+) -> list[UnsupportedClaim]:
+    """Extract claims and flag those not found in evidence text.
+
+    Args:
+        answer: The generated answer text.
+        evidence_text: Concatenated evidence content.
+        extractor: Function that extracts claims from text.
+        claim_type: Type label for unsupported claims (e.g., "number", "date").
+        evidence_chunk_ids: Chunk IDs to attach to unsupported claims.
+        case_sensitive: Whether the presence check is case-sensitive.
+
+    Returns:
+        List of UnsupportedClaim for any extracted claim missing from evidence.
+    """
+    claims = extractor(answer)
+    unsupported: list[UnsupportedClaim] = []
+    for claim in claims:
+        claim_stripped = claim.strip()
+        if not claim_stripped:
+            continue
+        if case_sensitive:
+            found = claim_stripped in evidence_text
+        else:
+            found = claim_stripped.lower() in evidence_text.lower()
+        if not found:
+            unsupported.append(UnsupportedClaim(
+                claim_text=claim_stripped,
+                claim_type=claim_type,
+                evidence_chunk_ids=evidence_chunk_ids,
+                reason=f"{claim_type.capitalize()} '{claim_stripped}' not found in evidence",
+            ))
+    return unsupported
+
+
 def verify_answer_grounding(
     answer: str,
     evidence_chunks: list[EvidenceChunk],
@@ -113,51 +159,12 @@ def verify_answer_grounding(
 
     evidence_text = _build_evidence_text(evidence_chunks)
     evidence_chunk_ids = [chunk.chunk_id for chunk in evidence_chunks]
+
     unsupported: list[UnsupportedClaim] = []
-
-    # Extract and verify numbers
-    answer_numbers = _extract_numbers(answer)
-    for num in answer_numbers:
-        if num.strip() and num.strip() not in evidence_text:
-            unsupported.append(UnsupportedClaim(
-                claim_text=num,
-                claim_type="number",
-                evidence_chunk_ids=evidence_chunk_ids,
-                reason=f"Number '{num}' not found in evidence",
-            ))
-
-    # Extract and verify dates
-    answer_dates = _extract_dates(answer)
-    for date_str in answer_dates:
-        if date_str and date_str not in evidence_text:
-            unsupported.append(UnsupportedClaim(
-                claim_text=date_str,
-                claim_type="date",
-                evidence_chunk_ids=evidence_chunk_ids,
-                reason=f"Date '{date_str}' not found in evidence",
-            ))
-
-    # Extract and verify named entities
-    answer_entities = _extract_entities(answer)
-    for entity in answer_entities:
-        if entity and entity.lower() not in evidence_text.lower():
-            unsupported.append(UnsupportedClaim(
-                claim_text=entity,
-                claim_type="entity",
-                evidence_chunk_ids=evidence_chunk_ids,
-                reason=f"Entity '{entity}' not found in evidence",
-            ))
-
-    # Extract and verify conditions
-    answer_conditions = _extract_conditions(answer)
-    for cond in answer_conditions:
-        if cond and cond.lower() not in evidence_text.lower():
-            unsupported.append(UnsupportedClaim(
-                claim_text=cond,
-                claim_type="condition",
-                evidence_chunk_ids=evidence_chunk_ids,
-                reason=f"Condition '{cond}' not found in evidence",
-            ))
+    unsupported.extend(_check_claims(answer, evidence_text, _extract_numbers, "number", evidence_chunk_ids))
+    unsupported.extend(_check_claims(answer, evidence_text, _extract_dates, "date", evidence_chunk_ids))
+    unsupported.extend(_check_claims(answer, evidence_text, _extract_entities, "entity", evidence_chunk_ids, case_sensitive=False))
+    unsupported.extend(_check_claims(answer, evidence_text, _extract_conditions, "condition", evidence_chunk_ids, case_sensitive=False))
 
     return GroundingResult(
         has_unsupported_claims=len(unsupported) > 0,

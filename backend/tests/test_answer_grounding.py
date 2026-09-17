@@ -61,6 +61,75 @@ class TestRegexExtraction:
         )
         assert result.has_unsupported_claims is False
 
+    def test_bare_number_not_flagged_as_claim(self):
+        """A bare number in a date context should not be flagged as unsupported."""
+        chunk = _make_chunk("The deadline is 31 March 2025.")
+        result = verify_answer_grounding(
+            "The deadline is 31 March 2025.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is False
+
+    def test_bare_number_in_sentence_not_flagged(self):
+        """A bare number embedded in prose should not be extracted."""
+        chunk = _make_chunk("The scheme has 5 categories and a 2% premium.")
+        result = verify_answer_grounding(
+            "The scheme has 5 categories and a 2% premium.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is False
+
+    def test_currency_number_flagged(self):
+        """A currency-prefixed number should still be extracted."""
+        chunk = _make_chunk("The premium is Rs.500.")
+        result = verify_answer_grounding(
+            "The premium is Rs.750.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is True
+        assert any("Rs.750" in c.claim_text for c in result.unsupported_claims)
+
+
+class TestConditionExtraction:
+    def test_extracts_conditions(self):
+        """Positive test: conditions present in answer but not in evidence."""
+        chunk = _make_chunk("Premium rates are 2%.")
+        result = verify_answer_grounding(
+            "Applicants must be members of a PACS. The age 18-65 years is required.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is True
+        assert any("age 18-65 years" in c.claim_text for c in result.unsupported_claims)
+        assert any(c.claim_type == "condition" for c in result.unsupported_claims)
+
+    def test_conditions_present_in_evidence(self):
+        """Negative test: conditions present in both answer and evidence."""
+        chunk = _make_chunk("The applicant must be a member of a PACS. Age 18-65 years required.")
+        result = verify_answer_grounding(
+            "The applicant must be a member of a PACS. Age 18-65 years required.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is False
+
+    def test_extracts_minimum_condition(self):
+        """Positive test: minimum condition not in evidence."""
+        chunk = _make_chunk("Premium rates are 2%.")
+        result = verify_answer_grounding(
+            "minimum 21 years is required.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is True
+        assert any(c.claim_type == "condition" for c in result.unsupported_claims)
+
+    def test_no_conditions_in_text(self):
+        """No conditions extracted when text has none."""
+        chunk = _make_chunk("The premium is 2% of the sum insured.")
+        result = verify_answer_grounding(
+            "The premium is 2% of the sum insured.",
+            [chunk],
+        )
+        assert result.has_unsupported_claims is False
+
 
 class TestGroundingResult:
     def test_empty_answer(self):
