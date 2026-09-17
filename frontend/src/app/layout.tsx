@@ -13,6 +13,7 @@ import {
   Noto_Serif_Oriya,
   Noto_Serif_Malayalam,
 } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { LanguageProvider } from "@/lib/i18n/provider";
 import { ConditionalNavs } from "@/components/layout/ConditionalNavs";
@@ -84,20 +85,22 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${inter.variable} ${grotesk.variable} ${geistMono.variable} ${devanagari.variable} ${bengali.variable} ${tamil.variable} ${telugu.variable} ${kannada.variable} ${gurmukhi.variable} ${gujarati.variable} ${odia.variable} ${malayalam.variable} h-full antialiased`}
-    >
-      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans bg-[var(--canvas)]">
-        <a href="#content" className="skip-link">
-          Skip to content
-        </a>
-        <LanguageProvider>
-            <ConditionalNavs>
-              {children}
-            </ConditionalNavs>
-        </LanguageProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${inter.variable} ${grotesk.variable} ${geistMono.variable} ${devanagari.variable} ${bengali.variable} ${tamil.variable} ${telugu.variable} ${kannada.variable} ${gurmukhi.variable} ${gujarati.variable} ${odia.variable} ${malayalam.variable} h-full antialiased`}
+      >
+        <body suppressHydrationWarning className="min-h-full flex flex-col font-sans bg-[var(--canvas)]">
+          <a href="#content" className="skip-link">
+            Skip to content
+          </a>
+          <LanguageProvider>
+              <ConditionalNavs>
+                {children}
+              </ConditionalNavs>
+          </LanguageProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
