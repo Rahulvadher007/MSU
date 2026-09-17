@@ -466,6 +466,16 @@ class EvidenceController:
         if assessment:
             assessment_text = f"\n== EVIDENCE ASSESSMENT ==\n{assessment.assessment_text}\n"
 
+        # Detect enumeration questions and add specific instruction
+        enum_instruction = ""
+        if detect_enumeration_question(english_query):
+            enum_instruction = (
+                "7. ENUMERATION MODE: The user is asking for a list or categories. "
+                "You MUST reproduce ALL enumerated items from the evidence exactly "
+                "as they appear. Do NOT compress into a generic summary. "
+                "If evidence lists A, B, C, D, your answer must list A, B, C, D.\n"
+            )
+
         # Language instruction injected per-request so the LLM writes in the
         # correct language directly. Translation in chat.py is a secondary
         # safety net; the LLM is the primary language enforcement mechanism.
@@ -500,6 +510,7 @@ class EvidenceController:
             f"4. If evidence is limited, answer only what is directly supported.\n"
             f"5. Use simple, clear language suitable for ordinary citizens.\n"
             f"6. Use markdown formatting (bullet points for lists, bold for key terms) to structure your answer cleanly.\n"
+            f"{enum_instruction}"
         )
 
         return system_prompt, user_prompt
