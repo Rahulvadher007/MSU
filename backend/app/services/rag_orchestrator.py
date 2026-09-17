@@ -23,20 +23,24 @@ import re
 import time
 from typing import Any, Callable
 
+from app.answer_grounding import verify_answer_grounding
 from app.citation_verifier import verify_citations
 from app.config import Settings, get_settings
 from app.contracts import (
     AbstentionReason,
     ConfidenceBand,
     EvidenceChunk,
+    QueryComplexity,
     RAGResponse,
     RAGResult,
+    ScenarioResult,
 )
 from app.evidence_controller import EvidenceController, QueryRequirementClassifier, strip_citations
 from app.llm_fallback import AllProvidersFailedError, grounded_answer
 from app.providers.gemini_llm import GeminiLLMProvider
 from app.providers.groq_llm import GroqLLMProvider
 from app.providers.sarvam_chat import SarvamChatProvider
+from app.scenario_reasoning import ScenarioReasoningEngine, QueryComplexityClassifier
 from app.services.static_rag import StaticRAGService
 from app.services.web_rag import WebRAGService
 from app.speech_text import prepare_speech_text, segment_speech
@@ -81,6 +85,18 @@ class RAGOrchestrator:
         self._web_rag = WebRAGService()
         self._evidence_controller = EvidenceController()
         self._query_classifier = QueryRequirementClassifier()
+        self._complexity_classifier = QueryComplexityClassifier()
+        self._scenario_engine: ScenarioReasoningEngine | None = None
+
+    def _get_scenario_engine(self) -> ScenarioReasoningEngine:
+        """Lazy-init scenario engine with LLM provider."""
+        if self._scenario_engine is None:
+            llm = GroqLLMProvider(self._settings)
+            self._scenario_engine = ScenarioReasoningEngine(
+                static_rag=self._static_rag,
+                llm_provider=llm,
+            )
+        return self._scenario_engine
 
     async def run(
         self,
@@ -133,6 +149,26 @@ class RAGOrchestrator:
 
         # Step 1: Classify query requirements
         query_requirements = self._query_classifier.classify(query, lang)
+
+        # Step 1b: Check query complexity for scenario routing
+        complexity = self._complexity_classifier.classify(english_query, lang)
+        if on_step and complexity != QueryComplexity.SIMPLE:
+            on_step({"id": "complexity_check", "detail": f"Query classified as {complexity.value} — using scenario reasoning", "status": "completed"})
+
+        if complexity != QueryComplexity.SIMPLE:
+            return await self._run_scenario_pipeline(
+                query=query,
+                english_query=english_query,
+                embedding=embedding,
+                domain=domain,
+                state=state,
+                classification=classification,
+                history=history,
+                lang=lang,
+                session_id=session_id,
+                complexity=complexity,
+                on_step=on_step,
+            )
 
         # Step 2: Run pipelines based on mode
         static_result, web_result = await self._run_pipelines(
@@ -259,6 +295,26 @@ class RAGOrchestrator:
                     domain=domain,
                     session_id=session_id,
                 )
+
+        # Step 9.5: Post-generation grounding check
+        grounding_result = verify_answer_grounding(answer, all_chunks)
+        if grounding_result.has_unsupported_claims:
+            logger.warning(
+                "Grounding check found %d unsupported claims: %s",
+                len(grounding_result.unsupported_claims),
+                [c.claim_text for c in grounding_result.unsupported_claims],
+            )
+            # Remove unsupported claims from answer
+            for claim in grounding_result.unsupported_claims:
+                # Try to remove the sentence containing the unsupported claim
+                # Simple approach: remove the claim text and surrounding context
+                answer = re.sub(
+                    rf"[^.]*\b{re.escape(claim.claim_text)}\b[^.]*\.",
+                    "",
+                    answer,
+                )
+            # Clean up extra spaces
+            answer = re.sub(r'  +', ' ', answer).strip()
 
         if on_step:
             on_step({"id": "llm_generate", "detail": "Response generated", "status": "completed"})
@@ -447,18 +503,185 @@ class RAGOrchestrator:
 
         return static_result, web_result
 
+    async def _run_scenario_pipeline(
+        self,
+        query: str,
+        english_query: str,
+        embedding: list[float],
+        domain: str,
+        state: str | None,
+        classification: QueryClassification | None,
+        history: list[dict] | None,
+        lang: str,
+        session_id: str,
+        complexity: QueryComplexity,
+        on_step: Callable[[dict], None] | None = None,
+    ) -> RAGResponse:
+        """Run the scenario reasoning pipeline for complex queries.
+
+        Flow:
+          1. Plan: extract requirements (LLM)
+          2. Retrieve: per-requirement retrieval
+          3. Evidence map: assess coverage
+          4. Retry: targeted retrieval for unsupported requirements
+          5. Derived conclusions
+          6. Answer generation with grounding enforcement
+        """
+        engine = self._get_scenario_engine()
+
+        # Phase 1: Plan
+        if on_step:
+            on_step({"id": "scenario_plan", "detail": "Analyzing query structure and extracting requirements", "status": "active"})
+        plan = engine.plan_query(english_query, lang, history)
+        plan.complexity = complexity
+        if on_step:
+            on_step({"id": "scenario_plan", "detail": f"Extracted {len(plan.requirements)} requirements from query", "status": "completed"})
+
+        # Phase 2: Retrieve per requirement
+        if on_step:
+            on_step({"id": "scenario_retrieve", "detail": f"Retrieving evidence for {len(plan.requirements)} requirements", "status": "active"})
+        retrieval_results = engine.retrieve_per_requirement(
+            plan, domain, state, embedding,
+        )
+
+        # Phase 3: Build evidence map
+        evidence_map, all_evidence = engine.build_evidence_map(plan, retrieval_results)
+        if on_step:
+            supported = sum(1 for e in evidence_map if e.status.value == "supported")
+            on_step({"id": "scenario_retrieve", "detail": f"Evidence coverage: {supported}/{len(evidence_map)} requirements supported", "status": "completed"})
+
+        # Phase 4: Retry unsupported requirements (max 1 round)
+        retry_results, evidence_map, retry_evidence = engine.retry_unsupported(
+            plan, evidence_map, domain, state, embedding, max_retries=1,
+        )
+        if retry_evidence:
+            all_evidence.extend(retry_evidence)
+
+        # Phase 5: Derived conclusions
+        if on_step:
+            on_step({"id": "scenario_reason", "detail": "Building evidence map and deriving conclusions", "status": "active"})
+        conclusions = engine._conclusion_engine.derive(plan, evidence_map, all_evidence)
+
+        # Assess overall sufficiency
+        overall_sufficiency = engine._evidence_map_builder.assess_sufficiency(evidence_map, plan)
+
+        if on_step:
+            on_step({"id": "scenario_reason", "detail": f"Overall evidence: {overall_sufficiency.value}", "status": "completed"})
+
+        # Phase 6: Generate answer
+        if on_step:
+            on_step({"id": "scenario_answer", "detail": "Generating grounded response from structured evidence", "status": "active"})
+        answer = engine.generate_answer(
+            query=english_query,
+            plan=plan,
+            evidence_map=evidence_map,
+            derived_conclusions=conclusions,
+            all_evidence=all_evidence,
+            lang=lang,
+            history=history,
+        )
+
+        if not answer:
+            return self._abstain_response(
+                lang=lang,
+                reason=AbstentionReason.PROVIDER_UNAVAILABLE,
+                domain=domain,
+                session_id=session_id,
+            )
+
+        # Auto-append citations
+        answer = self._auto_append_citations(answer, all_evidence)
+
+        # Verify citations
+        all_chunk_ids = [chunk.chunk_id for chunk in all_evidence]
+        citation_verification = verify_citations(answer, all_chunk_ids)
+        if not citation_verification.is_valid:
+            answer = self._auto_append_citations(answer, all_evidence, force=True)
+
+        # Strip citations from visible answer
+        clean_answer, _ = strip_citations(answer)
+        answer = clean_answer
+
+        # Build citations
+        citations = self._build_citations(all_evidence)
+
+        # Calculate confidence based on evidence coverage
+        supported_count = sum(1 for e in evidence_map if e.status.value == "supported")
+        total_count = len(evidence_map) if evidence_map else 1
+        coverage_ratio = supported_count / total_count
+
+        if coverage_ratio >= 0.8:
+            confidence, band = 0.85, ConfidenceBand.HIGH
+        elif coverage_ratio >= 0.5:
+            confidence, band = 0.65, ConfidenceBand.MEDIUM
+        else:
+            confidence, band = 0.35, ConfidenceBand.LOW
+
+        # Build result
+        missing_facts = plan.missing_user_facts
+        follow_up = None
+        if missing_facts:
+            follow_up = f"To give you a complete answer, I need to know: {', '.join(missing_facts)}"
+
+        speech_text = prepare_speech_text(answer)
+        speech_segments = segment_speech(answer, lang)
+
+        if on_step:
+            on_step({"id": "scenario_answer", "detail": "Response generated with grounded evidence", "status": "completed"})
+
+        logger.info(
+            "Scenario reasoning: complexity=%s requirements=%d supported=%d/%d confidence=%.2f",
+            complexity.value, len(plan.requirements), supported_count, total_count, confidence,
+        )
+
+        return RAGResponse(
+            answer=answer,
+            language=lang,
+            domain=domain,
+            confidence=confidence,
+            confidence_level=band,
+            citations=citations,
+            abstained=False,
+            speech_text=speech_text,
+            speech_segments=speech_segments,
+            follow_up_question=follow_up,
+            mode="scenario",
+            conversation_id=session_id,
+        )
+
     def _merge_evidence(
         self,
         static_chunks: list[EvidenceChunk],
         web_chunks: list[EvidenceChunk],
     ) -> list[EvidenceChunk]:
-        """Merge evidence from both pipelines with equal priority.
+        """Merge evidence from both pipelines with cross-source ranking.
 
-        Static chunks come first (official documents), then web chunks.
+        Static chunks (official documents) get an authority boost.
+        Weak web results cannot displace stronger static evidence.
+        Deduplicates by chunk_id.
         """
-        merged = list(static_chunks) + list(web_chunks)
+        AUTHORITY_BOOST_STATIC = 0.05
+
+        # Deduplicate by chunk_id, keeping the best score
+        seen: dict[str, EvidenceChunk] = {}
+        for chunk in static_chunks:
+            scored = (chunk.dense_score or 0) + AUTHORITY_BOOST_STATIC
+            existing = seen.get(chunk.chunk_id)
+            if not existing or scored > ((existing.dense_score or 0) + AUTHORITY_BOOST_STATIC):
+                seen[chunk.chunk_id] = chunk
+        for chunk in web_chunks:
+            existing = seen.get(chunk.chunk_id)
+            if not existing or (chunk.dense_score or 0) > (existing.dense_score or 0):
+                seen[chunk.chunk_id] = chunk
+
+        # Sort by effective score descending
+        merged = sorted(
+            seen.values(),
+            key=lambda c: -(c.dense_score or 0),
+        )
+
         logger.info(
-            "Merged evidence: %d static + %d web = %d total",
+            "Merged evidence: %d static + %d web = %d total (after dedup+rank)",
             len(static_chunks), len(web_chunks), len(merged),
         )
         return merged
